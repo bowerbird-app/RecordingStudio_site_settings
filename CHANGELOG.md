@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The admin logo uses Attachable's file button and a square Avatar preview, matching Users edit profile. Name save is a separate form. The page does not use Flatpack FileInput.
 - Hosts set `site_root_types` in the initializer. There is no site-settings YAML file.
 - Dummy and the README GitHub tag track Accessible `v0.9.0`. The gemspec floor stays `~> 0.8`.
+- Dummy Tailwind writes resolved gem `@source` paths before each build so core PageNav back keeps its Flatpack icon size.
 
 ### Upgrade notes
 - Add `recording_studio_site_settings` `~> 0.1`.

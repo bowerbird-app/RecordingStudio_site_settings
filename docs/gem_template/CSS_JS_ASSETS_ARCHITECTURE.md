@@ -1,6 +1,6 @@
 > **Architecture Documentation**
 > *   **Canonical Source:** [bowerbird-app/gem_template](https://github.com/bowerbird-app/gem_template/tree/main/docs/gem_template)
-> *   **Last Updated:** December 11, 2025
+> *   **Last Updated:** September 2, 2026
 >
 > *Maintainers: Please update the date above when modifying this file.*
 
@@ -255,12 +255,15 @@ The file `test/dummy/app/assets/tailwind/application.css` configures Tailwind:
 
 ```css
 @import "tailwindcss";
+@import "./gem_sources.css";
 
 /* Include the engine's views in the Tailwind build */
 @source "../../../../../app/views/**/*.erb";
 ```
 
-> **Note:** The relative path `../../../../../app/views/**/*.erb` points from the dummy app up to the engine's `app/views` folder so Tailwind can detect classes used in engine templates. Host applications will use the gem path instead.
+`rake tailwindcss:build` and `tailwindcss:watch` run `tailwindcss:inject_gem_sources` first. That writes absolute `@source` lines for loaded engines into `gem_sources.css`. Tailwind v4 only emits classes it scans. Bundle globs miss gems under `/usr/local/lib/ruby/gems`, and without Flatpack's component classes PageNav back has no `w-5` or icon-only padding.
+
+The relative path `../../../../../app/views/**/*.erb` still points from the dummy app up to this engine's `app/views`. Hosts add `@source` through the install generator.
 
 ------------------------------------------------------------
 5.3 Auto-Rebuild in Development

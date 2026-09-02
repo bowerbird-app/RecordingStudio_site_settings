@@ -45,6 +45,10 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_select %(body[data-recording-studio-default-layout="true"]), count: 1
     assert_select %(body[data-theme="rounded"]), count: 1
     assert_select "nav.flat-pack-page-nav", count: 1
+    assert_match(/flat-pack--page-nav#back/, response.body)
+    assert_select %(nav.flat-pack-page-nav [aria-label="Go back"]), count: 1
+    assert_includes response.body, "p-[var(--button-icon-only-padding-md)]"
+    assert_includes response.body, "w-5 h-5"
     assert_select "h1", text: "Site name and logo", count: 1
     assert_includes response.body, 'value="Studio"'
     assert_includes response.body, "Cancel"

@@ -63,6 +63,13 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     refute_includes view, "Upload a file or drag and drop"
     assert_includes view, "recording_studio_page_nav"
     assert_includes view, "page_nav_anchor_url: main_app.root_path"
+    refute_includes view, "page_nav_back_url"
+  end
+
+  def test_dummy_tailwind_imports_generated_gem_sources
+    css = File.read(File.expand_path("../test/dummy/app/assets/tailwind/application.css", __dir__))
+
+    assert_includes css, '@import "./gem_sources.css"'
   end
 
   def test_admin_controller_uses_core_default_layout
