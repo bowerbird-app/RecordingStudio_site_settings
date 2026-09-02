@@ -25,6 +25,16 @@ module RecordingStudioSiteSettings
 
     def configure
       yield(configuration) if block_given?
+      sync_site_setting_parent_types!
+    end
+
+    def sync_site_setting_parent_types!(load_site_setting: false)
+      const_get(:SiteSetting) if load_site_setting
+      return unless const_defined?(:SiteSetting, false)
+
+      SiteSetting.declare_hierarchy!
+    rescue NameError
+      nil
     end
 
     def name_for(root_recording)

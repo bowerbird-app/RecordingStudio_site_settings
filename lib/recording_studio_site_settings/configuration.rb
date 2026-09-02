@@ -2,8 +2,8 @@
 
 module RecordingStudioSiteSettings
   class Configuration
-    attr_accessor :site_root_types, :site_root_resolver
-    attr_reader :hooks
+    attr_accessor :site_root_resolver
+    attr_reader :site_root_types, :hooks
 
     def initialize
       @site_root_types = ["Workspace"]
@@ -16,6 +16,11 @@ module RecordingStudioSiteSettings
         site_root_types: site_root_types,
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
+    end
+
+    def site_root_types=(types)
+      @site_root_types = Array(types)
+      RecordingStudioSiteSettings.sync_site_setting_parent_types!
     end
 
     def merge!(hash)

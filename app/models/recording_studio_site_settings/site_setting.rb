@@ -4,9 +4,15 @@ module RecordingStudioSiteSettings
   class SiteSetting < ApplicationRecord
     self.table_name = "recording_studio_site_settings"
 
-    recording_studio_recordable label: "Site settings",
-                                root: false,
-                                allowed_parent_types: RecordingStudioSiteSettings.configuration.site_root_types
+    RECORDABLE_LABEL = "Site settings"
+
+    def self.declare_hierarchy!
+      recording_studio_recordable label: RECORDABLE_LABEL,
+                                  root: false,
+                                  allowed_parent_types: RecordingStudioSiteSettings.configuration.site_root_types
+    end
+
+    declare_hierarchy!
 
     include RecordingStudio::Capabilities::Attachable.to(
       allowed_content_types: ["image/*"],

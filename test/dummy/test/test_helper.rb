@@ -49,9 +49,13 @@ module SiteSettingsTestHelper
   TEST_SQUARE_LOGO_PATH = Rails.root.join("test/fixtures/files/square-logo.png")
   TEST_WIDE_LOGO_PATH = Rails.root.join("test/fixtures/files/wide-logo.png")
 
-  def admin_root_recording
-    admin_root = AdminRoot.find_or_create_by!(name: "Admin")
+  def admin_root_recording(name = "Admin")
+    admin_root = AdminRoot.find_or_create_by!(name: name)
     RecordingStudio.root_recording_for(admin_root)
+  end
+
+  def empty_admin_root_recording
+    admin_root_recording("Empty Admin")
   end
 
   def workspace_root(name)
@@ -62,6 +66,14 @@ module SiteSettingsTestHelper
   def grant_site_settings_admin!(actor, workspace_root: nil)
     bootstrap_owner_access!(actor, admin_root_recording)
     bootstrap_owner_access!(actor, workspace_root) if workspace_root
+  end
+
+  def with_site_root(root)
+    original = RecordingStudioSiteSettings.configuration.site_root_resolver
+    RecordingStudioSiteSettings.configuration.site_root_resolver = ->(_context) { root }
+    yield
+  ensure
+    RecordingStudioSiteSettings.configuration.site_root_resolver = original
   end
 
   def switch_root!(root_recording)

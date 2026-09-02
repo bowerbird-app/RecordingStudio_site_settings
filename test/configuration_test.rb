@@ -13,6 +13,10 @@ class ConfigurationTest < Minitest::Test
     RecordingStudioSiteSettings.configuration.site_root_resolver = @original_resolver
   end
 
+  def test_fresh_configuration_defaults_to_workspace
+    assert_equal ["Workspace"], RecordingStudioSiteSettings::Configuration.new.site_root_types
+  end
+
   def test_default_site_root_types
     RecordingStudioSiteSettings.configuration.site_root_types = ["Workspace"]
 

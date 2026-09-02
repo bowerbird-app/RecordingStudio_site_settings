@@ -35,11 +35,39 @@ seed_user = lambda do |email:, first_name:, last_name:|
   user
 end
 
+attach_seed_logos = lambda do |site_root, name:|
+  RecordingStudioSiteSettings.update!(site_root, name: name, actor: user)
+  unless RecordingStudioSiteSettings.square_logo_for(site_root).present?
+    File.open(Rails.root.join("db/seeds/square-logo.png"), "rb") do |io|
+      RecordingStudioSiteSettings.update!(
+        site_root,
+        name: name,
+        actor: user,
+        square_logo_io: io,
+        square_logo_filename: "square-logo.png",
+        square_logo_content_type: "image/png"
+      )
+    end
+  end
+  unless RecordingStudioSiteSettings.wide_logo_for(site_root).present?
+    File.open(Rails.root.join("db/seeds/wide-logo.png"), "rb") do |io|
+      RecordingStudioSiteSettings.update!(
+        site_root,
+        name: name,
+        actor: user,
+        wide_logo_io: io,
+        wide_logo_filename: "wide-logo.png",
+        wide_logo_content_type: "image/png"
+      )
+    end
+  end
+end
+
 previous_actor = Current.actor
 
 begin
   user = seed_user.call(email: "admin@admin.com", first_name: "Avery", last_name: "Admin")
-  member = seed_user.call(email: "member@admin.com", first_name: "Morgan", last_name: "Member")
+  seed_user.call(email: "member@admin.com", first_name: "Morgan", last_name: "Member")
   Current.actor = user
 
   workspace = Workspace.find_or_create_by!(name: "Studio")
@@ -54,43 +82,17 @@ begin
 
   admin_root = AdminRoot.find_or_create_by!(name: "Admin")
   admin_root_recording = RecordingStudio.root_recording_for(admin_root)
+  empty_admin = AdminRoot.find_or_create_by!(name: "Empty Admin")
+  empty_admin_recording = RecordingStudio.root_recording_for(empty_admin)
 
   bootstrap_owner_access.call(user, admin_root_recording)
+  bootstrap_owner_access.call(user, empty_admin_recording)
   bootstrap_owner_access.call(user, root_recording)
   bootstrap_owner_access.call(user, empty_logo_root)
 
+  attach_seed_logos.call(admin_root_recording, name: "Studio")
   RecordingStudioSiteSettings.update!(
-    root_recording,
-    name: "Studio",
-    actor: user
-  )
-  unless RecordingStudioSiteSettings.square_logo_for(root_recording).present?
-    File.open(Rails.root.join("db/seeds/square-logo.png"), "rb") do |io|
-      RecordingStudioSiteSettings.update!(
-        root_recording,
-        name: "Studio",
-        actor: user,
-        square_logo_io: io,
-        square_logo_filename: "square-logo.png",
-        square_logo_content_type: "image/png"
-      )
-    end
-  end
-  unless RecordingStudioSiteSettings.wide_logo_for(root_recording).present?
-    File.open(Rails.root.join("db/seeds/wide-logo.png"), "rb") do |io|
-      RecordingStudioSiteSettings.update!(
-        root_recording,
-        name: "Studio",
-        actor: user,
-        wide_logo_io: io,
-        wide_logo_filename: "wide-logo.png",
-        wide_logo_content_type: "image/png"
-      )
-    end
-  end
-
-  RecordingStudioSiteSettings.update!(
-    empty_logo_root,
+    empty_admin_recording,
     name: "Client Studio",
     actor: user
   )
@@ -100,7 +102,7 @@ end
 
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: member@admin.com / Password (no admin access)"
-puts "Seeded: Studio with name, square logo, and wide logo"
-puts "Seeded: Client Studio with name and empty marks"
+puts "Seeded: Admin root with name, square logo, and wide logo"
+puts "Seeded: Empty Admin root with name and empty marks"
 puts "Seeded: no favicon on either site"
-puts "Seeded: Admin root for the site settings screen"
+puts "Seeded: Studio and Client Studio workspaces without site settings"

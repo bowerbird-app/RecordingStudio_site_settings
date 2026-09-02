@@ -1,8 +1,13 @@
 module ApplicationHelper
-  def dummy_sidebar_wide_logo
-    return unless respond_to?(:current_root_recording) && current_root_recording.present?
+  def dummy_site_root_recording
+    RecordingStudioSiteSettings.site_root_for(controller)
+  end
 
-    recording_studio_site_wide_logo(current_root_recording, width: 192)
+  def dummy_sidebar_wide_logo
+    site_root = dummy_site_root_recording
+    return if site_root.blank?
+
+    recording_studio_site_wide_logo(site_root, width: 192)
   end
 
   def dummy_wide_logo_sidebar(&block)

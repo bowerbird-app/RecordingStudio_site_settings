@@ -5,7 +5,7 @@ require "test_helper"
 class SiteSettingsStoreTest < ActiveSupport::TestCase
   setup do
     @actor = create_user("store-#{SecureRandom.hex(4)}@example.com")
-    @root = workspace_root("Store #{SecureRandom.hex(4)}")
+    @root = admin_root_recording("Store #{SecureRandom.hex(4)}")
     bootstrap_owner_access!(@actor, @root)
   end
 
@@ -44,8 +44,9 @@ class SiteSettingsStoreTest < ActiveSupport::TestCase
     assert_equal RecordingStudioSiteSettings.square_logo_for(@root).recording.id,
                  RecordingStudioSiteSettings.logo_for(@root).recording.id
 
-    workspace = @root.recordable
-    refute workspace.class.column_names.include?("logo")
+    admin_root = @root.recordable
+    refute admin_root.class.column_names.include?("logo")
+    refute RecordingStudio.capability_enabled?(:attachable, for: AdminRoot)
     refute RecordingStudio.capability_enabled?(:attachable, for: Workspace)
     assert_equal 1, RecordingStudio::Recording.where(
       root_recording: @root,

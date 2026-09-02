@@ -42,7 +42,7 @@ RecordingStudio.configure do |config|
 end
 ```
 
-Tell the gem which recordable is a site root:
+Tell the gem which recordable is a site root. Site settings may sit under those types. Allowed parents follow this list after you set it, not a snapshot from class load.
 
 ```ruby
 RecordingStudioSiteSettings.configure do |config|
@@ -127,10 +127,13 @@ Rows stack full width, one field per row. Site name first, then wide logo, then 
 
 Dummy Tailwind writes resolved engine `@source` paths to `gem_sources.css` before each build. Bundle globs miss Flatpack on some install paths, and without those component classes PageNav back collapses to 2px.
 
-The dummy layout head prints `recording_studio_site_favicon(current_root_recording)`. Dummy does not override Recording Studio core `default_layout`. Dummy home and dummy docs print `recording_studio_site_wide_logo` in a Flatpack Sidebar so hosts can see that helper work. The site settings admin screen does not.
+The dummy layout head prints `recording_studio_site_favicon` from dummy's Admin site root. Dummy does not override Recording Studio core `default_layout`. Dummy home and dummy docs print `recording_studio_site_wide_logo` in a Flatpack Sidebar so hosts can see that helper work. The site settings admin screen does not.
+
+Dummy sets `site_root_types` to `AdminRoot` so we can prove Accessible inheritance from the admin root. The gem default for hosts stays `Workspace`. Site settings is a child of that Admin root. Dummy does not enable `:accessible` on Site settings. Grants stay on the admin root.
 
 ## What dummy seeds
 
-- Studio: name, square logo, and wide logo. No favicon.
-- Client Studio: name only. All three image slots empty.
+- Admin: name, square logo, and wide logo. No favicon.
+- Empty Admin: name only. All three image slots empty.
+- Studio and Client Studio workspaces. No site settings under either workspace.
 - `member@admin.com` can sign in and gets 403 on the admin screen.

@@ -13,6 +13,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
                  RecordingStudio.root_recordable_types.sort
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for("Folder")
     assert_equal %w[Workspace Folder], RecordingStudio.allowed_parent_types_for(Page)
+    assert_equal ["AdminRoot"], RecordingStudio.allowed_parent_types_for("RecordingStudioSiteSettings::SiteSetting")
   end
 
   test "root recordable creates a root recording" do
@@ -88,6 +89,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
     assert RecordingStudio.capability_enabled?(:accessible, for: "AdminRoot")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Folder")
     refute RecordingStudio.capability_enabled?(:accessible, for: "Page")
+    refute RecordingStudio.capability_enabled?(:accessible, for: RecordingStudioSiteSettings::SiteSetting)
 
     refute RecordingStudio.capability_enabled?(:attachable, for: "Workspace")
     assert RecordingStudio.capability_enabled?(:attachable, for: RecordingStudioSiteSettings::SiteSetting)
