@@ -1,44 +1,20 @@
-# Dummy App
+# Dummy app
 
-This Rails app exists to validate the Recording Studio addon template in a real host application.
+This Rails app is a host that proves `recording_studio_site_settings`.
 
-## What It Covers
+It is not the product. The product is the gem README and the admin screen for name and logo.
 
-- Devise authentication with a seeded admin user
-- `Current.actor` wiring for Recording Studio events
-- Root workspace plus seeded folder and page recordables
-- Recording Studio default layout, FlatPack assets, and Tailwind source scanning
-- Mounted `RecordingStudio::Engine` route behavior inside a host app
-- Dummy-only `/docs/*` pages for gem-specific onboarding
-
-## Quick Start
-
-```bash
-cd test/dummy
-bundle install
-bin/rails db:setup
-bin/dev
-```
-
-Run the commands above from the dummy app directory, not the repository root.
-
-Then open the app and sign in with:
+## Sign in
 
 - Email: `admin@admin.com`
 - Password: `Password`
 
-## Useful Routes
+`member@admin.com` / `Password` has no admin grant and gets 403 on the site settings screen.
 
-- `/` - dummy app home page and template guidance
-- `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
-- `/users/sign_in` - Devise sign-in page
-- `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - dummy-only starter pages
-- `/up` - Rails health check
+## Routes that matter
 
-## Why This App Exists
+- `/users/sign_in`
+- `/recording_studio_site_settings/settings` — the site name and logo admin screen
+- `/admin` — Admin mount with the Site section
 
-Use this app to verify the generated addon experience before renaming the gem or copying patterns into another host app. If a layout, route, asset source, or Recording Studio initializer change breaks here, the template likely needs adjustment before reuse.
-
-Authenticated pages use Recording Studio's shared default layout. Devise sign-in keeps `layouts/application`. Replace dummy docs page content so it matches the gem's actual concepts.
-
-The home page in `app/views/home/index.html.erb` should stay a minimal demo surface for the gem's core feature. Do not turn it into a wall of documentation; the dummy docs pages exist so deeper explanations can live in focused sections.
+Seeded Studio has a name and a logo. Seeded Client Studio has a name and no logo.

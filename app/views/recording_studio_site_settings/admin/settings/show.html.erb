@@ -1,0 +1,36 @@
+<% recording_studio_page_nav(title: "Site name and logo") %>
+
+<div class="flex w-full flex-col gap-8">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Site name and logo",
+    subtitle: "This is what people see when they arrive.",
+    variant: :h1
+  ) %>
+
+  <%= render FlatPack::Grid::Component.new(cols: 2) do %>
+    <%= form_with url: settings_path, method: :patch, local: true, multipart: true, class: "flex w-full flex-col gap-6" do %>
+      <%= render FlatPack::TextInput::Component.new(
+        name: "site_setting[name]",
+        label: "Site name",
+        value: @name,
+        required: true
+      ) %>
+
+      <div class="flex w-full flex-col gap-3">
+        <% if @logo.present? %>
+          <%= recording_studio_site_logo(@site_root, size: :"2xl") %>
+        <% end %>
+        <%= render FlatPack::FileInput::Component.new(
+          name: "site_setting[logo]",
+          label: "Logo",
+          accept: "image/*",
+          help_text: @logo.present? ? "Replace it with a new file if you like." : "No logo yet. Add a mark so people know they are in the right place."
+        ) %>
+      </div>
+
+      <div>
+        <%= render FlatPack::Button::Component.new(text: "Save", type: :submit, style: :primary) %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

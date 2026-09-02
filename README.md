@@ -1,170 +1,110 @@
-# GemTemplate
+# Recording Studio Site Settings
 
-Internal template for building Rails engine addons on top of Recording Studio 4.x.
+This gem is the source of truth for a site's name and logo in Recording Studio.
 
-## What's Included
+Core does not store them. The site root does not store them. Other gems read them from this gem. Do not call Attachable just to print the mark.
 
-- **Recording Studio** 4.x gem pinned and configured
-- **Devise** authentication with a pre-seeded admin user
-- **Workspace**, **Folder**, and **Page** recordables seeded into the dummy host app
-- **FlatPack** UI component library for all views
-- **Dummy app** (`test/dummy/`) with a FlatPack sign-in screen, a home page on Recording Studio's default layout, mounted Recording Studio routes, and FlatPack's built-in rounded theme
+Each site root gets one name and one logo. The logo is an Attachable image under this gem's site-settings recording.
 
-Authenticated dummy pages use Recording Studio's shared default layout (`RecordingStudio::UsesDefaultLayout`) plus FlatPack CSS and JS. Devise keeps its own sign-in layout. Dummy `/docs/*` pages stay in the dummy app as a host-app sandbox; they are not the product README.
+## Install
 
-## Quick Start
-
-### Cursor Cloud Agent (Recommended)
-
-A Cloud Agent boots this repo into a ready-to-use dev environment with no manual steps. The setup lives in `.cursor/`:
-
-- `install.sh` provisions Ruby (pinned by `.ruby-version`), PostgreSQL 16, all gems, the seeded dummy database, and compiled CSS at build time, then fetches Recording Studio skills.
-- `start.sh` starts PostgreSQL on every boot.
-- `environment.json` runs the `rails-server` and `tailwind-watch` terminals and exposes port 3000.
-
-Open port 3000 and sign in at `/users/sign_in`. No environment variables are required — the dummy app's `database.yml` defaults match the provisioned PostgreSQL cluster.
-
-### GitHub Codespaces
-
-1. Click **Code** → **Codespaces** → **Create codespace**
-2. Wait for setup to complete
-3. Run:
-   ```bash
-   cd test/dummy
-   bin/rails db:setup
-   bin/dev
-   ```
-4. Open port 3000 — you'll land on the dummy app home page and can sign in at `/users/sign_in`
-
-The dummy app is intended as a host-app validation surface for authentication, FlatPack rendering, Tailwind source scanning, and Recording Studio route wiring.
-
-### Login Credentials
-
-| Field    | Value             |
-|----------|-------------------|
-| Email    | admin@admin.com   |
-| Password | Password          |
-
-The login form is prefilled with these credentials for fast access.
-
-### Useful Routes
-
-- `/` — dummy app home page
-- `/users/sign_in` — Devise sign-in page
-- `/recording_studio` — redirect to `/` while the mounted Recording Studio engine remains data/API-focused
-- `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` — dummy-only starter pages
-
-The home page in `test/dummy/app/views/home/index.html.erb` is a starting point for a minimal demo of the gem's primary behavior. Keep deeper explanations on the dummy docs pages, not in this README.
-
-## Architecture
-
-### Root Recording Pattern
-
-This template follows Recording Studio's root recording pattern:
-
-- **Workspace** is the top-level recordable
-- **Folder** and **Page** demonstrate nested recordables under the workspace root
-- Each configured recordable declares `recording_studio_recordable(...)`; strict declaration validation stays enabled
-- A root `RecordingStudio::Recording` wraps the Workspace
-- `Current.actor` is set from `current_user` (Devise) in `ApplicationController`
-
-### Extending Recording Studio
-
-To add new recordable types:
-
-1. Create your model (e.g., `Page`, `Comment`)
-2. Register it in `config/initializers/recording_studio.rb`:
-   ```ruby
-   RecordingStudio.configure do |config|
-     config.recordable_types = ["Workspace", "YourNewType"]
-   end
-   ```
-3. Declare whether the model can be a root and which parents may contain it:
-   ```ruby
-   class YourNewType < ApplicationRecord
-     recording_studio_recordable label: "Your new type",
-                                 root: false,
-                                 allowed_parent_types: ["Workspace", "Folder"]
-   end
-   ```
-4. Validate declarations and create recordings under the root:
-   ```ruby
-   RecordingStudio.validate_recordable_declarations!
-   root_recording = RecordingStudio.root_recording_for(workspace)
-   root_recording.record(YourNewType) do |record|
-     record.title = "Example"
-   end
-   ```
-
-### Recordable Declarations
-
-Every configured ActiveRecord recordable type must declare its hierarchy rules. Declarations are required; they are not version-specific.
-
-- `Workspace` declares `root: true`
-- `Folder` and `Page` declare `root: false, allowed_parent_types: ["Workspace", "Folder"]`
-- `config.require_recordable_declarations = true` remains enabled in the dummy app initializer
-
-Useful console checks:
+Add the gem and its Recording Studio majors:
 
 ```ruby
-RecordingStudio.validate_recordable_declarations!
-RecordingStudio.root_recordable_types
-RecordingStudio.allowed_parent_types_for("Page")
+gem "recording_studio_site_settings"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.8.0"
+gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.1"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.5.0"
 ```
 
-### Capabilities
+Then:
 
-Capability mixins are opt-in. Installing this gem does not enable mixins on host types.
+```bash
+bin/rails generate recording_studio_site_settings:install
+bin/rails generate recording_studio_site_settings:migrations
+bin/rails generate recording_studio_attachable:install
+bin/rails generate recording_studio_attachable:migrations
+bin/rails db:migrate
+```
 
-The dummy Workspace enables Accessible because that addon is bundled:
+Register this gem's type next to the host root and Attachable's attachment type:
 
 ```ruby
-RecordingStudio.enable_capability(:accessible, on: Workspace)
+RecordingStudio.configure do |config|
+  config.recordable_types = [
+    "Workspace",
+    "RecordingStudioSiteSettings::SiteSetting",
+    "RecordingStudioAttachable::Attachment"
+  ]
+end
 ```
 
-The template also ships one example mixin that uses core 4.2.0's `include_for` factory:
+Tell the gem which recordable is a site root:
 
 ```ruby
-include RecordingStudio::Capabilities::Example.to(label: "dummy workspace")
+RecordingStudioSiteSettings.configure do |config|
+  config.site_root_types = ["Workspace"]
+end
 ```
 
-`.to` wraps `RecordingStudio::Capabilities.include_for`. It does not add a fourth verb and it does not call `enable_capability` / `set_capability_options` itself. Folder and Page stay without the example mixin.
+Enable Accessible on the site root and on the admin root. Enable Attachable only on `RecordingStudioSiteSettings::SiteSetting`. Do not enable Attachable on the root to hold the logo.
 
-Use core `RecordingStudio::Hooks` and `RecordingStudio::Services::BaseService`. Do not copy those classes into a new addon.
+Mount the engines and Admin:
 
-### FlatPack UI Components
+```ruby
+mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
+mount RecordingStudioSiteSettings::Engine, at: "/recording_studio_site_settings"
+recording_studio_admin_for :admin, at: "/admin", root_section: :site_settings
+```
 
-All views use FlatPack ViewComponents. Available components include:
+Enable the `site_settings` section on the admin root. Grant Accessible access on that admin root. People without that grant get 403.
 
-- `FlatPack::Button::Component` — Buttons (`:primary`, `:secondary`, `:ghost`)
-- `FlatPack::Card::Component` — Cards (`:default`, `:elevated`, `:outlined`)
-- `FlatPack::Alert::Component` — Alerts (`:success`, `:error`, `:warning`, `:info`)
-- `FlatPack::Badge::Component` — Status badges
-- `FlatPack::Table::Component` — Data tables
-- `FlatPack::TextInput::Component`, `EmailInput`, `PasswordInput` — Form inputs
-- `FlatPack::PageNav::Component` — Default-layout page navigation
-- `FlatPack::PageTitle::Component` — Page titles
+## Read name and logo
 
-Use the live FlatPack demo app at [flatpack.bowerbird.io](https://flatpack.bowerbird.io/) as the approved UI reference for current shared patterns. Its component table is the fastest way to discover available FlatPack components before introducing new custom UI.
+```ruby
+root = RecordingStudio.root_recording_for(workspace)
 
-See the [FlatPack README](https://github.com/bowerbird-app/flatpack) for full documentation.
+RecordingStudioSiteSettings.name_for(root)
+RecordingStudioSiteSettings.logo_for(root)
+RecordingStudioSiteSettings.logo_for(root).preview_url
+RecordingStudioSiteSettings.logo_for(root).present?
+```
 
-## Tech Stack
+In a view:
 
-| Component       | Version |
-|-----------------|---------|
-| Ruby            | 3.3+    |
-| Rails           | 8.1+    |
-| PostgreSQL      | 16      |
-| TailwindCSS     | 4       |
-| RecordingStudio | 4.x (`~> 4.1` in the gemspec; dummy GitHub tag `v4.2.0`) |
-| Accessible      | dummy GitHub tag `v0.6.0` |
-| Root Switchable | dummy GitHub tag `v0.5.0` |
-| FlatPack        | dummy GitHub tag `v0.1.133` |
-| Devise          | latest  |
+```erb
+<%= RecordingStudioSiteSettings.name_for(current_root_recording) %>
+<%= recording_studio_site_logo(current_root_recording) %>
+```
 
-The dummy Gemfile keeps `github:` sources so Bundler can fetch those gems. The gemspec still pins `recording_studio` to `~> 4.1` so copied addons declare the core dependency even when GitHub is the fetch source.
+`logo_for` returns a small object with `recording`, `preview_url`, `filename`, `present?`, and `blank?`. Callers should not reach into Attachable to render the mark.
 
-## Documentation
+## Write name and logo
 
-The original gem template documentation is preserved in `docs/gem_template/` as architectural reference material. Use it as background on the engine conventions; this README and the dummy app are the source of truth for the Recording Studio addon workflow.
+```ruby
+RecordingStudioSiteSettings.update!(
+  root,
+  name: "Studio",
+  actor: current_user,
+  logo_io: File.open("logo.png"),
+  filename: "logo.png",
+  content_type: "image/png"
+)
+```
+
+Writes check Accessible `:edit` on the site root. Name changes `revise` the site-settings recording. A second logo on the same site replaces the file on the existing attachment.
+
+## Admin
+
+Staff open one Admin section, Site, and one screen that edits name and logo. The form is one full-width field per row. Accessible on the admin root gates the page. `user.admin?` is not used.
+
+## Dummy app
+
+`test/dummy` is a host that proves this gem. Sign in at `/users/sign_in` with `admin@admin.com` / `Password`. The admin screen is `/recording_studio_site_settings/settings`.
+
+Seeded proof:
+
+- Studio has the name Studio and a logo
+- Client Studio has a name and no logo
+- `member@admin.com` has no admin grant and gets 403

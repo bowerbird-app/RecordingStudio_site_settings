@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
-GemTemplate::Engine.routes.draw do
-  root "home#index"
+RecordingStudioSiteSettings::Engine.routes.draw do
+  resource :settings, only: %i[show update], controller: "admin/settings"
+  root to: "admin/settings#show"
 end

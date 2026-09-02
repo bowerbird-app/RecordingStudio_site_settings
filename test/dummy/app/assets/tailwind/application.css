@@ -11,5 +11,9 @@
 @source "../../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}";
 @source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
 
-/* Include the engine's views in the Tailwind build */
+/* Include Recording Studio Admin, Attachable, and this gem's views */
+@source "../../../vendor/bundle/**/recording_studio_admin/app/views/**/*.erb";
+@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/recordingstudio-admin-*/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/recording_studio_attachable/app/**/*.{rb,erb}";
+@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/recordingstudio-attachable-*/app/**/*.{rb,erb}";
 @source "../../../../../app/views/**/*.erb";

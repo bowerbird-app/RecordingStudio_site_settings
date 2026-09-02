@@ -1,0 +1,7 @@
+development:
+  site_root_types:
+    - Workspace
+
+production:
+  site_root_types:
+    - Workspace
