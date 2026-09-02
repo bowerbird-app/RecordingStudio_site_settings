@@ -69,6 +69,8 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Folder"
     assert_includes response.body, "Page"
     assert_includes response.body, "Site settings"
+    assert_includes response.body, "AdminRoot"
+    assert_match(/Allowed parents:\s*AdminRoot/, response.body.gsub(/\s+/, " "))
   end
 
   test "recordings tree page renders successfully" do
@@ -78,8 +80,10 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     folder_recording = record_child(folder, root_recording, root_recording)
     page = Page.create!(title: "API")
     record_child(page, root_recording, folder_recording)
+    admin = AdminRoot.create!(name: "Tree Admin")
+    admin_root = RecordingStudio.root_recording_for(admin)
     site_setting = RecordingStudioSiteSettings::SiteSetting.create!(name: "Tree Site")
-    record_child(site_setting, root_recording, root_recording)
+    record_child(site_setting, admin_root, admin_root)
 
     get docs_recordings_tree_path
 
@@ -88,6 +92,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Workspace: Tree Workspace"
     assert_includes response.body, "Folder: Reference"
     assert_includes response.body, "Page: API"
+    assert_includes response.body, "Admin root: Tree Admin"
     assert_includes response.body, "Site setting: Tree Site"
     refute_includes response.body, "Access boundary"
     assert_select "div[role='tree']", count: 1

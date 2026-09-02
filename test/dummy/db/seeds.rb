@@ -35,14 +35,14 @@ seed_user = lambda do |email:, first_name:, last_name:|
   user
 end
 
-attach_seed_logos = lambda do |site_root, name:|
-  RecordingStudioSiteSettings.update!(site_root, name: name, actor: user)
+attach_seed_logos = lambda do |site_root, name:, actor:|
+  RecordingStudioSiteSettings.update!(site_root, name: name, actor: actor)
   unless RecordingStudioSiteSettings.square_logo_for(site_root).present?
     File.open(Rails.root.join("db/seeds/square-logo.png"), "rb") do |io|
       RecordingStudioSiteSettings.update!(
         site_root,
         name: name,
-        actor: user,
+        actor: actor,
         square_logo_io: io,
         square_logo_filename: "square-logo.png",
         square_logo_content_type: "image/png"
@@ -54,7 +54,7 @@ attach_seed_logos = lambda do |site_root, name:|
       RecordingStudioSiteSettings.update!(
         site_root,
         name: name,
-        actor: user,
+        actor: actor,
         wide_logo_io: io,
         wide_logo_filename: "wide-logo.png",
         wide_logo_content_type: "image/png"
@@ -90,7 +90,7 @@ begin
   bootstrap_owner_access.call(user, root_recording)
   bootstrap_owner_access.call(user, empty_logo_root)
 
-  attach_seed_logos.call(admin_root_recording, name: "Studio")
+  attach_seed_logos.call(admin_root_recording, name: "Studio", actor: user)
   RecordingStudioSiteSettings.update!(
     empty_admin_recording,
     name: "Client Studio",

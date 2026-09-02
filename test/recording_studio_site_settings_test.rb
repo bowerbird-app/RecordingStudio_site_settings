@@ -151,7 +151,8 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     refute File.exist?(File.join(dummy_root, "app/views/recording_studio/_site_marks.html.erb")),
            "dummy must not inject site_marks into layout"
     assert_includes head, "recording_studio_site_favicon"
-    assert_includes head, "dummy_site_root_recording"
+    assert_includes head, "RecordingStudioSiteSettings.site_root_for"
+    refute_includes head, "current_root_recording"
     assert_includes helper, "def dummy_site_root_recording"
     assert_includes helper, "def dummy_wide_logo_sidebar"
     assert_includes helper, "recording_studio_site_wide_logo"
