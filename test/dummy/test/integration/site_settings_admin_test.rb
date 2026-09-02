@@ -43,6 +43,7 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Site name and logo", count: 1
     assert_includes response.body, 'value="Studio"'
     assert_includes response.body, "Cancel"
+    assert_includes response.body, "md:grid-cols-2"
     refute_includes response.body, "flex w-full flex-col gap-6"
     refute_includes response.body, "No logo yet"
     assert_includes response.body, "/recording_studio_attachable/attachments/"

@@ -21,11 +21,16 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
 
   def test_gemspec_pins_live_majors
     gemspec = File.read(File.expand_path("../recording_studio_site_settings.gemspec", __dir__))
+    readme = File.read(File.expand_path("../README.md", __dir__))
+    dummy_gemfile = File.read(File.expand_path("../test/dummy/Gemfile", __dir__))
 
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.8"'
+    refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.9"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.5"'
+    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.9.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.9.0"'
     assert_match(
       %r{spec\.homepage\s+=\s+"https://github.com/bowerbird-app/RecordingStudio_site_settings"},
       gemspec
@@ -37,5 +42,18 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     cursor_files = spec.files.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }
 
     assert_empty cursor_files
+  end
+
+  def test_admin_form_uses_grid_cols_2_as_a_width_cap
+    view = File.read(
+      File.expand_path(
+        "../app/views/recording_studio_site_settings/admin/settings/show.html.erb",
+        __dir__
+      )
+    )
+
+    assert_includes view, "FlatPack::Grid::Component.new(cols: 2)"
+    assert_includes view, "form_with url: settings_path"
+    assert_includes view, "FlatPack::Grid::Component.new(cols: 1, gap: :lg)"
   end
 end

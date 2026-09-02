@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Admin PageNav is the back control only. The visible title is PageTitle once.
 - Admin form spacing comes from Flatpack Grid. Save stays primary. Cancel is a separate back control.
 - Hosts set `site_root_types` in the initializer. There is no site-settings YAML file.
+- Dummy and the README GitHub tag track Accessible `v0.9.0`. The gemspec floor stays `~> 0.8`.
 
 ### Upgrade notes
 - Add `recording_studio_site_settings` `~> 0.1`.
