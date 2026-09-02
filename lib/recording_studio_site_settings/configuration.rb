@@ -27,7 +27,40 @@ module RecordingStudioSiteSettings
       end
     end
 
+    def load_from_rails_app!(app)
+      merge_config_for(app)
+      merge_x_config(app)
+    end
+
     private
+
+    def merge_config_for(app)
+      return unless app.respond_to?(:config_for)
+
+      yaml = app.config_for(:recording_studio_site_settings)
+      merge!(yaml) if yaml.respond_to?(:each)
+    rescue StandardError
+      nil
+    end
+
+    def merge_x_config(app)
+      xcfg = x_config_for(app)
+      return if xcfg.blank?
+
+      merge!(xcfg)
+    rescue StandardError
+      nil
+    end
+
+    def x_config_for(app)
+      return unless app.config.respond_to?(:x) && app.config.x.respond_to?(:recording_studio_site_settings)
+
+      xcfg = app.config.x.recording_studio_site_settings
+      return xcfg.to_h if xcfg.respond_to?(:to_h)
+      return unless xcfg.respond_to?(:each_pair)
+
+      xcfg.each_pair.with_object({}) { |(key, value), hash| hash[key] = value }
+    end
 
     def default_site_root_resolver
       lambda do |context|

@@ -18,7 +18,6 @@ require "recording_studio_site_settings/store"
 require "recording_studio_site_settings/admin"
 
 module RecordingStudioSiteSettings
-
   class << self
     def configuration
       @configuration ||= Configuration.new

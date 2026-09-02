@@ -21,7 +21,8 @@ module RecordingStudioSiteSettings
       end
 
       def copy_initializer
-        template "recording_studio_site_settings_initializer.rb", "config/initializers/recording_studio_site_settings.rb"
+        template "recording_studio_site_settings_initializer.rb",
+                 "config/initializers/recording_studio_site_settings.rb"
       end
 
       def add_yaml_config
@@ -94,7 +95,8 @@ module RecordingStudioSiteSettings
       def tailwind_source_lines
         [
           '@source "../../vendor/bundle/**/recording_studio_site_settings/app/views/**/*.erb";',
-          '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/recording_studio_site_settings-*/app/views/**/*.erb";',
+          "@source \"../../../../../../usr/local/bundle/ruby/**/bundler/gems/" \
+          "recording_studio_site_settings-*/app/views/**/*.erb\";",
           '@source "../../vendor/bundle/**/flatpack/app/components/**/*.{rb,erb}";',
           '@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";'
         ]

@@ -26,12 +26,16 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.8"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.5"'
-    assert_includes gemspec, 'spec.homepage = "https://github.com/bowerbird-app/RecordingStudio_site_settings"'
+    assert_match(
+      %r{spec\.homepage\s+=\s+"https://github.com/bowerbird-app/RecordingStudio_site_settings"},
+      gemspec
+    )
   end
 
   def test_cursor_is_not_in_the_gemspec
-    gemspec = File.read(File.expand_path("../recording_studio_site_settings.gemspec", __dir__))
+    spec = Gem::Specification.load(File.expand_path("../recording_studio_site_settings.gemspec", __dir__))
+    cursor_files = spec.files.select { |path| path == ".cursor" || path.split("/").include?(".cursor") }
 
-    refute_includes gemspec, ".cursor"
+    assert_empty cursor_files
   end
 end

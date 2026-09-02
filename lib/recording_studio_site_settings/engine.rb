@@ -52,47 +52,21 @@ module RecordingStudioSiteSettings
     end
 
     # Run before_initialize hooks
-    initializer "recording_studio_site_settings.before_initialize", before: "recording_studio_site_settings.load_config" do |_app|
+    initializer "recording_studio_site_settings.before_initialize",
+                before: "recording_studio_site_settings.load_config" do |_app|
       RecordingStudioSiteSettings.configuration.hooks.run(:before_initialize, self)
     end
 
     initializer "recording_studio_site_settings.load_config" do |app|
-      # Load config/recording_studio_site_settings.yml via Rails config_for if present
-      if app.respond_to?(:config_for)
-        begin
-          yaml = begin
-            app.config_for(:recording_studio_site_settings)
-          rescue StandardError
-            nil
-          end
-          RecordingStudioSiteSettings.configuration.merge!(yaml) if yaml.respond_to?(:each)
-        rescue StandardError => _e
-          # ignore load errors; host app can provide initializer overrides
-        end
-      end
-
-      # Merge Rails.application.config.x.recording_studio_site_settings if present
-      if app.config.respond_to?(:x) && app.config.x.respond_to?(:recording_studio_site_settings)
-        xcfg = app.config.x.recording_studio_site_settings
-        if xcfg.respond_to?(:to_h)
-          RecordingStudioSiteSettings.configuration.merge!(xcfg.to_h)
-        else
-          begin
-            # try converting OrderedOptions
-            hash = {}
-            xcfg.each_pair { |k, v| hash[k] = v } if xcfg.respond_to?(:each_pair)
-            RecordingStudioSiteSettings.configuration.merge!(hash) if hash&.any?
-          rescue StandardError => _e
-            # ignore
-          end
-        end
-      end
-
-      # Run on_configuration hooks after config is loaded
-      RecordingStudioSiteSettings.configuration.hooks.run(:on_configuration, RecordingStudioSiteSettings.configuration)
+      RecordingStudioSiteSettings.configuration.load_from_rails_app!(app)
+      RecordingStudioSiteSettings.configuration.hooks.run(
+        :on_configuration,
+        RecordingStudioSiteSettings.configuration
+      )
     end
 
-    initializer "recording_studio_site_settings.after_initialize", after: "recording_studio_site_settings.load_config" do |_app|
+    initializer "recording_studio_site_settings.after_initialize",
+                after: "recording_studio_site_settings.load_config" do |_app|
       RecordingStudioSiteSettings.configuration.hooks.run(:after_initialize, self)
     end
 
