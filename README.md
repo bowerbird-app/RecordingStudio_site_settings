@@ -97,7 +97,9 @@ Writes check Accessible `:edit` on the site root. Name changes `revise` the site
 
 ## Admin
 
-Staff open one Admin section, Site, and one screen that edits name and logo. The form is one full-width field per row. Save keeps the change. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used.
+Staff open one Admin section, Site, and one screen that edits name and logo. The screen uses Recording Studio core default layout. PageNav is back (history.back) plus Close. The title lives once in PageTitle.
+
+The logo row matches Users edit profile: a square Avatar preview and Attachable's file-only Add or Change button, outside the name form. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used.
 
 ## Dummy app
 

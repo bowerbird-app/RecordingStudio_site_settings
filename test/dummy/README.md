@@ -17,4 +17,4 @@ It is not the product. The product is the gem README and the admin screen for na
 - `/recording_studio_site_settings/settings` — the site name and logo admin screen
 - `/admin` — Admin mount with the Site section
 
-Seeded Studio has a name and a logo. Seeded Client Studio has a name and no logo.
+Seeded Studio has a name and a logo. Seeded Client Studio has a name and no logo. The admin logo row is an Avatar plus Attachable's Add or Change button, not a dropzone.

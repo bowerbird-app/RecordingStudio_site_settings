@@ -49,8 +49,7 @@ module RecordingStudioSiteSettings
         RecordingStudioSiteSettings.update!(
           @site_root,
           name: submitted_name,
-          actor: current_actor,
-          **submitted_logo
+          actor: current_actor
         )
       end
 
@@ -63,22 +62,15 @@ module RecordingStudioSiteSettings
 
       def assign_settings
         @name = RecordingStudioSiteSettings.name_for(@site_root)
-        @logo = RecordingStudioSiteSettings.logo_for(@site_root)
+        @site_setting_recording = RecordingStudioSiteSettings.recording_for(@site_root)
       end
 
       def submitted_name
         settings_params[:name].to_s.strip
       end
 
-      def submitted_logo
-        logo = settings_params[:logo]
-        return {} if logo.blank?
-
-        { logo_io: logo.tempfile, filename: logo.original_filename, content_type: logo.content_type }
-      end
-
       def settings_params
-        params.fetch(:site_setting, {}).permit(:name, :logo)
+        params.fetch(:site_setting, {}).permit(:name)
       end
     end
   end

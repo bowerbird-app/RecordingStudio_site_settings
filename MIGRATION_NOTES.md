@@ -18,3 +18,5 @@
 5. Enable the `site_settings` Admin section on the admin root and grant Accessible access there.
 
 Name and logo stay in this gem. Do not copy them onto the root.
+
+The admin logo control is Attachable's file button on this gem's site-settings recording. Hosts should not add a FileInput for the mark. Programmatic writes still go through `update!`.

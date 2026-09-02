@@ -1,4 +1,7 @@
-<% recording_studio_page_nav %>
+<% recording_studio_page_nav(
+  title: "Site name and logo",
+  page_nav_anchor_url: main_app.root_path
+) %>
 
 <%= render FlatPack::PageTitle::Component.new(
   title: "Site name and logo",
@@ -7,34 +10,40 @@
 ) %>
 
 <%= render FlatPack::Grid::Component.new(cols: 2) do %>
-  <%= form_with url: settings_path, method: :patch, local: true, multipart: true do %>
-    <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg) do %>
-      <%= render FlatPack::TextInput::Component.new(
-        name: "site_setting[name]",
-        label: "Site name",
-        value: @name,
-        required: true
-      ) %>
-
-      <% if @logo.present? %>
-        <%= recording_studio_site_logo(@site_root, size: :"2xl") %>
-      <% end %>
-
-      <%= render FlatPack::FileInput::Component.new(
-        name: "site_setting[logo]",
-        label: "Logo",
-        accept: "image/*",
-        help_text: @logo.present? ? "Replace it with a new file if you like." : "No logo yet. Add a mark so people know they are in the right place."
-      ) %>
-
-      <div>
-        <%= render FlatPack::Button::Component.new(text: "Save", type: :submit, style: :primary) %>
-        <%= render FlatPack::Button::Component.new(
-          text: "Cancel",
-          style: :secondary,
-          href: request.referer.presence || main_app.root_path
-        ) %>
+  <div>
+    <% if @site_setting_recording.present? %>
+      <div class="mb-8">
+        <%= turbo_frame_tag "site-logo" do %>
+          <div class="inline-flex items-end gap-3">
+            <%= render FlatPack::Avatar::Component.new(
+                  src: attachment_preview_url(@site_setting_recording, variant: :square_med),
+                  size: :"2xl",
+                  shape: :square
+                ) %>
+            <%= render_attachment_file_button(@site_setting_recording, return_to: settings_path) %>
+          </div>
+        <% end %>
       </div>
     <% end %>
-  <% end %>
+
+    <%= form_with url: settings_path, method: :patch do %>
+      <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg) do %>
+        <%= render FlatPack::TextInput::Component.new(
+          name: "site_setting[name]",
+          label: "Site name",
+          value: @name,
+          required: true
+        ) %>
+
+        <div>
+          <%= render FlatPack::Button::Component.new(text: "Save", type: "submit", style: :primary) %>
+          <%= render FlatPack::Button::Component.new(
+            text: "Cancel",
+            style: :secondary,
+            href: request.referer.presence || main_app.root_path
+          ) %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 <% end %>

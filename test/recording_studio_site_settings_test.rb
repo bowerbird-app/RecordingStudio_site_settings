@@ -55,5 +55,25 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes view, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes view, "form_with url: settings_path"
     assert_includes view, "FlatPack::Grid::Component.new(cols: 1, gap: :lg)"
+    assert_includes view, 'turbo_frame_tag "site-logo"'
+    assert_includes view, "render_attachment_file_button(@site_setting_recording, return_to: settings_path)"
+    assert_includes view, "attachment_preview_url(@site_setting_recording, variant: :square_med)"
+    assert_includes view, "shape: :square"
+    refute_includes view, "FileInput"
+    refute_includes view, "Upload a file or drag and drop"
+    assert_includes view, "recording_studio_page_nav"
+    assert_includes view, "page_nav_anchor_url: main_app.root_path"
+  end
+
+  def test_admin_controller_uses_core_default_layout
+    source = File.read(
+      File.expand_path(
+        "../app/controllers/recording_studio_site_settings/application_controller.rb",
+        __dir__
+      )
+    )
+
+    assert_includes source, "include RecordingStudio::UsesDefaultLayout"
+    assert_includes source, 'layout "recording_studio/default_layout"'
   end
 end
