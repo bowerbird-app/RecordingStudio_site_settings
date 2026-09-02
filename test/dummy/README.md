@@ -17,4 +17,4 @@ It is not the product. The product is the gem README and the admin screen for na
 - `/recording_studio_site_settings/settings` — the site name, logos, and favicon admin screen
 - `/admin` — Admin mount with the Site section
 
-Seeded Studio has a name, a square logo, and a wide logo. Seeded Client Studio has a name and empty marks. Neither seed has a favicon. The admin mark rows are an Avatar or wide image plus Attachable's Add or Change button, not a dropzone. Empty square, wide, and favicon slots show a photo icon. Dummy chrome prints the square and wide logos from the helpers. The dummy layout may print `recording_studio_site_favicon`.
+Seeded Studio has a name, a square logo, and a wide logo. Seeded Client Studio has a name and empty marks. Neither seed has a favicon. The admin mark rows are an Avatar or wide image plus Attachable's Add or Change button, not a dropzone. Empty square, wide, and favicon slots show a photo icon. Dummy home and dummy docs print the wide logo in a sidebar from `recording_studio_site_wide_logo`. Dummy does not override core `default_layout`. The dummy layout head may print `recording_studio_site_favicon`.

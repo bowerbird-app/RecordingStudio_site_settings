@@ -13,11 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public write API: `update!`, gated with Accessible `:edit` on the site root. `square_logo_io` and `wide_logo_io` attach the marks. `logo_io` writes the square slot. `favicon_io` attaches the tab icon.
 - Logo and favicon storage through three Attachable image children on this gem's site-settings recording, not on the root, named `square_logo`, `wide_logo`, and `favicon`.
 - One Admin section and one screen for staff to edit name, both logos, and the tab icon.
-- Dummy host that seeds a named Studio with both logos, a named empty-mark Client Studio, and a 403 actor. Dummy layout prints the favicon link tag. Dummy chrome prints the square and wide logos from the helpers.
+- Dummy host that seeds a named Studio with both logos, a named empty-mark Client Studio, and a 403 actor. Dummy layout head prints the favicon link tag. Dummy home and dummy docs print the wide logo in a Flatpack Sidebar. Dummy does not override core `default_layout`.
 
 ### Changed
 - Admin PageNav is the back control only. The visible title is PageTitle once.
-- Admin form spacing comes from Flatpack Grid. Save stays primary. Cancel is a separate back control.
+- Admin form spacing comes from Flatpack Grid. Fields stack in this order: site name, wide logo, square logo, favicon. Save and Cancel are separate Buttons after the fields.
 - Mark rows stack full width. Square logo uses Attachable's file button and a square Avatar. Wide logo uses the same button and the image in real proportion. Empty Avatars pass Flatpack `icon: "photo"`. Name save is a separate form. The page does not use Flatpack FileInput.
 - Hosts set `site_root_types` in the initializer. There is no site-settings YAML file.
 - Dummy and the README GitHub tag track Accessible `v0.9.0`. The gemspec floor stays `~> 0.8`.

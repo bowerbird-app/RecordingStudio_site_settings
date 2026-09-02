@@ -1,5 +1,6 @@
 <% dummy_page_nav(title: "Recordable types", back_url: root_path) %>
 
+<%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Recordable types",
@@ -28,3 +29,4 @@
     <p class="text-sm text-(--surface-muted-content-color)">No recordable types are configured.</p>
   <% end %>
 </div>
+<% end %>

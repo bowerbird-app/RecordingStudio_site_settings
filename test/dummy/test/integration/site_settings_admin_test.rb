@@ -70,6 +70,24 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "FlatPack::FileInput"
     refute_includes response.body, "Choose File"
     refute_includes response.body, "parent-attachment-slot"
+    refute_includes response.body, "flat-pack-button-group"
+    refute_includes response.body, "flat-pack-sidebar-layout"
+    assert_select "aside", count: 0
+    assert_select "header img", count: 0
+    assert_select "form#site-name-form", count: 1
+    assert_select %(button[form="site-name-form"]), text: "Save", count: 1
+    body = response.body
+    name_at = body.index("Site name")
+    wide_at = body.index("Wide logo")
+    square_at = body.index("Square logo")
+    favicon_at = body.index(">Favicon<") || body.index("Favicon")
+    save_at = body.index(">Save<")
+    cancel_at = body.index(">Cancel<")
+    assert name_at < wide_at, "Site name must render before Wide logo"
+    assert wide_at < square_at, "Wide logo must render before Square logo"
+    assert square_at < favicon_at, "Square logo must render before Favicon"
+    assert favicon_at < save_at, "Favicon must render before Save"
+    assert save_at < cancel_at, "Save must render before Cancel"
     assert_select "turbo-frame#site-square-logo"
     assert_select "turbo-frame#site-wide-logo"
     assert_select "turbo-frame#site-favicon"
@@ -108,14 +126,9 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     square_preview = RecordingStudioSiteSettings.square_logo_for(@studio_root).preview_url
     wide_preview = RecordingStudioSiteSettings.wide_logo_for(@studio_root).preview_url
 
-    assert_select "#site-square-logo img"
-    assert_select "#site-wide-logo img"
-    assert_select "header img[src=?]", square_preview
-    assert_select "header img[src=?]", wide_preview
-    assert_select "header img[width='96']"
-    refute_includes frame_html("site-wide-logo"), 'width="96"'
     assert_includes response.body, square_preview
     assert_includes response.body, wide_preview
+    refute_includes response.body, 'width="192"'
   end
 
   test "an authorized actor sees empty photo icons for a named site" do
@@ -150,7 +163,8 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_includes frame_html("site-square-logo"), "flat-pack--icon-name-value=\"photo\""
     assert_includes frame_html("site-wide-logo"), "flat-pack--icon-name-value=\"photo\""
     assert_includes frame_html("site-favicon"), "flat-pack--icon-name-value=\"photo\""
-    assert_select "header", count: 0
+    assert_select "header img", count: 0
+    assert_select "aside", count: 0
     assert_includes unescaped_page, recording_studio_attachable.recording_attachment_imports_path(
       recording,
       redirect_mode: "return_to",
@@ -299,6 +313,47 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select %(link[rel="icon"][href="#{preview}"])
+  end
+
+  test "dummy home prints the wide logo in a sidebar and settings does not" do
+    RecordingStudioSiteSettings.update!(@studio_root, name: "Studio", actor: @admin)
+    File.open(TEST_WIDE_LOGO_PATH, "rb") do |io|
+      RecordingStudioSiteSettings.update!(
+        @studio_root,
+        name: "Studio",
+        actor: @admin,
+        wide_logo_io: io,
+        wide_logo_filename: "wide-logo.png",
+        wide_logo_content_type: "image/png"
+      )
+    end
+    preview = RecordingStudioSiteSettings.wide_logo_for(@studio_root).preview_url
+
+    sign_in @admin
+    switch_root!(@studio_root)
+
+    get "/"
+
+    assert_response :success
+    assert_select %(body[data-recording-studio-default-layout="true"]), count: 1
+    refute_includes response.body, "flat-pack-sidebar-layout"
+    assert_select "aside img[src=?]", preview
+    assert_select "aside img[width='192']"
+    refute_includes response.body, "Site name and logos"
+
+    get "/docs/install"
+
+    assert_response :success
+    assert_select "aside img[src=?]", preview
+    refute_includes response.body, "flat-pack-sidebar-layout"
+
+    get recording_studio_site_settings.settings_path
+
+    assert_response :success
+    assert_select "aside", count: 0
+    assert_select "header img", count: 0
+    refute_includes response.body, 'width="192"'
+    assert_includes response.body, preview
   end
 
   private

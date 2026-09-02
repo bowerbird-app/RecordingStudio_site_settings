@@ -5,33 +5,23 @@
 
 <%= render FlatPack::PageTitle::Component.new(
   title: "Site name and logos",
-  subtitle: "Square mark, wide mark, and the icon in the browser tab.",
+  subtitle: "Name, wide mark, square mark, and the icon in the browser tab.",
   variant: :h1
 ) %>
 
 <%= render FlatPack::Grid::Component.new(cols: 2) do %>
-  <div>
-    <% if @site_setting_recording.present? %>
-      <div class="mb-8">
-        <p class="mb-2 text-sm font-medium text-(--surface-content-color)">Square logo</p>
-        <%= turbo_frame_tag "site-square-logo" do %>
-          <div class="inline-flex items-end gap-3">
-            <%= render FlatPack::Avatar::Component.new(
-                  src: @square_logo.preview_url,
-                  size: :"2xl",
-                  shape: :square,
-                  icon: "photo"
-                ) %>
-            <%= render_site_settings_file_button(
-                  @site_setting_recording,
-                  slot: "square_logo",
-                  return_to: settings_path
-                ) %>
-          </div>
-        <% end %>
-      </div>
+  <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg) do %>
+    <%= form_with url: settings_path, method: :patch, html: { id: "site-name-form" } do %>
+      <%= render FlatPack::TextInput::Component.new(
+        name: "site_setting[name]",
+        label: "Site name",
+        value: @name,
+        required: true
+      ) %>
+    <% end %>
 
-      <div class="mb-8">
+    <% if @site_setting_recording.present? %>
+      <div>
         <p class="mb-2 text-sm font-medium text-(--surface-content-color)">Wide logo</p>
         <%= turbo_frame_tag "site-wide-logo" do %>
           <div class="inline-flex items-end gap-3">
@@ -53,7 +43,26 @@
         <% end %>
       </div>
 
-      <div class="mb-8">
+      <div>
+        <p class="mb-2 text-sm font-medium text-(--surface-content-color)">Square logo</p>
+        <%= turbo_frame_tag "site-square-logo" do %>
+          <div class="inline-flex items-end gap-3">
+            <%= render FlatPack::Avatar::Component.new(
+                  src: @square_logo.preview_url,
+                  size: :"2xl",
+                  shape: :square,
+                  icon: "photo"
+                ) %>
+            <%= render_site_settings_file_button(
+                  @site_setting_recording,
+                  slot: "square_logo",
+                  return_to: settings_path
+                ) %>
+          </div>
+        <% end %>
+      </div>
+
+      <div>
         <p class="mb-1 text-sm font-medium text-(--surface-content-color)">Favicon</p>
         <p class="mb-2 text-sm text-(--surface-muted-content-color)">Browser tab.</p>
         <%= turbo_frame_tag "site-favicon" do %>
@@ -74,24 +83,18 @@
       </div>
     <% end %>
 
-    <%= form_with url: settings_path, method: :patch do %>
-      <%= render FlatPack::Grid::Component.new(cols: 1, gap: :lg) do %>
-        <%= render FlatPack::TextInput::Component.new(
-          name: "site_setting[name]",
-          label: "Site name",
-          value: @name,
-          required: true
-        ) %>
-
-        <div>
-          <%= render FlatPack::Button::Component.new(text: "Save", type: "submit", style: :primary) %>
-          <%= render FlatPack::Button::Component.new(
-            text: "Cancel",
-            style: :secondary,
-            href: request.referer.presence || main_app.root_path
-          ) %>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
+    <div>
+      <%= render FlatPack::Button::Component.new(
+        text: "Save",
+        type: "submit",
+        style: :primary,
+        form: "site-name-form"
+      ) %>
+      <%= render FlatPack::Button::Component.new(
+        text: "Cancel",
+        style: :secondary,
+        href: request.referer.presence || main_app.root_path
+      ) %>
+    </div>
+  <% end %>
 <% end %>

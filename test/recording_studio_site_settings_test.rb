@@ -88,6 +88,30 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes view, "recording_studio_page_nav"
     assert_includes view, "page_nav_anchor_url: main_app.root_path"
     refute_includes view, "page_nav_back_url"
+    refute_includes view, "ButtonGroup"
+    assert_includes view, 'html: { id: "site-name-form" }'
+    assert_includes view, 'form: "site-name-form"'
+    assert_includes view, 'text: "Save"'
+    assert_includes view, 'text: "Cancel"'
+
+    name_at = view.index('label: "Site name"')
+    wide_at = view.index("Wide logo")
+    square_at = view.index("Square logo")
+    favicon_at = view.index("Favicon")
+    save_at = view.index('text: "Save"')
+    cancel_at = view.index('text: "Cancel"')
+
+    assert name_at, "Site name field is missing"
+    assert wide_at, "Wide logo row is missing"
+    assert square_at, "Square logo row is missing"
+    assert favicon_at, "Favicon row is missing"
+    assert save_at, "Save is missing"
+    assert cancel_at, "Cancel is missing"
+    assert name_at < wide_at, "Site name must come before Wide logo"
+    assert wide_at < square_at, "Wide logo must come before Square logo"
+    assert square_at < favicon_at, "Square logo must come before Favicon"
+    assert favicon_at < save_at, "Favicon must come before Save"
+    assert save_at < cancel_at, "Save must come before Cancel"
   end
 
   def test_dummy_tailwind_imports_generated_gem_sources
@@ -109,15 +133,12 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
   end
 
   def test_dummy_layout_head_prints_favicon
-    head = File.read(
-      File.expand_path("../test/dummy/app/views/recording_studio/_default_layout_head.html.erb", __dir__)
-    )
-    chrome = File.read(
-      File.expand_path("../test/dummy/app/views/recording_studio/_site_marks.html.erb", __dir__)
-    )
-    layout = File.read(
-      File.expand_path("../test/dummy/app/views/layouts/recording_studio/default_layout.html.erb", __dir__)
-    )
+    dummy_root = File.expand_path("../test/dummy", __dir__)
+    head = File.read(File.join(dummy_root, "app/views/recording_studio/_default_layout_head.html.erb"))
+    sidebar = File.read(File.join(dummy_root, "app/views/application/_wide_logo_sidebar.html.erb"))
+    home = File.read(File.join(dummy_root, "app/views/home/index.html.erb"))
+    docs_install = File.read(File.join(dummy_root, "app/views/docs/install.html.erb"))
+    helper = File.read(File.join(dummy_root, "app/helpers/application_helper.rb"))
     button = File.read(
       File.expand_path(
         "../app/views/recording_studio_site_settings/admin/settings/_mark_file_button.html.erb",
@@ -125,10 +146,18 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
       )
     )
 
+    refute File.exist?(File.join(dummy_root, "app/views/layouts/recording_studio/default_layout.html.erb")),
+           "dummy must not override core default_layout"
+    refute File.exist?(File.join(dummy_root, "app/views/recording_studio/_site_marks.html.erb")),
+           "dummy must not inject site_marks into layout"
     assert_includes head, "recording_studio_site_favicon"
-    assert_includes chrome, "recording_studio_site_square_logo"
-    assert_includes chrome, "recording_studio_site_wide_logo"
-    assert_includes layout, "recording_studio/site_marks"
+    assert_includes helper, "def dummy_wide_logo_sidebar"
+    assert_includes helper, "recording_studio_site_wide_logo"
+    assert_includes sidebar, "dummy_sidebar_wide_logo"
+    assert_includes sidebar, "FlatPack::Sidebar::Component"
+    refute_includes sidebar, "SidebarLayout"
+    assert_includes home, "dummy_wide_logo_sidebar"
+    assert_includes docs_install, "dummy_wide_logo_sidebar"
     assert_includes button, "attachment_import[attachments][][name]"
     assert_includes button, "mark_name"
   end

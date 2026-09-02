@@ -1,0 +1,21 @@
+<% wide_mark = dummy_sidebar_wide_logo %>
+<% if wide_mark.present? %>
+  <%= render FlatPack::Grid::Component.new(cols: 2, align: :start, gap: :lg) do %>
+    <%= render FlatPack::Sidebar::Component.new(collapsible: false) do |sidebar| %>
+      <% sidebar.header do %>
+        <%= render FlatPack::Sidebar::Header::Component.new(
+              collapsible: false,
+              brand_abbr: nil,
+              title: ""
+            ) do %>
+          <%= wide_mark %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <div>
+      <%= yield %>
+    </div>
+  <% end %>
+<% else %>
+  <%= yield %>
+<% end %>

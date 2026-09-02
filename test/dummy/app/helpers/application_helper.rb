@@ -1,4 +1,16 @@
 module ApplicationHelper
+  def dummy_sidebar_wide_logo
+    return unless respond_to?(:current_root_recording) && current_root_recording.present?
+
+    recording_studio_site_wide_logo(current_root_recording, width: 192)
+  end
+
+  def dummy_wide_logo_sidebar(&block)
+    render layout: "application/wide_logo_sidebar" do
+      capture(&block)
+    end
+  end
+
   def dummy_page_nav(title:, back_url: nil, back_label: "Home")
     recording_studio_page_nav(
       title: title,

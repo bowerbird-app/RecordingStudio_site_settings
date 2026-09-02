@@ -119,7 +119,7 @@ Writes check Accessible `:edit` on the site root. Name changes `revise` the site
 
 Staff open one Admin section, Site, and one screen that edits name, both logos, and the tab icon. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.
 
-Rows stack full width. Square logo is a square Avatar at size `2xl` plus Attachable Add or Change. Wide logo shows the image in real proportion, or a photo icon when empty, plus the same Add or Change control. Favicon uses a smaller square Avatar. Empty square and favicon Avatars pass Flatpack `icon: "photo"`, so the empty slot is a photo, not a person. Filled square and favicon slots still show the attached image. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used. Hosts need Flatpack `0.1.144` or newer for that empty icon.
+Rows stack full width, one field per row. Site name first, then wide logo, then square logo, then favicon. Square logo is a square Avatar at size `2xl` plus Attachable Add or Change. Wide logo shows the image in real proportion, or a photo icon when empty, plus the same Add or Change control. Favicon uses a smaller square Avatar. Empty square, wide, and favicon Avatars pass Flatpack `icon: "photo"`, so the empty slot is a photo, not a person. Filled square and favicon slots still show the attached image. Save and Cancel sit after the fields as separate Buttons. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used. Hosts need Flatpack `0.1.144` or newer for that empty icon.
 
 ## Dummy app
 
@@ -127,7 +127,7 @@ Rows stack full width. Square logo is a square Avatar at size `2xl` plus Attacha
 
 Dummy Tailwind writes resolved engine `@source` paths to `gem_sources.css` before each build. Bundle globs miss Flatpack on some install paths, and without those component classes PageNav back collapses to 2px.
 
-The dummy layout prints `recording_studio_site_favicon(current_root_recording)` in the document head. Dummy chrome prints the square and wide logos from the helpers so a seeded Studio shows the marks in use, not only on the admin form.
+The dummy layout head prints `recording_studio_site_favicon(current_root_recording)`. Dummy does not override Recording Studio core `default_layout`. Dummy home and dummy docs print `recording_studio_site_wide_logo` in a Flatpack Sidebar so hosts can see that helper work. The site settings admin screen does not.
 
 ## What dummy seeds
 

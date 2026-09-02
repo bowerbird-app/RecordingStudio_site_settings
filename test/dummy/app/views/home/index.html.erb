@@ -1,15 +1,17 @@
 <% dummy_page_nav(title: "Site settings", back_url: root_path) %>
 
-<div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Site settings dummy",
-    subtitle: "Open the admin screen to change the site name, logo, and tab icon.",
-    variant: :h1
-  ) %>
+<%= dummy_wide_logo_sidebar do %>
+  <div class="flex w-full flex-col gap-6">
+    <%= render FlatPack::PageTitle::Component.new(
+      title: "Site settings dummy",
+      subtitle: "Open the admin screen to change the site name, logo, and tab icon.",
+      variant: :h1
+    ) %>
 
-  <%= render FlatPack::Button::Component.new(
-    text: "Open site settings",
-    style: :primary,
-    url: recording_studio_site_settings.settings_path
-  ) %>
-</div>
+    <%= render FlatPack::Button::Component.new(
+      text: "Open site settings",
+      style: :primary,
+      url: recording_studio_site_settings.settings_path
+    ) %>
+  </div>
+<% end %>
