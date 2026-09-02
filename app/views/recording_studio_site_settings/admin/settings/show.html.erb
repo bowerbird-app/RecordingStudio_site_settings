@@ -19,7 +19,8 @@
             <%= render FlatPack::Avatar::Component.new(
                   src: @logo.preview_url,
                   size: :"2xl",
-                  shape: :square
+                  shape: :square,
+                  icon: "photo"
                 ) %>
             <%= render_site_settings_file_button(
                   @site_setting_recording,
@@ -38,7 +39,8 @@
             <%= render FlatPack::Avatar::Component.new(
                   src: @favicon.preview_url,
                   size: :xl,
-                  shape: :square
+                  shape: :square,
+                  icon: "photo"
                 ) %>
             <%= render_site_settings_file_button(
                   @site_setting_recording,

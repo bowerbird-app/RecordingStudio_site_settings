@@ -17,4 +17,4 @@ It is not the product. The product is the gem README and the admin screen for na
 - `/recording_studio_site_settings/settings` — the site name, logo, and favicon admin screen
 - `/admin` — Admin mount with the Site section
 
-Seeded Studio has a name and a logo. Seeded Client Studio has a name and no logo. Neither seed has a favicon. The admin mark rows are an Avatar plus Attachable's Add or Change button, not a dropzone. The dummy layout may print `recording_studio_site_favicon`.
+Seeded Studio has a name and a logo. Seeded Client Studio has a name and no logo. Neither seed has a favicon. The admin mark rows are an Avatar plus Attachable's Add or Change button, not a dropzone. Empty logo and favicon Avatars show a photo icon. The dummy layout may print `recording_studio_site_favicon`.

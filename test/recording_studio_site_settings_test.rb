@@ -26,6 +26,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     readme = File.read(File.expand_path("../README.md", __dir__))
     dummy_gemfile = File.read(File.expand_path("../test/dummy/Gemfile", __dir__))
 
+    assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.144"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.8"'
     refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.9"'
@@ -33,6 +34,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.5"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.9.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.9.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.144"'
     assert_match(
       %r{spec\.homepage\s+=\s+"https://github.com/bowerbird-app/RecordingStudio_site_settings"},
       gemspec
@@ -68,6 +70,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes view, "size: :xl"
     assert_includes view, "Browser tab."
     assert_includes view, "shape: :square"
+    assert_includes view, 'icon: "photo"'
     refute_includes view, "render_attachment_file_button"
     refute_includes view, "attachment_preview_url"
     refute_includes view, "FileInput"

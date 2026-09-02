@@ -82,7 +82,10 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     )
     assert_includes response.body, 'name="attachment_import[attachments][][name]"'
     assert_includes response.body, 'value="favicon"'
-    assert_includes response.body, "M12 2C6.48 2 2 6.48"
+    refute_includes frame_html("site-favicon"), "M12 2C6.48 2 2 6.48"
+    assert_includes frame_html("site-favicon"), "flat-pack--icon-name-value=\"photo\""
+    refute_includes frame_html("site-logo"), "M12 2C6.48 2 2 6.48"
+    assert_select "#site-logo img"
   end
 
   test "an authorized actor sees an empty logo for a named site" do
@@ -109,7 +112,10 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_select "input[type='file'].hidden"
     assert_includes response.body, "h-24 w-24"
     assert_includes response.body, "h-16 w-16"
-    assert_includes response.body, "M12 2C6.48 2 2 6.48"
+    refute_includes frame_html("site-logo"), "M12 2C6.48 2 2 6.48"
+    refute_includes frame_html("site-favicon"), "M12 2C6.48 2 2 6.48"
+    assert_includes frame_html("site-logo"), "flat-pack--icon-name-value=\"photo\""
+    assert_includes frame_html("site-favicon"), "flat-pack--icon-name-value=\"photo\""
     assert_includes unescaped_page, recording_studio_attachable.recording_attachment_imports_path(
       recording,
       redirect_mode: "return_to",
@@ -225,5 +231,9 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
 
   def unescaped_page
     CGI.unescapeHTML(response.body)
+  end
+
+  def frame_html(id)
+    css_select("turbo-frame##{id}").first.to_html
   end
 end

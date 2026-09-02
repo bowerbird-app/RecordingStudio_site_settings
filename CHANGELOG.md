@@ -18,14 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Admin PageNav is the back control only. The visible title is PageTitle once.
 - Admin form spacing comes from Flatpack Grid. Save stays primary. Cancel is a separate back control.
-- Logo and favicon rows stack full width. Each uses Attachable's file button and a square Avatar preview. Name save is a separate form. The page does not use Flatpack FileInput.
+- Logo and favicon rows stack full width. Each uses Attachable's file button and a square Avatar preview. Empty Avatars pass Flatpack `icon: "photo"`. Name save is a separate form. The page does not use Flatpack FileInput.
 - Hosts set `site_root_types` in the initializer. There is no site-settings YAML file.
 - Dummy and the README GitHub tag track Accessible `v0.9.0`. The gemspec floor stays `~> 0.8`.
 - Dummy Tailwind writes resolved gem `@source` paths before each build so core PageNav back keeps its Flatpack icon size.
+- Flatpack floor is `>= 0.1.144` so empty Avatars can pass `icon: "photo"`.
 
 ### Upgrade notes
 - Add `recording_studio_site_settings` `~> 0.1`.
-- Pin `recording_studio ~> 4.2`, Accessible `~> 0.8`, Admin `~> 2.0`, and Attachable `~> 0.5`.
+- Pin `recording_studio ~> 4.2`, Accessible `~> 0.8`, Admin `~> 2.0`, Attachable `~> 0.5`, and Flatpack `>= 0.1.144`.
 - Register `RecordingStudioSiteSettings::SiteSetting` and `RecordingStudioAttachable::Attachment`.
 - Do not add name, logo, or favicon columns to core or to the root recordable.
 - Read name, logo, and favicon from this gem. Do not read Attachable to print a site mark.

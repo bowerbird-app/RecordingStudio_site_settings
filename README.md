@@ -109,7 +109,7 @@ Older logos that were stored before named slots still count as the logo. They ar
 
 Staff open one Admin section, Site, and one screen that edits name, logo, and tab icon. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.
 
-Rows stack full width. Logo is a square Avatar at size `2xl` plus Attachable Add or Change. Favicon uses the same control at a smaller square. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used.
+Rows stack full width. Logo is a square Avatar at size `2xl` plus Attachable Add or Change. Favicon uses the same control at a smaller square. Empty logo and favicon Avatars pass Flatpack `icon: "photo"`, so the empty slot is a photo, not a person. Filled slots still show the attached image. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used. Hosts need Flatpack `0.1.144` or newer for that empty icon.
 
 ## Dummy app
 
