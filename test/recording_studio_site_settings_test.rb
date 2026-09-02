@@ -108,7 +108,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     )
 
     assert_includes head, "recording_studio_site_favicon"
-    assert_includes button, 'attachment_import[attachments][][name]'
+    assert_includes button, "attachment_import[attachments][][name]"
     assert_includes button, "mark_name"
   end
 

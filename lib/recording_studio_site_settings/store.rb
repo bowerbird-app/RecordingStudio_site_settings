@@ -3,7 +3,7 @@
 module RecordingStudioSiteSettings
   RECORDABLE_TYPE = "RecordingStudioSiteSettings::SiteSetting"
 
-  module Store
+  module Store # rubocop:disable Metrics/ModuleLength
     module_function
 
     def name_for(root_recording)
@@ -54,11 +54,11 @@ module RecordingStudioSiteSettings
       recording.reload
     end
 
-    def attach_named_image!(parent_recording, actor:, slot:, io:, filename:, content_type:)
+    def attach_named_image!(parent_recording, actor:, slot:, **file)
       existing = existing_image_for(parent_recording, slot)
-      return replace_image!(existing, io:, filename:, content_type:, actor:) if existing.present?
+      return replace_image!(existing, actor:, **file) if existing.present?
 
-      import_image!(parent_recording, io:, filename:, content_type:, actor:, slot:)
+      import_image!(parent_recording, actor:, slot:, **file)
     end
 
     def site_root?(recording)
@@ -92,17 +92,21 @@ module RecordingStudioSiteSettings
       end
     end
 
-    def replace_image!(existing, io:, filename:, content_type:, actor:)
-      blob = ActiveStorage::Blob.create_and_upload!(io:, filename:, content_type:)
+    def replace_image!(existing, actor:, **file)
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: file.fetch(:io),
+        filename: file.fetch(:filename),
+        content_type: file.fetch(:content_type)
+      )
       existing.replace_attachment_file(signed_blob_id: blob.signed_id, actor: actor)
     end
 
-    def import_image!(parent_recording, io:, filename:, content_type:, actor:, slot:)
+    def import_image!(parent_recording, actor:, slot:, **file)
       result = RecordingStudioAttachable::Services::ImportAttachment.call(
         parent_recording: parent_recording,
-        io: io,
-        filename: filename,
-        content_type: content_type,
+        io: file.fetch(:io),
+        filename: file.fetch(:filename),
+        content_type: file.fetch(:content_type),
         actor: actor,
         name: slot
       )
