@@ -25,19 +25,17 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     get docs_install_path
     assert_response :success
     assert_select "h1", text: "Install"
-    assert_includes response.body, "Step 1"
-    assert_includes response.body, "Provide one section title for each step"
-    assert_includes response.body, "# Put the step instruction here."
+    assert_includes response.body, "Add the gem"
+    assert_includes response.body, "recording_studio_site_settings"
+    assert_includes response.body, "bin/rails generate recording_studio_site_settings:install"
   end
 
   test "config page renders successfully" do
     get docs_config_path
     assert_response :success
     assert_select "h1", text: "Config"
-    expected_placeholder = "Replace this placeholder with the configuration settings your generated gem exposes."
-
-    assert_includes response.body, expected_placeholder
-    assert_includes response.body, "# Add the config settings for the gem here."
+    assert_includes response.body, "site_root_types"
+    assert_includes response.body, "RecordingStudioSiteSettings.configure"
   end
 
   test "recordable types page renders configured recordables dynamically" do
@@ -69,6 +67,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Workspace"
     assert_includes response.body, "Folder"
     assert_includes response.body, "Page"
+    assert_includes response.body, "Site settings"
   end
 
   test "recordings tree page renders successfully" do
@@ -78,6 +77,8 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     folder_recording = record_child(folder, root_recording, root_recording)
     page = Page.create!(title: "API")
     record_child(page, root_recording, folder_recording)
+    site_setting = RecordingStudioSiteSettings::SiteSetting.create!(name: "Tree Site")
+    record_child(site_setting, root_recording, root_recording)
 
     get docs_recordings_tree_path
 
@@ -86,8 +87,8 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Workspace: Tree Workspace"
     assert_includes response.body, "Folder: Reference"
     assert_includes response.body, "Page: API"
+    assert_includes response.body, "Site setting: Tree Site"
     refute_includes response.body, "Access boundary"
-    refute_includes response.body, "Access: Admin"
     assert_select "div[role='tree']", count: 1
     assert_select "[role='treeitem']", minimum: 3
     refute_includes response.body, "Current structure"
@@ -106,11 +107,10 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     get docs_methods_path
     assert_response :success
     assert_select "h1", text: "Methods"
-    assert_includes response.body, "Document the public methods your addon exposes."
-    assert_includes response.body, "Example method"
-    assert_includes response.body, "recordingstudio_addon.example_method"
-    assert_includes response.body, "# Explain what this method does before the example."
-    assert_includes response.body, "Provide one section title and codeblock for each method"
+    assert_includes response.body, "RecordingStudioSiteSettings.name_for"
+    assert_includes response.body, "RecordingStudioSiteSettings.logo_for"
+    assert_includes response.body, "recording_studio_site_logo"
+    assert_includes response.body, "RecordingStudioSiteSettings.update!"
   end
 
   test "authenticated docs pages use the recording studio default layout" do

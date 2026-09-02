@@ -3,30 +3,65 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Methods",
-    subtitle: "Document the public methods your addon exposes.",
+    subtitle: "Other gems read name and logo here. Do not call Attachable just to print the mark.",
     variant: :h1
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Example method",
-    subtitle: "recordingstudio_addon.example_method",
+    title: "Read the name",
+    subtitle: "RecordingStudioSiteSettings.name_for",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      # Explain what this method does before the example.
-      result = RecordingstudioAddon.example_method(
-        # Replace with the real arguments this method accepts.
-        input: "demo value"
-      )
-
-      # Show what the method returns or what side effect it creates.
-      puts result
+      root = RecordingStudio.root_recording_for(workspace)
+      RecordingStudioSiteSettings.name_for(root)
     CODE
   ) %>
 
-  <p class="text-sm text-(--body-muted-content-color)">
-    Provide one section title and codeblock for each method
-  </p>
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Read the logo",
+    subtitle: "RecordingStudioSiteSettings.logo_for",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      logo = RecordingStudioSiteSettings.logo_for(root)
+      logo.preview_url
+      logo.present?
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Print the mark",
+    subtitle: "recording_studio_site_logo",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      recording_studio_site_logo(current_root_recording)
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Write name and logo",
+    subtitle: "RecordingStudioSiteSettings.update!",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioSiteSettings.update!(
+        root,
+        name: "Studio",
+        actor: current_user,
+        logo_io: File.open("logo.png"),
+        filename: "logo.png",
+        content_type: "image/png"
+      )
+    CODE
+  ) %>
 </div>
