@@ -1,6 +1,6 @@
 <% if respond_to?(:current_root_recording) && current_root_recording.present? %>
   <% square_mark = recording_studio_site_square_logo(current_root_recording) %>
-  <% wide_mark = recording_studio_site_wide_logo(current_root_recording, height: 48) %>
+  <% wide_mark = recording_studio_site_wide_logo(current_root_recording, width: 96) %>
   <% if square_mark.present? || wide_mark.present? %>
     <%= render FlatPack::TopNav::Component.new(mobile_menu: false) do |nav| %>
       <% nav.left(always_display: true) do %>

@@ -112,8 +112,8 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_select "#site-wide-logo img"
     assert_select "header img[src=?]", square_preview
     assert_select "header img[src=?]", wide_preview
-    assert_select "header img[height='48']"
-    refute_includes frame_html("site-wide-logo"), 'height="48"'
+    assert_select "header img[width='96']"
+    refute_includes frame_html("site-wide-logo"), 'width="96"'
     assert_includes response.body, square_preview
     assert_includes response.body, wide_preview
   end
