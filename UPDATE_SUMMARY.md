@@ -1,10 +1,8 @@
-# Recording Studio 4.x Template Update
+# Recording Studio Site Settings
 
-Copied addons now start on Recording Studio 4.x.
+This gem holds one site name, a square logo, a wide logo, and one optional favicon per site root.
 
-- Gemspec: `add_dependency "recording_studio", "~> 4.1"`
-- Dummy GitHub tags: Recording Studio `v4.2.0`, Accessible `v0.6.0`, Root Switchable `v0.5.0`, FlatPack `v0.1.133`
-- Authenticated dummy layout: `RecordingStudio::UsesDefaultLayout` plus FlatPack CSS/JS
-- Hooks and BaseService come from core; do not copy them into a new addon
-- Recordable declarations remain required
-- Optional example mixin: `include RecordingStudio::Capabilities::Example.to(**opts)` wraps `RecordingStudio::Capabilities.include_for`. Installing the gem does not enable it globally.
+- Public API: `name_for`, `square_logo_for`, `wide_logo_for`, `logo_for`, `favicon_for`, `recording_studio_site_square_logo`, `recording_studio_site_wide_logo`, `recording_studio_site_logo`, `recording_studio_site_favicon`, `update!`
+- Logo and favicon storage is three Attachable children on this gem's site-settings recording, not on the root
+- Admin: one Site section and one screen, gated with Accessible on the admin root
+- Pins: Recording Studio `~> 4.2`, Accessible `~> 0.8` (dummy and README GitHub tag `v0.9.0`), Admin `~> 2.0`, Attachable `~> 0.5`, Flatpack `>= 0.1.144`

@@ -1,10 +1,22 @@
 # Pin npm packages by running ./bin/importmap
 
 pin "application"
+pin "@hotwired/turbo-rails", to: "turbo.min.js"
 pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 
-# Pin FlatPack controllers
 pin_all_from FlatPack::Engine.root.join("app/javascript/flat_pack/controllers"), under: "controllers/flat_pack", to: "flat_pack/controllers", preload: false
 pin "flat_pack/heroicons", to: "flat_pack/heroicons.js", preload: false
+
+roots = Rails.application.config.x.site_settings_importmap_roots || {}
+
+pin_all_from roots.fetch(:admin).join("app/javascript/recording_studio_admin/controllers"),
+             under: "controllers/recording_studio_admin",
+             to: "recording_studio_admin/controllers",
+             preload: false
+
+pin "@rails/activestorage", to: "activestorage.esm.js"
+pin_all_from roots.fetch(:attachable).join("app/javascript/controllers/recording_studio_attachable"),
+             under: "controllers/recording_studio_attachable",
+             to: "controllers/recording_studio_attachable"

@@ -1,5 +1,6 @@
 <% dummy_page_nav(title: "Recordings tree", back_url: root_path) %>
 
+<%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Recordings tree",
@@ -17,3 +18,4 @@
     <p class="text-sm text-(--surface-muted-content-color)">No active recordings found.</p>
   <% end %>
 </div>
+<% end %>

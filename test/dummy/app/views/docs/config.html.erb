@@ -1,16 +1,22 @@
 <% dummy_page_nav(title: "Config", back_url: root_path) %>
 
+<%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Config",
-    subtitle: "Replace this placeholder with the configuration settings your generated gem exposes.",
+    subtitle: "Tell the gem which recordable is a site root. Name, logos, and favicon still live in this gem.",
     variant: :h1
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      # Add the config settings for the gem here.
+      RecordingStudioSiteSettings.configure do |config|
+        config.site_root_types = ["Workspace"]
+        # Optional. Default uses the current Workspace root.
+        # config.site_root_resolver = ->(context) { ... }
+      end
     CODE
   ) %>
 </div>
+<% end %>

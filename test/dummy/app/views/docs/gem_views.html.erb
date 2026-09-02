@@ -1,5 +1,6 @@
 <% dummy_page_nav(title: "Gem Views", back_url: root_path) %>
 
+<%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Gem Views",
@@ -14,3 +15,4 @@
     <% table.column(title: "Source") { |view| view[:source] } %>
   <% end %>
 </div>
+<% end %>

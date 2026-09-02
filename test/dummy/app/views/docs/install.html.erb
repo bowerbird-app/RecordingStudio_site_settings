@@ -1,21 +1,43 @@
 <% dummy_page_nav(title: "Install", back_url: root_path) %>
 
+<%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Install",
-    subtitle: "Host-app setup for the mounted GemTemplate engine and its sample migrations.",
+    subtitle: "Add this gem so a host can store site name, logos, and tab icon outside core and outside the root.",
     variant: :h1
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Step 1",
-    subtitle: "Provide one section title for each step",
+    title: "Add the gem",
+    subtitle: "Pin Recording Studio and the majors this gem reads.",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~CODE
+      gem "recording_studio_site_settings"
+      gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"
+      gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.9.0"
+      gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "2.0.1"
+      gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.5.0"
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Generate and migrate",
+    subtitle: "Install this gem and Attachable. Core does not store name, logos, or favicon.",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :bash,
     code: <<~CODE
-      # Put the step instruction here.
+      bin/rails generate recording_studio_site_settings:install
+      bin/rails generate recording_studio_site_settings:migrations
+      bin/rails generate recording_studio_attachable:install
+      bin/rails generate recording_studio_attachable:migrations
+      bin/rails db:migrate
     CODE
   ) %>
 </div>
+<% end %>
