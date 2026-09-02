@@ -35,6 +35,10 @@ module RecordingStudioSiteSettings
       Store.logo_for(root_recording, variant: variant)
     end
 
+    def favicon_for(root_recording, variant: :square_small)
+      Store.favicon_for(root_recording, variant: variant)
+    end
+
     def recording_for(root_recording)
       Store.recording_for(root_recording)
     end
@@ -45,6 +49,10 @@ module RecordingStudioSiteSettings
 
     def logo_recording_for(root_recording)
       Store.logo_recording_for(root_recording)
+    end
+
+    def favicon_recording_for(root_recording)
+      Store.favicon_recording_for(root_recording)
     end
 
     def update!(...)

@@ -1,10 +1,10 @@
 # Recording Studio Site Settings
 
-This gem is the source of truth for a site's name and logo in Recording Studio.
+This gem is the source of truth for a site's name, logo, and tab icon in Recording Studio.
 
-Core does not store them. The site root does not store them. Other gems read them from this gem. Do not call Attachable just to print the mark.
+Core does not store them. The site root does not store them. Other gems read them from this gem. Do not call Attachable just to print a mark.
 
-Each site root gets one name and one logo. The logo is an Attachable image under this gem's site-settings recording.
+Each site root gets one name, one logo, and one optional favicon. Name lives on this gem's site-settings recording. Logo and favicon are two Attachable image children under that recording, named `logo` and `favicon`.
 
 ## Install
 
@@ -48,7 +48,7 @@ RecordingStudioSiteSettings.configure do |config|
 end
 ```
 
-Enable Accessible on the site root and on the admin root. Enable Attachable only on `RecordingStudioSiteSettings::SiteSetting`. Do not enable Attachable on the root to hold the logo.
+Enable Accessible on the site root and on the admin root. Enable Attachable only on `RecordingStudioSiteSettings::SiteSetting`. Do not enable Attachable on the root to hold the marks.
 
 Mount the engines and Admin:
 
@@ -60,7 +60,7 @@ recording_studio_admin_for :admin, at: "/admin", root_section: :site_settings
 
 Enable the `site_settings` section on the admin root. Grant Accessible access on that admin root. People without that grant get 403.
 
-## Read name and logo
+## Read name, logo, and favicon
 
 ```ruby
 root = RecordingStudio.root_recording_for(workspace)
@@ -69,6 +69,8 @@ RecordingStudioSiteSettings.name_for(root)
 RecordingStudioSiteSettings.logo_for(root)
 RecordingStudioSiteSettings.logo_for(root).preview_url
 RecordingStudioSiteSettings.logo_for(root).present?
+RecordingStudioSiteSettings.favicon_for(root)
+RecordingStudioSiteSettings.favicon_for(root).present?
 ```
 
 In a view:
@@ -76,11 +78,14 @@ In a view:
 ```erb
 <%= RecordingStudioSiteSettings.name_for(current_root_recording) %>
 <%= recording_studio_site_logo(current_root_recording) %>
+<%= recording_studio_site_favicon(current_root_recording) %>
 ```
 
-`logo_for` returns a small object with `recording`, `preview_url`, `filename`, `present?`, and `blank?`. Callers should not reach into Attachable to render the mark.
+`logo_for` and `favicon_for` return a small object with `recording`, `preview_url`, `filename`, `present?`, and `blank?`. Callers should not reach into Attachable to render the mark.
 
-## Write name and logo
+`recording_studio_site_favicon` returns a `<link rel="icon">` tag when a tab icon is present, or nothing. Put it in the layout head. Favicon is optional. This gem does not convert to `.ico` or crop the file.
+
+## Write name, logo, and favicon
 
 ```ruby
 RecordingStudioSiteSettings.update!(
@@ -89,17 +94,22 @@ RecordingStudioSiteSettings.update!(
   actor: current_user,
   logo_io: File.open("logo.png"),
   filename: "logo.png",
-  content_type: "image/png"
+  content_type: "image/png",
+  favicon_io: File.open("favicon.png"),
+  favicon_filename: "favicon.png",
+  favicon_content_type: "image/png"
 )
 ```
 
-Writes check Accessible `:edit` on the site root. Name changes `revise` the site-settings recording. A second logo on the same site replaces the file on the existing attachment.
+Writes check Accessible `:edit` on the site root. Name changes `revise` the site-settings recording. A second file for the same slot replaces the file on that attachment. Logo and favicon stay separate children.
+
+Older logos that were stored before named slots still count as the logo. They are not treated as the favicon.
 
 ## Admin
 
-Staff open one Admin section, Site, and one screen that edits name and logo. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.
+Staff open one Admin section, Site, and one screen that edits name, logo, and tab icon. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.
 
-The logo row matches Users edit profile: a square Avatar preview and Attachable's file-only Add or Change button, outside the name form. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used.
+Rows stack full width. Logo is a square Avatar at size `2xl` plus Attachable Add or Change. Favicon uses the same control at a smaller square. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used.
 
 ## Dummy app
 
@@ -107,8 +117,11 @@ The logo row matches Users edit profile: a square Avatar preview and Attachable'
 
 Dummy Tailwind writes resolved engine `@source` paths to `gem_sources.css` before each build. Bundle globs miss Flatpack on some install paths, and without those component classes PageNav back collapses to 2px.
 
+The dummy layout prints `recording_studio_site_favicon(current_root_recording)` in the document head.
+
 Seeded proof:
 
 - Studio has the name Studio and a logo
 - Client Studio has a name and no logo
+- Neither seed has a favicon
 - `member@admin.com` has no admin grant and gets 403

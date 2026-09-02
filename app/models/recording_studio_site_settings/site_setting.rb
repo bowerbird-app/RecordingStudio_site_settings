@@ -11,7 +11,7 @@ module RecordingStudioSiteSettings
     include RecordingStudio::Capabilities::Attachable.to(
       allowed_content_types: ["image/*"],
       enabled_attachment_kinds: %i[image],
-      max_file_count: 1
+      max_file_count: 2
     )
 
     self.record_timestamps = false

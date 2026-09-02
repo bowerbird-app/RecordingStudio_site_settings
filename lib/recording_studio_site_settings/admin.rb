@@ -8,11 +8,11 @@ module RecordingStudioSiteSettings
       key "site_settings"
       icon :photo
       title "Site"
-      subtitle "The name and logo people see"
+      subtitle "Name, logo, and the browser tab icon."
       blast_radius :site
 
       link :edit,
-           text: "Edit name and logo",
+           text: "Edit site settings",
            url: ->(context) { RecordingStudioSiteSettings.admin_settings_path(context) },
            style: :primary
     end

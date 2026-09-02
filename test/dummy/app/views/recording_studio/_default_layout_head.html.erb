@@ -3,3 +3,6 @@
 <script>
   document.documentElement.setAttribute("data-theme", "rounded");
 </script>
+<% if respond_to?(:current_root_recording) %>
+  <%= recording_studio_site_favicon(current_root_recording) %>
+<% end %>

@@ -53,8 +53,10 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     assert_equal 2, Workspace.where(name: %w[Studio Client\ Studio]).count
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(root_recording)
     assert RecordingStudioSiteSettings.logo_for(root_recording).present?
+    assert RecordingStudioSiteSettings.favicon_for(root_recording).blank?
     assert_equal "Client Studio", RecordingStudioSiteSettings.name_for(client_root_recording)
     assert RecordingStudioSiteSettings.logo_for(client_root_recording).blank?
+    assert RecordingStudioSiteSettings.favicon_for(client_root_recording).blank?
 
     assert_no_difference -> { User.count } do
       load Rails.root.join("db/seeds.rb").to_s
@@ -70,6 +72,7 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
 
     refute_includes workspace_source, "Attachable"
     assert_includes settings_source, "Capabilities::Attachable"
+    assert_includes settings_source, "max_file_count: 2"
 
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
     refute RecordingStudio.capability_enabled?(:attachable, for: Workspace)

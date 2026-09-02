@@ -18,4 +18,8 @@ class LogoTest < Minitest::Test
     assert_predicate logo, :blank?
     refute_predicate logo, :present?
   end
+
+  def test_favicon_is_the_same_shape
+    assert_equal RecordingStudioSiteSettings::Logo, RecordingStudioSiteSettings::Favicon
+  end
 end

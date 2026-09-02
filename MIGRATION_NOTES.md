@@ -17,6 +17,6 @@
 4. Set `site_root_types` in the initializer to the host site root class, usually `Workspace`. Do not add a YAML settings file.
 5. Enable the `site_settings` Admin section on the admin root and grant Accessible access there.
 
-Name and logo stay in this gem. Do not copy them onto the root.
+Name, logo, and favicon stay in this gem. Do not copy them onto the root.
 
-The admin logo control is Attachable's file button on this gem's site-settings recording. Hosts should not add a FileInput for the mark. Programmatic writes still go through `update!`.
+The admin mark controls are Attachable file buttons on this gem's site-settings recording. Logo and favicon are two named children (`logo` and `favicon`). Hosts should not add a FileInput for either mark. Programmatic writes still go through `update!`. Print the tab icon with `recording_studio_site_favicon`.

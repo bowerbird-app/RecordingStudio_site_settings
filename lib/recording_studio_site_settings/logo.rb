@@ -10,4 +10,6 @@ module RecordingStudioSiteSettings
       recording.blank?
     end
   end
+
+  Favicon = Logo
 end

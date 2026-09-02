@@ -5,7 +5,7 @@
 
 <%= render FlatPack::PageTitle::Component.new(
   title: "Site name and logo",
-  subtitle: "This is what people see when they arrive.",
+  subtitle: "Name, logo, and the icon in the browser tab.",
   variant: :h1
 ) %>
 
@@ -13,14 +13,38 @@
   <div>
     <% if @site_setting_recording.present? %>
       <div class="mb-8">
+        <p class="mb-2 text-sm font-medium text-(--surface-content-color)">Logo</p>
         <%= turbo_frame_tag "site-logo" do %>
           <div class="inline-flex items-end gap-3">
             <%= render FlatPack::Avatar::Component.new(
-                  src: attachment_preview_url(@site_setting_recording, variant: :square_med),
+                  src: @logo.preview_url,
                   size: :"2xl",
                   shape: :square
                 ) %>
-            <%= render_attachment_file_button(@site_setting_recording, return_to: settings_path) %>
+            <%= render_site_settings_file_button(
+                  @site_setting_recording,
+                  slot: "logo",
+                  return_to: settings_path
+                ) %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="mb-8">
+        <p class="mb-1 text-sm font-medium text-(--surface-content-color)">Favicon</p>
+        <p class="mb-2 text-sm text-(--surface-muted-content-color)">Browser tab.</p>
+        <%= turbo_frame_tag "site-favicon" do %>
+          <div class="inline-flex items-end gap-3">
+            <%= render FlatPack::Avatar::Component.new(
+                  src: @favicon.preview_url,
+                  size: :xl,
+                  shape: :square
+                ) %>
+            <%= render_site_settings_file_button(
+                  @site_setting_recording,
+                  slot: "favicon",
+                  return_to: settings_path
+                ) %>
           </div>
         <% end %>
       </div>

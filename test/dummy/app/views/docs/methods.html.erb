@@ -3,7 +3,7 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Methods",
-    subtitle: "Other gems read name and logo here. Do not call Attachable just to print the mark.",
+    subtitle: "Other gems read name, logo, and favicon here. Do not call Attachable just to print a mark.",
     variant: :h1
   ) %>
 
@@ -35,6 +35,20 @@
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
+    title: "Read the favicon",
+    subtitle: "RecordingStudioSiteSettings.favicon_for",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      favicon = RecordingStudioSiteSettings.favicon_for(root)
+      favicon.preview_url
+      favicon.present?
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
     title: "Print the mark",
     subtitle: "recording_studio_site_logo",
   ) %>
@@ -47,7 +61,19 @@
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Write name and logo",
+    title: "Print the tab icon",
+    subtitle: "recording_studio_site_favicon",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      recording_studio_site_favicon(current_root_recording)
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Write name, logo, and favicon",
     subtitle: "RecordingStudioSiteSettings.update!",
   ) %>
 
@@ -60,7 +86,10 @@
         actor: current_user,
         logo_io: File.open("logo.png"),
         filename: "logo.png",
-        content_type: "image/png"
+        content_type: "image/png",
+        favicon_io: File.open("favicon.png"),
+        favicon_filename: "favicon.png",
+        favicon_content_type: "image/png"
       )
     CODE
   ) %>

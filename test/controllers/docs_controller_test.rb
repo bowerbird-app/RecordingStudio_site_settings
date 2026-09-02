@@ -110,7 +110,9 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Methods"
     assert_includes response.body, "RecordingStudioSiteSettings.name_for"
     assert_includes response.body, "RecordingStudioSiteSettings.logo_for"
+    assert_includes response.body, "RecordingStudioSiteSettings.favicon_for"
     assert_includes response.body, "recording_studio_site_logo"
+    assert_includes response.body, "recording_studio_site_favicon"
     assert_includes response.body, "RecordingStudioSiteSettings.update!"
   end
 

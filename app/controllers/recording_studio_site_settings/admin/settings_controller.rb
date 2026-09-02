@@ -13,7 +13,7 @@ module RecordingStudioSiteSettings
       def update
         authorize_site_settings_admin!(role: :admin)
         save_site_settings
-        redirect_to settings_path, notice: "Saved. That's the name and logo for this site."
+        redirect_to settings_path, notice: "Saved. That's this site's name, logo, and tab icon."
       rescue RecordingStudioSiteSettings::Unauthorized
         head :forbidden
       rescue ActiveRecord::RecordInvalid
@@ -37,7 +37,7 @@ module RecordingStudioSiteSettings
         recording = context.access_recording
         return if actor && recording && RecordingStudioAccessible.authorized?(actor:, recording:, role:)
 
-        raise RecordingStudioAdmin::AuthorizationFailed, "You cannot change this site's name or logo."
+        raise RecordingStudioAdmin::AuthorizationFailed, "You cannot change this site's name, logo, or tab icon."
       end
 
       def require_site_root!
@@ -63,6 +63,8 @@ module RecordingStudioSiteSettings
       def assign_settings
         @name = RecordingStudioSiteSettings.name_for(@site_root)
         @site_setting_recording = RecordingStudioSiteSettings.recording_for(@site_root)
+        @logo = RecordingStudioSiteSettings.logo_for(@site_root, variant: :square_med)
+        @favicon = RecordingStudioSiteSettings.favicon_for(@site_root, variant: :square_small)
       end
 
       def submitted_name
