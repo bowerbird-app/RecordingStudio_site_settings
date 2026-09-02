@@ -25,6 +25,8 @@ class SiteSettingsStoreTest < ActiveSupport::TestCase
     assert_equal "Harbor", RecordingStudioSiteSettings.name_for(@root)
     assert RecordingStudioSiteSettings.logo_for(@root).present?
     assert_equal "logo.png", RecordingStudioSiteSettings.logo_for(@root).filename
+    assert_match(%r{/recording_studio_attachable/attachments/.+/preview/square_med},
+                 RecordingStudioSiteSettings.logo_for(@root).preview_url.to_s)
 
     workspace = @root.recordable
     refute workspace.class.column_names.include?("logo")

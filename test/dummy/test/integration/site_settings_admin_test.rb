@@ -42,6 +42,7 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Site name and logo"
     assert_includes response.body, 'value="Studio"'
     refute_includes response.body, "No logo yet"
+    assert_includes response.body, "/recording_studio_attachable/attachments/"
   end
 
   test "an authorized actor sees an empty logo for a named site" do
