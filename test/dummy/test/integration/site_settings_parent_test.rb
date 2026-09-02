@@ -9,7 +9,6 @@ class SiteSettingsParentTest < ActiveSupport::TestCase
     @admin_root = admin_root_recording("Parent Admin #{SecureRandom.hex(4)}")
     @workspace_root = workspace_root("Parent Workspace #{SecureRandom.hex(4)}")
     bootstrap_owner_access!(@owner, @admin_root)
-    bootstrap_owner_access!(@owner, @workspace_root)
     bootstrap_owner_access!(@member, @workspace_root)
   end
 
@@ -54,6 +53,7 @@ class SiteSettingsParentTest < ActiveSupport::TestCase
     assert RecordingStudioAccessible.authorized?(actor: @owner, recording: settings, role: :edit)
     refute RecordingStudioAccessible.authorized?(actor: @member, recording: @admin_root, role: :edit)
     refute RecordingStudioAccessible.authorized?(actor: @member, recording: settings, role: :edit)
+    assert RecordingStudioAccessible.authorized?(actor: @member, recording: @workspace_root, role: :edit)
 
     error = assert_raises(RecordingStudioSiteSettings::Unauthorized) do
       RecordingStudioSiteSettings.update!(@admin_root, name: "Nope", actor: @member)
