@@ -14,8 +14,12 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes readme, "# Recording Studio Site Settings"
     assert_includes readme, "source of truth"
     assert_includes readme, "name_for"
+    assert_includes readme, "square_logo_for"
+    assert_includes readme, "wide_logo_for"
     assert_includes readme, "logo_for"
     assert_includes readme, "favicon_for"
+    assert_includes readme, "recording_studio_site_square_logo"
+    assert_includes readme, "recording_studio_site_wide_logo"
     assert_includes readme, "recording_studio_site_favicon"
     refute_includes readme, "Gem Template"
     refute_includes readme, "recording_studio_gem_template"
@@ -59,18 +63,23 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes view, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes view, "form_with url: settings_path"
     assert_includes view, "FlatPack::Grid::Component.new(cols: 1, gap: :lg)"
-    assert_includes view, 'turbo_frame_tag "site-logo"'
+    assert_includes view, 'turbo_frame_tag "site-square-logo"'
+    assert_includes view, 'turbo_frame_tag "site-wide-logo"'
     assert_includes view, 'turbo_frame_tag "site-favicon"'
-    assert_includes view, 'slot: "logo"'
+    assert_includes view, 'slot: "square_logo"'
+    assert_includes view, 'slot: "wide_logo"'
     assert_includes view, 'slot: "favicon"'
     assert_includes view, "render_site_settings_file_button"
-    assert_includes view, "@logo.preview_url"
+    assert_includes view, "@square_logo.preview_url"
+    assert_includes view, "@wide_logo.preview_url"
     assert_includes view, "@favicon.preview_url"
+    assert_includes view, "recording_studio_site_wide_logo"
     assert_includes view, 'size: :"2xl"'
     assert_includes view, "size: :xl"
     assert_includes view, "Browser tab."
     assert_includes view, "shape: :square"
     assert_includes view, 'icon: "photo"'
+    refute_includes view, "<img src="
     refute_includes view, "render_attachment_file_button"
     refute_includes view, "attachment_preview_url"
     refute_includes view, "FileInput"
@@ -103,6 +112,12 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     head = File.read(
       File.expand_path("../test/dummy/app/views/recording_studio/_default_layout_head.html.erb", __dir__)
     )
+    chrome = File.read(
+      File.expand_path("../test/dummy/app/views/recording_studio/_site_marks.html.erb", __dir__)
+    )
+    layout = File.read(
+      File.expand_path("../test/dummy/app/views/layouts/recording_studio/default_layout.html.erb", __dir__)
+    )
     button = File.read(
       File.expand_path(
         "../app/views/recording_studio_site_settings/admin/settings/_mark_file_button.html.erb",
@@ -111,6 +126,9 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     )
 
     assert_includes head, "recording_studio_site_favicon"
+    assert_includes chrome, "recording_studio_site_square_logo"
+    assert_includes chrome, "recording_studio_site_wide_logo"
+    assert_includes layout, "recording_studio/site_marks"
     assert_includes button, "attachment_import[attachments][][name]"
     assert_includes button, "mark_name"
   end
@@ -124,8 +142,10 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     )
 
     assert_includes helper, "def recording_studio_site_favicon"
+    assert_includes helper, "def recording_studio_site_square_logo"
+    assert_includes helper, "def recording_studio_site_wide_logo"
     assert_includes helper, "def recording_studio_site_logo"
     refute_includes helper, "FileInput"
-    assert_includes model, "max_file_count: 2"
+    assert_includes model, "max_file_count: 3"
   end
 end

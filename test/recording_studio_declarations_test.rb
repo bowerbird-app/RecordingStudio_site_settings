@@ -91,7 +91,7 @@ class RecordingStudioDeclarationsTest < ActiveSupport::TestCase
 
     refute RecordingStudio.capability_enabled?(:attachable, for: "Workspace")
     assert RecordingStudio.capability_enabled?(:attachable, for: RecordingStudioSiteSettings::SiteSetting)
-    assert_equal 2, RecordingStudio.capability_options(
+    assert_equal 3, RecordingStudio.capability_options(
       :attachable,
       for: RecordingStudioSiteSettings::SiteSetting
     )[:max_file_count]

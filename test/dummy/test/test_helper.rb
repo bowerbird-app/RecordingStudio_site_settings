@@ -46,6 +46,8 @@ end
 
 module SiteSettingsTestHelper
   TEST_LOGO_PATH = Rails.root.join("test/fixtures/files/logo.png")
+  TEST_SQUARE_LOGO_PATH = Rails.root.join("test/fixtures/files/square-logo.png")
+  TEST_WIDE_LOGO_PATH = Rails.root.join("test/fixtures/files/wide-logo.png")
 
   def admin_root_recording
     admin_root = AdminRoot.find_or_create_by!(name: "Admin")

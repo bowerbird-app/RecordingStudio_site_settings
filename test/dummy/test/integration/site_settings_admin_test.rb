@@ -21,20 +21,31 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_response :forbidden
   end
 
-  test "an authorized actor sees the seeded name and logo" do
+  test "an authorized actor sees the attached square logo, wide logo, and empty favicon" do
     RecordingStudioSiteSettings.update!(@studio_root, name: "Studio", actor: @admin)
-    File.open(TEST_LOGO_PATH, "rb") do |io|
+    File.open(TEST_SQUARE_LOGO_PATH, "rb") do |io|
       RecordingStudioSiteSettings.update!(
         @studio_root,
         name: "Studio",
         actor: @admin,
-        logo_io: io,
-        filename: "logo.png",
-        content_type: "image/png"
+        square_logo_io: io,
+        square_logo_filename: "square-logo.png",
+        square_logo_content_type: "image/png"
+      )
+    end
+    File.open(TEST_WIDE_LOGO_PATH, "rb") do |io|
+      RecordingStudioSiteSettings.update!(
+        @studio_root,
+        name: "Studio",
+        actor: @admin,
+        wide_logo_io: io,
+        wide_logo_filename: "wide-logo.png",
+        wide_logo_content_type: "image/png"
       )
     end
     recording = RecordingStudioSiteSettings.recording_for(@studio_root)
-    image = RecordingStudioSiteSettings.logo_recording_for(@studio_root)
+    square = RecordingStudioSiteSettings.square_logo_recording_for(@studio_root)
+    wide = RecordingStudioSiteSettings.wide_logo_recording_for(@studio_root)
 
     sign_in @admin
     switch_root!(@studio_root)
@@ -49,7 +60,7 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_select %(nav.flat-pack-page-nav [aria-label="Go back"]), count: 1
     assert_includes response.body, "p-[var(--button-icon-only-padding-md)]"
     assert_includes response.body, "w-5 h-5"
-    assert_select "h1", text: "Site name and logo", count: 1
+    assert_select "h1", text: "Site name and logos", count: 1
     assert_includes response.body, 'value="Studio"'
     assert_includes response.body, "Cancel"
     assert_includes response.body, "md:grid-cols-2"
@@ -59,19 +70,28 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "FlatPack::FileInput"
     refute_includes response.body, "Choose File"
     refute_includes response.body, "parent-attachment-slot"
-    assert_select "turbo-frame#site-logo"
+    assert_select "turbo-frame#site-square-logo"
+    assert_select "turbo-frame#site-wide-logo"
     assert_select "turbo-frame#site-favicon"
-    assert_select "#site-logo button", text: "Change"
+    assert_select "#site-square-logo button", text: "Change"
+    assert_select "#site-wide-logo button", text: "Change"
     assert_select "#site-favicon button", text: "Add"
     assert_select "input[type='file'].hidden"
     assert_includes response.body, "h-24 w-24"
     assert_includes response.body, "h-16 w-16"
     assert_includes response.body, "rounded-[var(--avatar-radius-square)]"
+    assert_includes response.body, "Square logo"
+    assert_includes response.body, "Wide logo"
     assert_includes response.body, "Favicon"
     assert_includes response.body, "Browser tab."
     refute_includes response.body, ">Avatar<"
     assert_includes unescaped_page, recording_studio_attachable.attachment_path(
-      image,
+      square,
+      redirect_mode: "return_to",
+      return_to: recording_studio_site_settings.settings_path
+    )
+    assert_includes unescaped_page, recording_studio_attachable.attachment_path(
+      wide,
       redirect_mode: "return_to",
       return_to: recording_studio_site_settings.settings_path
     )
@@ -84,11 +104,21 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_includes response.body, 'value="favicon"'
     refute_includes frame_html("site-favicon"), "M12 2C6.48 2 2 6.48"
     assert_includes frame_html("site-favicon"), "flat-pack--icon-name-value=\"photo\""
-    refute_includes frame_html("site-logo"), "M12 2C6.48 2 2 6.48"
-    assert_select "#site-logo img"
+    refute_includes frame_html("site-square-logo"), "M12 2C6.48 2 2 6.48"
+    square_preview = RecordingStudioSiteSettings.square_logo_for(@studio_root).preview_url
+    wide_preview = RecordingStudioSiteSettings.wide_logo_for(@studio_root).preview_url
+
+    assert_select "#site-square-logo img"
+    assert_select "#site-wide-logo img"
+    assert_select "header img[src=?]", square_preview
+    assert_select "header img[src=?]", wide_preview
+    assert_select "header img[height='48']"
+    refute_includes frame_html("site-wide-logo"), 'height="48"'
+    assert_includes response.body, square_preview
+    assert_includes response.body, wide_preview
   end
 
-  test "an authorized actor sees an empty logo for a named site" do
+  test "an authorized actor sees empty photo icons for a named site" do
     RecordingStudioSiteSettings.update!(@client_root, name: "Client Studio", actor: @admin)
     recording = RecordingStudioSiteSettings.recording_for(@client_root)
 
@@ -100,28 +130,34 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, 'value="Client Studio"'
     assert_select %(body[data-recording-studio-default-layout="true"]), count: 1
-    assert_select "h1", text: "Site name and logo", count: 1
+    assert_select "h1", text: "Site name and logos", count: 1
     refute_includes response.body, "No logo yet"
     refute_includes response.body, "Upload a file or drag and drop"
     refute_includes response.body, "Choose File"
     refute_includes response.body, "parent-attachment-slot"
-    assert_select "turbo-frame#site-logo"
+    assert_select "turbo-frame#site-square-logo"
+    assert_select "turbo-frame#site-wide-logo"
     assert_select "turbo-frame#site-favicon"
-    assert_select "#site-logo button", text: "Add"
+    assert_select "#site-square-logo button", text: "Add"
+    assert_select "#site-wide-logo button", text: "Add"
     assert_select "#site-favicon button", text: "Add"
     assert_select "input[type='file'].hidden"
     assert_includes response.body, "h-24 w-24"
     assert_includes response.body, "h-16 w-16"
-    refute_includes frame_html("site-logo"), "M12 2C6.48 2 2 6.48"
+    refute_includes frame_html("site-square-logo"), "M12 2C6.48 2 2 6.48"
+    refute_includes frame_html("site-wide-logo"), "M12 2C6.48 2 2 6.48"
     refute_includes frame_html("site-favicon"), "M12 2C6.48 2 2 6.48"
-    assert_includes frame_html("site-logo"), "flat-pack--icon-name-value=\"photo\""
+    assert_includes frame_html("site-square-logo"), "flat-pack--icon-name-value=\"photo\""
+    assert_includes frame_html("site-wide-logo"), "flat-pack--icon-name-value=\"photo\""
     assert_includes frame_html("site-favicon"), "flat-pack--icon-name-value=\"photo\""
+    assert_select "header", count: 0
     assert_includes unescaped_page, recording_studio_attachable.recording_attachment_imports_path(
       recording,
       redirect_mode: "return_to",
       return_to: recording_studio_site_settings.settings_path
     )
-    assert_includes response.body, 'value="logo"'
+    assert_includes response.body, 'value="square_logo"'
+    assert_includes response.body, 'value="wide_logo"'
     assert_includes response.body, 'value="favicon"'
   end
 
@@ -136,11 +172,11 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to recording_studio_site_settings.settings_path
     follow_redirect!
-    assert_includes unescaped_page, "Saved. That's this site's name, logo, and tab icon."
+    assert_includes unescaped_page, "Saved. That's this site's name, logos, and tab icon."
     assert_equal "North Studio", RecordingStudioSiteSettings.name_for(@studio_root)
   end
 
-  test "an authorized actor can attach a logo through Attachable" do
+  test "an authorized actor can attach a square logo through Attachable" do
     RecordingStudioSiteSettings.update!(@studio_root, name: "Studio", actor: @admin)
     recording = RecordingStudioSiteSettings.recording_for(@studio_root)
     settings_path = recording_studio_site_settings.settings_path
@@ -155,27 +191,65 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
       ), params: {
         attachment_import: {
           attachments: [
-            { file: Rack::Test::UploadedFile.new(TEST_LOGO_PATH.to_s, "image/png"), name: "logo" }
+            { file: Rack::Test::UploadedFile.new(TEST_SQUARE_LOGO_PATH.to_s, "image/png"), name: "square_logo" }
           ]
         }
       }
     end
 
     assert_redirected_to settings_path
-    assert RecordingStudioSiteSettings.logo_for(@studio_root).present?
-    assert_equal "logo", RecordingStudioSiteSettings.logo_recording_for(@studio_root).recordable.name
+    assert RecordingStudioSiteSettings.square_logo_for(@studio_root).present?
+    assert_equal "square_logo", RecordingStudioSiteSettings.square_logo_recording_for(@studio_root).recordable.name
   end
 
-  test "an authorized actor can attach a favicon without replacing the logo" do
+  test "an authorized actor can attach a wide logo without replacing the square logo" do
     RecordingStudioSiteSettings.update!(@studio_root, name: "Studio", actor: @admin)
-    File.open(TEST_LOGO_PATH, "rb") do |io|
+    File.open(TEST_SQUARE_LOGO_PATH, "rb") do |io|
       RecordingStudioSiteSettings.update!(
         @studio_root,
         name: "Studio",
         actor: @admin,
-        logo_io: io,
-        filename: "logo.png",
-        content_type: "image/png"
+        square_logo_io: io,
+        square_logo_filename: "square-logo.png",
+        square_logo_content_type: "image/png"
+      )
+    end
+    recording = RecordingStudioSiteSettings.recording_for(@studio_root)
+    settings_path = recording_studio_site_settings.settings_path
+    sign_in @admin
+    switch_root!(@studio_root)
+
+    assert_difference -> { recording.images.to_a.size }, +1 do
+      post recording_studio_attachable.recording_attachment_imports_path(
+        recording,
+        redirect_mode: "return_to",
+        return_to: settings_path
+      ), params: {
+        attachment_import: {
+          attachments: [
+            { file: Rack::Test::UploadedFile.new(TEST_WIDE_LOGO_PATH.to_s, "image/png"), name: "wide_logo" }
+          ]
+        }
+      }
+    end
+
+    assert_redirected_to settings_path
+    assert RecordingStudioSiteSettings.square_logo_for(@studio_root).present?
+    assert RecordingStudioSiteSettings.wide_logo_for(@studio_root).present?
+    assert_equal "square_logo", RecordingStudioSiteSettings.square_logo_recording_for(@studio_root).recordable.name
+    assert_equal "wide_logo", RecordingStudioSiteSettings.wide_logo_recording_for(@studio_root).recordable.name
+  end
+
+  test "an authorized actor can attach a favicon without replacing a logo" do
+    RecordingStudioSiteSettings.update!(@studio_root, name: "Studio", actor: @admin)
+    File.open(TEST_SQUARE_LOGO_PATH, "rb") do |io|
+      RecordingStudioSiteSettings.update!(
+        @studio_root,
+        name: "Studio",
+        actor: @admin,
+        square_logo_io: io,
+        square_logo_filename: "square-logo.png",
+        square_logo_content_type: "image/png"
       )
     end
     recording = RecordingStudioSiteSettings.recording_for(@studio_root)
@@ -198,9 +272,9 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to settings_path
-    assert RecordingStudioSiteSettings.logo_for(@studio_root).present?
+    assert RecordingStudioSiteSettings.square_logo_for(@studio_root).present?
     assert RecordingStudioSiteSettings.favicon_for(@studio_root).present?
-    assert_equal "logo", RecordingStudioSiteSettings.logo_recording_for(@studio_root).recordable.name
+    assert_equal "square_logo", RecordingStudioSiteSettings.square_logo_recording_for(@studio_root).recordable.name
     assert_equal "favicon", RecordingStudioSiteSettings.favicon_recording_for(@studio_root).recordable.name
   end
 

@@ -1,10 +1,12 @@
 # Recording Studio Site Settings
 
-This gem is the source of truth for a site's name, logo, and tab icon in Recording Studio.
+This gem is the source of truth for a site's name, square logo, wide logo, and tab icon in Recording Studio.
 
 Core does not store them. The site root does not store them. Other gems read them from this gem. Do not call Attachable just to print a mark.
 
-Each site root gets one name, one logo, and one optional favicon. Name lives on this gem's site-settings recording. Logo and favicon are two Attachable image children under that recording, named `logo` and `favicon`.
+Each site root gets one name, one square logo, one wide logo, and one optional favicon. Name lives on this gem's site-settings recording. The three images are Attachable children under that recording, named `square_logo`, `wide_logo`, and `favicon`.
+
+`logo_for` and `recording_studio_site_logo` are aliases for the square mark. There is no third logo upload.
 
 ## Install
 
@@ -60,15 +62,18 @@ recording_studio_admin_for :admin, at: "/admin", root_section: :site_settings
 
 Enable the `site_settings` section on the admin root. Grant Accessible access on that admin root. People without that grant get 403.
 
-## Read name, logo, and favicon
+## Read name, logos, and favicon
 
 ```ruby
 root = RecordingStudio.root_recording_for(workspace)
 
 RecordingStudioSiteSettings.name_for(root)
+RecordingStudioSiteSettings.square_logo_for(root)
+RecordingStudioSiteSettings.square_logo_for(root).preview_url
+RecordingStudioSiteSettings.square_logo_for(root).present?
+RecordingStudioSiteSettings.wide_logo_for(root)
+RecordingStudioSiteSettings.wide_logo_for(root).present?
 RecordingStudioSiteSettings.logo_for(root)
-RecordingStudioSiteSettings.logo_for(root).preview_url
-RecordingStudioSiteSettings.logo_for(root).present?
 RecordingStudioSiteSettings.favicon_for(root)
 RecordingStudioSiteSettings.favicon_for(root).present?
 ```
@@ -77,39 +82,44 @@ In a view:
 
 ```erb
 <%= RecordingStudioSiteSettings.name_for(current_root_recording) %>
+<%= recording_studio_site_square_logo(current_root_recording) %>
+<%= recording_studio_site_wide_logo(current_root_recording) %>
 <%= recording_studio_site_logo(current_root_recording) %>
 <%= recording_studio_site_favicon(current_root_recording) %>
 ```
 
-`logo_for` and `favicon_for` return a small object with `recording`, `preview_url`, `filename`, `present?`, and `blank?`. Callers should not reach into Attachable to render the mark.
+`square_logo_for`, `wide_logo_for`, `logo_for`, and `favicon_for` return a small object with `recording`, `preview_url`, `filename`, `present?`, and `blank?`. Callers should not reach into Attachable to render the mark.
 
-`recording_studio_site_favicon` returns a `<link rel="icon">` tag when a tab icon is present, or nothing. Put it in the layout head. Favicon is optional. This gem does not convert to `.ico` or crop the file.
+`recording_studio_site_square_logo` prints a square Avatar when a square mark is present, or nothing. `recording_studio_site_wide_logo` prints the wide image in its real proportion when present, or nothing. `recording_studio_site_favicon` returns a `<link rel="icon">` tag when a tab icon is present, or nothing. Put the favicon helper in the layout head. Favicon is optional. This gem does not convert to `.ico` or crop the file.
 
-## Write name, logo, and favicon
+## Write name, logos, and favicon
 
 ```ruby
 RecordingStudioSiteSettings.update!(
   root,
   name: "Studio",
   actor: current_user,
-  logo_io: File.open("logo.png"),
-  filename: "logo.png",
-  content_type: "image/png",
+  square_logo_io: File.open("square-logo.png"),
+  square_logo_filename: "square-logo.png",
+  square_logo_content_type: "image/png",
+  wide_logo_io: File.open("wide-logo.png"),
+  wide_logo_filename: "wide-logo.png",
+  wide_logo_content_type: "image/png",
   favicon_io: File.open("favicon.png"),
   favicon_filename: "favicon.png",
   favicon_content_type: "image/png"
 )
 ```
 
-Writes check Accessible `:edit` on the site root. Name changes `revise` the site-settings recording. A second file for the same slot replaces the file on that attachment. Logo and favicon stay separate children.
+Writes check Accessible `:edit` on the site root. Name changes `revise` the site-settings recording. A second file for the same slot replaces the file on that attachment. Square, wide, and favicon stay separate children.
 
-Older logos that were stored before named slots still count as the logo. They are not treated as the favicon.
+`logo_io` still writes the square slot.
 
 ## Admin
 
-Staff open one Admin section, Site, and one screen that edits name, logo, and tab icon. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.
+Staff open one Admin section, Site, and one screen that edits name, both logos, and the tab icon. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.
 
-Rows stack full width. Logo is a square Avatar at size `2xl` plus Attachable Add or Change. Favicon uses the same control at a smaller square. Empty logo and favicon Avatars pass Flatpack `icon: "photo"`, so the empty slot is a photo, not a person. Filled slots still show the attached image. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used. Hosts need Flatpack `0.1.144` or newer for that empty icon.
+Rows stack full width. Square logo is a square Avatar at size `2xl` plus Attachable Add or Change. Wide logo shows the image in real proportion, or a photo icon when empty, plus the same Add or Change control. Favicon uses a smaller square Avatar. Empty square and favicon Avatars pass Flatpack `icon: "photo"`, so the empty slot is a photo, not a person. Filled square and favicon slots still show the attached image. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used. Hosts need Flatpack `0.1.144` or newer for that empty icon.
 
 ## Dummy app
 
@@ -117,11 +127,10 @@ Rows stack full width. Logo is a square Avatar at size `2xl` plus Attachable Add
 
 Dummy Tailwind writes resolved engine `@source` paths to `gem_sources.css` before each build. Bundle globs miss Flatpack on some install paths, and without those component classes PageNav back collapses to 2px.
 
-The dummy layout prints `recording_studio_site_favicon(current_root_recording)` in the document head.
+The dummy layout prints `recording_studio_site_favicon(current_root_recording)` in the document head. Dummy chrome prints the square and wide logos from the helpers so a seeded Studio shows the marks in use, not only on the admin form.
 
-Seeded proof:
+## What dummy seeds
 
-- Studio has the name Studio and a logo
-- Client Studio has a name and no logo
-- Neither seed has a favicon
-- `member@admin.com` has no admin grant and gets 403
+- Studio: name, square logo, and wide logo. No favicon.
+- Client Studio: name only. All three image slots empty.
+- `member@admin.com` can sign in and gets 403 on the admin screen.

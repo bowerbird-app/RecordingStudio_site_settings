@@ -64,16 +64,27 @@ begin
     name: "Studio",
     actor: user
   )
-  unless RecordingStudioSiteSettings.logo_for(root_recording).present?
-    logo_path = Rails.root.join("db/seeds/studio-logo.png")
-    File.open(logo_path, "rb") do |io|
+  unless RecordingStudioSiteSettings.square_logo_for(root_recording).present?
+    File.open(Rails.root.join("db/seeds/square-logo.png"), "rb") do |io|
       RecordingStudioSiteSettings.update!(
         root_recording,
         name: "Studio",
         actor: user,
-        logo_io: io,
-        filename: "studio-logo.png",
-        content_type: "image/png"
+        square_logo_io: io,
+        square_logo_filename: "square-logo.png",
+        square_logo_content_type: "image/png"
+      )
+    end
+  end
+  unless RecordingStudioSiteSettings.wide_logo_for(root_recording).present?
+    File.open(Rails.root.join("db/seeds/wide-logo.png"), "rb") do |io|
+      RecordingStudioSiteSettings.update!(
+        root_recording,
+        name: "Studio",
+        actor: user,
+        wide_logo_io: io,
+        wide_logo_filename: "wide-logo.png",
+        wide_logo_content_type: "image/png"
       )
     end
   end
@@ -89,7 +100,7 @@ end
 
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: member@admin.com / Password (no admin access)"
-puts "Seeded: Studio with name and logo"
-puts "Seeded: Client Studio with name and no logo"
+puts "Seeded: Studio with name, square logo, and wide logo"
+puts "Seeded: Client Studio with name and empty marks"
 puts "Seeded: no favicon on either site"
 puts "Seeded: Admin root for the site settings screen"

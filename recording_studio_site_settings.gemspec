@@ -7,9 +7,10 @@ Gem::Specification.new do |spec|
   spec.version     = RecordingStudioSiteSettings::VERSION
   spec.authors     = ["Bowerbird"]
   spec.homepage    = "https://github.com/bowerbird-app/RecordingStudio_site_settings"
-  spec.summary     = "Site name and logo for Recording Studio"
-  spec.description = "Recording Studio addon that holds one site name and one site logo per site. " \
-                     "Other gems read them from this gem, not from the root and not from Attachable."
+  spec.summary     = "Site name and logos for Recording Studio"
+  spec.description = "Recording Studio addon that holds one site name, a square logo, a wide logo, " \
+                     "and an optional favicon per site. Other gems read them from this gem, not from " \
+                     "the root and not from Attachable."
   spec.license     = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
 

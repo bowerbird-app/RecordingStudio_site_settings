@@ -2,7 +2,7 @@
 
 This Rails app is a host that proves `recording_studio_site_settings`.
 
-It is not the product. The product is the gem README and the admin screen for name, logo, and tab icon.
+It is not the product. The product is the gem README and the admin screen for name, logos, and tab icon.
 
 ## Sign in
 
@@ -14,7 +14,7 @@ It is not the product. The product is the gem README and the admin screen for na
 ## Routes that matter
 
 - `/users/sign_in`
-- `/recording_studio_site_settings/settings` — the site name, logo, and favicon admin screen
+- `/recording_studio_site_settings/settings` — the site name, logos, and favicon admin screen
 - `/admin` — Admin mount with the Site section
 
-Seeded Studio has a name and a logo. Seeded Client Studio has a name and no logo. Neither seed has a favicon. The admin mark rows are an Avatar plus Attachable's Add or Change button, not a dropzone. Empty logo and favicon Avatars show a photo icon. The dummy layout may print `recording_studio_site_favicon`.
+Seeded Studio has a name, a square logo, and a wide logo. Seeded Client Studio has a name and empty marks. Neither seed has a favicon. The admin mark rows are an Avatar or wide image plus Attachable's Add or Change button, not a dropzone. Empty square, wide, and favicon slots show a photo icon. Dummy chrome prints the square and wide logos from the helpers. The dummy layout may print `recording_studio_site_favicon`.

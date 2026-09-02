@@ -52,10 +52,12 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     assert_equal root_recording, page_recording.root_recording
     assert_equal 2, Workspace.where(name: %w[Studio Client\ Studio]).count
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(root_recording)
-    assert RecordingStudioSiteSettings.logo_for(root_recording).present?
+    assert RecordingStudioSiteSettings.square_logo_for(root_recording).present?
+    assert RecordingStudioSiteSettings.wide_logo_for(root_recording).present?
     assert RecordingStudioSiteSettings.favicon_for(root_recording).blank?
     assert_equal "Client Studio", RecordingStudioSiteSettings.name_for(client_root_recording)
-    assert RecordingStudioSiteSettings.logo_for(client_root_recording).blank?
+    assert RecordingStudioSiteSettings.square_logo_for(client_root_recording).blank?
+    assert RecordingStudioSiteSettings.wide_logo_for(client_root_recording).blank?
     assert RecordingStudioSiteSettings.favicon_for(client_root_recording).blank?
 
     assert_no_difference -> { User.count } do
@@ -66,13 +68,13 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     Current.actor = nil
   end
 
-  test "workspace opts into accessible without attachable, and site settings owns the logo" do
+  test "workspace opts into accessible without attachable, and site settings owns the logos" do
     workspace_source = File.read(Rails.root.join("app/models/workspace.rb"))
     settings_source = File.read(RecordingStudioSiteSettings::Engine.root.join("app/models/recording_studio_site_settings/site_setting.rb"))
 
     refute_includes workspace_source, "Attachable"
     assert_includes settings_source, "Capabilities::Attachable"
-    assert_includes settings_source, "max_file_count: 2"
+    assert_includes settings_source, "max_file_count: 3"
 
     assert RecordingStudio.capability_enabled?(:accessible, for: Workspace)
     refute RecordingStudio.capability_enabled?(:attachable, for: Workspace)

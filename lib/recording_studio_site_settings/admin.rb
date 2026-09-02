@@ -8,7 +8,7 @@ module RecordingStudioSiteSettings
       key "site_settings"
       icon :photo
       title "Site"
-      subtitle "Name, logo, and the browser tab icon."
+      subtitle "Name, logos, and the browser tab icon."
       blast_radius :site
 
       link :edit,
@@ -20,10 +20,10 @@ module RecordingStudioSiteSettings
     class SiteSettingsResource < RecordingStudioAdmin::Resource
       key "site_settings"
       section "site_settings"
-      title "Site name and logo"
+      title "Site name and logos"
 
       action :show,
-             text: "Site name and logo",
+             text: "Site name and logos",
              icon: "photo",
              url: ->(_row, context) { RecordingStudioSiteSettings.admin_settings_path(context) }
 

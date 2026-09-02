@@ -2,10 +2,10 @@
 
 ## Architecture
 
-- This repository is the Recording Studio Site Settings addon. It is the source of truth for a site's name, logo, and tab icon.
+- This repository is the Recording Studio Site Settings addon. It is the source of truth for a site's name, logos, and tab icon.
 - Preserve engine namespace isolation under `RecordingStudioSiteSettings`.
 - Treat `docs/gem_template/` as architectural reference material. The public README is the product.
-- Do not store name, logo, or favicon on Recording Studio core or on the site root recordable.
+- Do not store name, logos, or favicon on Recording Studio core or on the site root recordable.
 
 ## UI Conventions
 

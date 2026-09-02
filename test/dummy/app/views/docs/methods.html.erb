@@ -3,7 +3,7 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Methods",
-    subtitle: "Other gems read name, logo, and favicon here. Do not call Attachable just to print a mark.",
+    subtitle: "Other gems read name, logos, and favicon here. Do not call Attachable just to print a mark.",
     variant: :h1
   ) %>
 
@@ -21,14 +21,29 @@
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Read the logo",
-    subtitle: "RecordingStudioSiteSettings.logo_for",
+    title: "Read the square logo",
+    subtitle: "RecordingStudioSiteSettings.square_logo_for",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      logo = RecordingStudioSiteSettings.logo_for(root)
+      logo = RecordingStudioSiteSettings.square_logo_for(root)
+      logo.preview_url
+      logo.present?
+      RecordingStudioSiteSettings.logo_for(root)
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Read the wide logo",
+    subtitle: "RecordingStudioSiteSettings.wide_logo_for",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      logo = RecordingStudioSiteSettings.wide_logo_for(root)
       logo.preview_url
       logo.present?
     CODE
@@ -49,13 +64,15 @@
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Print the mark",
-    subtitle: "recording_studio_site_logo",
+    title: "Print the marks",
+    subtitle: "recording_studio_site_square_logo and recording_studio_site_wide_logo",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
+      recording_studio_site_square_logo(current_root_recording)
+      recording_studio_site_wide_logo(current_root_recording)
       recording_studio_site_logo(current_root_recording)
     CODE
   ) %>
@@ -73,7 +90,7 @@
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Write name, logo, and favicon",
+    title: "Write name, logos, and favicon",
     subtitle: "RecordingStudioSiteSettings.update!",
   ) %>
 
@@ -84,9 +101,12 @@
         root,
         name: "Studio",
         actor: current_user,
-        logo_io: File.open("logo.png"),
-        filename: "logo.png",
-        content_type: "image/png",
+        square_logo_io: File.open("square-logo.png"),
+        square_logo_filename: "square-logo.png",
+        square_logo_content_type: "image/png",
+        wide_logo_io: File.open("wide-logo.png"),
+        wide_logo_filename: "wide-logo.png",
+        wide_logo_content_type: "image/png",
         favicon_io: File.open("favicon.png"),
         favicon_filename: "favicon.png",
         favicon_content_type: "image/png"
