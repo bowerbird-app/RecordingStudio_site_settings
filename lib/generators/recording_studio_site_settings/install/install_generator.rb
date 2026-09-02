@@ -25,10 +25,6 @@ module RecordingStudioSiteSettings
                  "config/initializers/recording_studio_site_settings.rb"
       end
 
-      def add_yaml_config
-        # Hosts configure site_root_types in the initializer. No extra YAML file.
-      end
-
       def add_tailwind_source
         tailwind_css_path = Rails.root.join("app/assets/tailwind/application.css")
         return show_missing_tailwind_notice unless File.exist?(tailwind_css_path)

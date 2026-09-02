@@ -28,20 +28,10 @@ module RecordingStudioSiteSettings
     end
 
     def load_from_rails_app!(app)
-      merge_config_for(app)
       merge_x_config(app)
     end
 
     private
-
-    def merge_config_for(app)
-      return unless app.respond_to?(:config_for)
-
-      yaml = app.config_for(:recording_studio_site_settings)
-      merge!(yaml) if yaml.respond_to?(:each)
-    rescue StandardError
-      nil
-    end
 
     def merge_x_config(app)
       xcfg = x_config_for(app)

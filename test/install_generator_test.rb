@@ -140,9 +140,20 @@ class InstallGeneratorTest < Minitest::Test
 
     assert_includes install_guide, "bin/rails generate recording_studio_site_settings:migrations"
     assert_includes install_guide, "bin/rails db:migrate"
+    assert_includes install_guide, "site_root_types"
     assert_includes install_guide, "auth, layout, and current actor integration"
     assert_includes install_guide, "recording_studio_recordable"
+    refute_includes install_guide, "recording_studio_site_settings.yml"
     refute_includes install_guide, "RecordingStudio v3"
+  end
+
+  def test_install_templates_do_not_ship_a_yaml_settings_file
+    yaml_template = File.expand_path(
+      "../lib/generators/recording_studio_site_settings/install/templates/recording_studio_site_settings.yml",
+      __dir__
+    )
+
+    refute File.exist?(yaml_template)
   end
 
   private

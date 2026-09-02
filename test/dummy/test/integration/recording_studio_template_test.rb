@@ -77,5 +77,6 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     refute RecordingStudio.capability_enabled?(:accessible, for: Folder)
     refute RecordingStudio.capability_enabled?(:accessible, for: Page)
     assert_includes ApplicationController.ancestors, RecordingStudio::UsesDefaultLayout
+    refute File.exist?(Rails.root.join("config/recording_studio_site_settings.yml"))
   end
 end

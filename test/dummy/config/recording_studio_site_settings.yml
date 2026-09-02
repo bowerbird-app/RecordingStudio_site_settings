@@ -1,7 +1,0 @@
-test:
-  site_root_types:
-    - Workspace
-
-development:
-  site_root_types:
-    - Workspace

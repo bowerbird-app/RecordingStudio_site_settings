@@ -97,7 +97,7 @@ Writes check Accessible `:edit` on the site root. Name changes `revise` the site
 
 ## Admin
 
-Staff open one Admin section, Site, and one screen that edits name and logo. The form is one full-width field per row. Accessible on the admin root gates the page. `user.admin?` is not used.
+Staff open one Admin section, Site, and one screen that edits name and logo. The form is one full-width field per row. Save keeps the change. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used.
 
 ## Dummy app
 
