@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Dummy and README GitHub tags now track Accessible `v0.11.1`, Admin `v2.0.4`, Attachable `v0.7.1`, and Root Switchable `v0.5.3`. Core stays on `v4.2.2`.
+- Gemspec floors: Accessible `~> 0.11`. Attachable stays `~> 0.5` (already accepts `0.7`). Admin stays `~> 2.0`.
+- Dummy Accessible schema includes 0.8–0.11 migrations: `depends_on_recording_id`, access invitations, and string roles.
+
+### Upgrade notes
+- Pin Accessible `~> 0.11`. Root and README GitHub tags track Attachable `v0.7.1`; dummy keeps Attachable `v0.5.0` because `recording_studio_user` `v0.6.2` still requires `recording_studio_attachable ~> 0.5.0`.
+- Hosts already on Accessible 0.8+ should run `bin/rails generate recording_studio_accessible:migrations` then `bin/rails db:migrate` so roles are strings and invitations exist.
+- Grant access through `bootstrap_owner_access!` / `grant_access`. Do not write `RecordingStudio::Access` rows directly.
+
 ## [0.1.0] - 2026-09-02
 
 ### Added
@@ -33,4 +45,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/releases/tag/v0.1.0
