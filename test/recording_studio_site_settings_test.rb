@@ -38,7 +38,8 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.5"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.198"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.207"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.6"'
     assert_match(
       %r{spec\.homepage\s+=\s+"https://github.com/bowerbird-app/RecordingStudio_site_settings"},
       gemspec
