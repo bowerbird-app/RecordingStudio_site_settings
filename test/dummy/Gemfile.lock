@@ -8,10 +8,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_accessible.git
-  revision: fe2d86aa2d96b843bc05651dc25023fd4546ab37
-  tag: v0.11.1
+  revision: bc0f62cf104bf6f6223bc81fadf56f44f7e7e920
+  tag: v0.13.0
   specs:
-    recording_studio_accessible (0.11.0)
+    recording_studio_accessible (0.13.0)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
 
@@ -27,11 +27,11 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
-  revision: dadc3c53997c700bd80f5281e49fba86a26f8104
-  tag: v0.7.1
+  revision: 8457c5681d9d3742d2b272082d62eecd91dd1102
+  tag: v0.13.0
   specs:
-    recording_studio_attachable (0.7.0)
-      flat_pack (>= 0.1.135)
+    recording_studio_attachable (0.13.0)
+      flat_pack (>= 0.1.213)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
 
@@ -69,10 +69,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
-  revision: 7490c10b4ec59c7df81aa4f6a46d8f9ef83de8bc
-  tag: v0.1.207
+  revision: 9606a6f24717e8f98c22c73e7ed40b30523fdd3f
+  tag: v0.1.213
   specs:
-    flat_pack (0.1.207)
+    flat_pack (0.1.213)
       pagy (~> 9.0)
       rails (>= 7.1, < 9)
       tailwind_merge (~> 0.13)
@@ -658,7 +658,7 @@ CHECKSUMS
   ffi (1.17.2-x86_64-darwin) sha256=981f2d4e32ea03712beb26e55e972797c2c5a7b0257955d8667ba58f2da6440e
   ffi (1.17.2-x86_64-linux-gnu) sha256=05d2026fc9dbb7cfd21a5934559f16293815b7ce0314846fee2ac8efbdb823ea
   ffi (1.17.2-x86_64-linux-musl) sha256=97c0eb3981414309285a64dc4d466bd149e981c279a56371ef811395d68cb95c
-  flat_pack (0.1.207)
+  flat_pack (0.1.213)
   fugit (1.12.1) sha256=5898f478ede9b415f0804e42b8f3fd53f814bd85eebffceebdbc34e1107aaf68
   globalid (1.3.0) sha256=05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11
   hashie (5.1.0) sha256=c266471896f323c446ea8207f8ffac985d2718df0a0ba98651a3057096ca3870
@@ -742,9 +742,9 @@ CHECKSUMS
   rbs (4.0.3) sha256=5a7bf70e2628549d9a1f44eae447b2cfe55968a9c60cfff52693a4bdcc020e14
   rdoc (8.0.0) sha256=03bf8c08a9639658855a0cfd77c0abca8325c227693f7f33f82957811348c469
   recording_studio (4.4.0)
-  recording_studio_accessible (0.11.0)
+  recording_studio_accessible (0.13.0)
   recording_studio_admin (2.0.7)
-  recording_studio_attachable (0.7.0)
+  recording_studio_attachable (0.13.0)
   recording_studio_root_switchable (0.5.1)
   recording_studio_site_settings (0.1.0)
   recording_studio_user (0.16.0)
