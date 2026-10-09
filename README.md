@@ -15,9 +15,9 @@ Add the gem and its Recording Studio majors:
 ```ruby
 gem "recording_studio_site_settings"
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.4.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.11.1"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.7"
-gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.7.1"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
 ```
 
 Then:
@@ -37,7 +37,9 @@ RecordingStudio.configure do |config|
   config.recordable_types = [
     "Workspace",
     "RecordingStudioSiteSettings::SiteSetting",
-    "RecordingStudioAttachable::Attachment"
+    "RecordingStudioAttachable::Attachment",
+    "RecordingStudioAttachable::Library",
+    "RecordingStudioAttachable::Placement"
   ]
 end
 ```
