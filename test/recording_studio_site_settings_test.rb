@@ -44,7 +44,8 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.213"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
+    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
     assert_match(
