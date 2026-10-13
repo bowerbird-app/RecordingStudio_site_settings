@@ -119,6 +119,10 @@ Writes check Accessible `:edit` on the site root. Name changes `revise` the site
 
 `logo_io` still writes the square slot.
 
+## Locales
+
+The save notice, invalid-name alert, and public logo helper alt fallbacks resolve through `recording_studio.site_settings.*` in this gem's `config/locales/en.yml` (`flashes.*`, `helpers.*`). Hosts override by defining the same nested keys in their own `config/locales`. Lookups use plain `I18n.t` via `Copy.t` with no English `default:`. Admin DSL labels stay literal English Strings.
+
 ## Admin
 
 Staff open one Admin section, Site, and one screen that edits name, both logos, and the tab icon. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.

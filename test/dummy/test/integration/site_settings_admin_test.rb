@@ -194,6 +194,81 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_equal "North Studio", RecordingStudioSiteSettings.name_for(@site_root)
   end
 
+  test "blank site name re-renders with the check-name alert" do
+    RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @admin)
+    sign_in @admin
+    switch_root!(@studio_root)
+
+    patch recording_studio_site_settings.settings_path, params: {
+      site_setting: { name: "" }
+    }
+
+    assert_response :unprocessable_entity
+    assert_equal "Check the name and try again.", flash[:alert]
+    assert_includes unescaped_page, "Check the name and try again."
+    assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+  end
+
+  test "admin section title and edit link stay main English literals" do
+    assert_equal "Site", RecordingStudioSiteSettings::Admin::SiteSettingsSection.title
+    edit_text = RecordingStudioSiteSettings::Admin::SiteSettingsSection.links
+                                                                       .find { |link| link.name == :edit }
+                                                                       .text
+    show_text = RecordingStudioSiteSettings::Admin::SiteSettingsResource.actions.fetch(:show).text
+
+    assert_equal "Edit site settings", edit_text
+    assert_equal "Site name and logos", show_text
+    assert_equal "Save",
+                 RecordingStudioSiteSettings::Admin::SiteSettingsResource.actions.fetch(:edit).text
+    assert_equal "Name, logos, and the browser tab icon.",
+                 RecordingStudioSiteSettings::Admin::SiteSettingsSection.subtitle
+    assert_kind_of String, RecordingStudioSiteSettings::Admin::SiteSettingsSection.title
+    assert_kind_of String, edit_text
+    assert_kind_of String, show_text
+  end
+
+  test "french locale changes flash notice while English stays byte-identical" do
+    RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @admin)
+    sign_in @admin
+    switch_root!(@studio_root)
+
+    previous_backend = I18n.backend
+    previous_available = I18n.available_locales
+    I18n.available_locales = Array(previous_available) | %i[en fr]
+    I18n.backend.store_translations(
+      :fr,
+      recording_studio: {
+        site_settings: {
+          flashes: {
+            saved: "Enregistré. Nom, logos et icône d'onglet."
+          }
+        }
+      }
+    )
+
+    I18n.with_locale(:fr) do
+      patch recording_studio_site_settings.settings_path, params: {
+        site_setting: { name: "Studio FR" }
+      }
+      assert_redirected_to recording_studio_site_settings.settings_path
+      follow_redirect!
+      assert_includes unescaped_page, "Enregistré. Nom, logos et icône d'onglet."
+    end
+
+    I18n.with_locale(:en) do
+      patch recording_studio_site_settings.settings_path, params: {
+        site_setting: { name: "Studio EN" }
+      }
+      assert_redirected_to recording_studio_site_settings.settings_path
+      follow_redirect!
+      assert_includes unescaped_page, "Saved. That's this site's name, logos, and tab icon."
+    end
+  ensure
+    I18n.available_locales = previous_available if previous_available
+    I18n.backend = previous_backend if previous_backend
+    I18n.reload!
+  end
+
   test "an authorized actor can attach a square logo through Attachable" do
     RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @admin)
     recording = RecordingStudioSiteSettings.recording_for(@site_root)

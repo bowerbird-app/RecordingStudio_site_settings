@@ -1,0 +1,11 @@
+# English user-facing copy for RecordingStudio_site_settings (wave 2+).
+# Hosts override by defining the same nested keys in their own config/locales.
+en:
+  recording_studio:
+    site_settings:
+      flashes:
+        saved: "Saved. That's this site's name, logos, and tab icon."
+        check_name: "Check the name and try again."
+      helpers:
+        square_logo_alt: "Square logo"
+        wide_logo_alt: "Wide logo"

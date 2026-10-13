@@ -1,0 +1,10 @@
+# Always-loaded boot-order guard. Overrides real, rarely shown public helper
+# alt fallbacks (used only when the site name is blank). Asserted on the real
+# settings screen via recording_studio_site_wide_logo. Visible flashes stay
+# gem/main English when the site is named.
+en:
+  recording_studio:
+    site_settings:
+      helpers:
+        square_logo_alt: "HOST square-logo alt"
+        wide_logo_alt: "HOST wide-logo alt"
