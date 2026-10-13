@@ -46,8 +46,10 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes dummy_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.213"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.2.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.8.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.21.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.0"'
     assert_match(
       %r{spec\.homepage\s+=\s+"https://github.com/bowerbird-app/RecordingStudio_site_settings"},
       gemspec
