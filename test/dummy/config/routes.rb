@@ -12,9 +12,7 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Test-only probes for boot-order / fresh-backend host locale overrides.
-  get "locale_probes/boot_override", to: "locale_probes#boot_override",
-                                     as: :locale_probe_boot_override
+  # Test-only probe that renders real helper alt keys for host-override asserts.
   get "locale_probes/helper_alts", to: "locale_probes#helper_alts",
                                    as: :locale_probe_helper_alts
 

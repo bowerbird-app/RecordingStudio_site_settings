@@ -4,14 +4,11 @@ require "test_helper"
 
 class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
   HOST_SAVED = "HOST Saved. That's this site's name, logos, and tab icon."
-  HOST_BOOT_PROBE = "HOST Boot override probe."
-  GEM_BOOT_PROBE = "Site settings boot override probe."
   HOST_SQUARE_ALT = "HOST square-logo alt"
   HOST_WIDE_ALT = "HOST wide-logo alt"
   GEM_SQUARE_ALT = "Square logo"
   GEM_WIDE_ALT = "Wide logo"
   SAVED_KEY = "recording_studio.site_settings.flashes.saved"
-  BOOT_PROBE_KEY = "recording_studio.site_settings.probes.boot_override"
   SQUARE_ALT_KEY = "recording_studio.site_settings.helpers.square_logo_alt"
   WIDE_ALT_KEY = "recording_studio.site_settings.helpers.wide_logo_alt"
   FRESH_HOST_LOCALE = Rails.root.join("test/locales/site_settings_host_override.en.yml")
@@ -31,23 +28,16 @@ class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
                  "test must not leave I18n.load_path modified"
   end
 
-  # Real-boot-order guard: always-loaded dummy override wins for the probe key
-  # and public logo helper alt keys, asserted on real probe renders.
-  test "boot-order host override for probe and helper alts wins on real render" do
+  # Real-boot-order guard: always-loaded dummy override wins for real, rarely
+  # shown helper alt keys, asserted on a real probe render of those keys.
+  test "boot-order host override for helper alts wins on real render" do
     assert File.exist?(BOOT_HOST_LOCALE)
-    assert_includes File.read(BOOT_HOST_LOCALE), HOST_BOOT_PROBE
     assert_includes File.read(BOOT_HOST_LOCALE), HOST_SQUARE_ALT
     assert_includes File.read(BOOT_HOST_LOCALE), HOST_WIDE_ALT
-    assert_equal HOST_BOOT_PROBE, I18n.t(BOOT_PROBE_KEY)
     assert_equal HOST_SQUARE_ALT, I18n.t(SQUARE_ALT_KEY)
     assert_equal HOST_WIDE_ALT, I18n.t(WIDE_ALT_KEY)
     assert_equal @load_path_before, I18n.load_path,
                  "boot-order test must not mutate I18n.load_path"
-
-    get "/locale_probes/boot_override"
-    assert_response :success
-    assert_equal HOST_BOOT_PROBE, response.body
-    refute_includes response.body, GEM_BOOT_PROBE
 
     get "/locale_probes/helper_alts"
     assert_response :success

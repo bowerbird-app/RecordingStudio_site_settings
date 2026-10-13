@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - English Rails I18n keys for the Site Settings save notice and invalid-name alert under `recording_studio.site_settings.flashes.*` (`config/locales/en.yml`), resolved through `RecordingStudioSiteSettings::Copy.t` with no English `default:` fallback.
 - English Rails I18n keys for public logo helper alt fallbacks under `recording_studio.site_settings.helpers.*` (`square_logo_alt` / `wide_logo_alt`), resolved through `Copy.t` with no English `default:` fallback.
 - Host English override coverage: test-only fixture `test/dummy/test/locales/site_settings_host_override.en.yml` loaded into a fresh `I18n::Backend::Simple` via `load_translations` (no `I18n.load_path` mutation) plus a real-page assert after redirect (flashes and helper alts).
-- Always-loaded boot-order guard `test/dummy/config/locales/recording_studio_site_settings_boot_override.en.yml` for a test-only probe key (`probes.boot_override`) and the public helper alt keys, with real probe-route render asserts (visible flashes stay main English in the dummy UI).
+- Always-loaded boot-order guard `test/dummy/config/locales/recording_studio_site_settings_boot_override.en.yml` for the real, rarely shown public helper alt keys, with a dummy probe-route render assert (visible flashes stay main English in the dummy UI; no probe keys in the gem's packaged locales).
 - Locale regression: French flash notice via stored translations; English render stays byte-identical to main.
 
 ### Upgrade notes

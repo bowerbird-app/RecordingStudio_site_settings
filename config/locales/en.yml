@@ -9,6 +9,3 @@ en:
       helpers:
         square_logo_alt: "Square logo"
         wide_logo_alt: "Wide logo"
-      probes:
-        # Test/host boot-order probe only — not rendered on product screens.
-        boot_override: "Site settings boot override probe."

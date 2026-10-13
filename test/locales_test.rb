@@ -9,14 +9,22 @@ class LocalesTest < Minitest::Test
     "flashes.saved" => "Saved. That's this site's name, logos, and tab icon.",
     "flashes.check_name" => "Check the name and try again.",
     "helpers.square_logo_alt" => "Square logo",
-    "helpers.wide_logo_alt" => "Wide logo",
-    "probes.boot_override" => "Site settings boot override probe."
+    "helpers.wide_logo_alt" => "Wide logo"
   }.freeze
 
   def test_engine_ships_only_english_locale_files
     files = Dir[File.join(engine_locales_dir, "*")].map { |path| File.basename(path) }
 
     assert_equal ["en.yml"], files.sort
+  end
+
+  def test_packaged_locales_have_no_probe_or_test_only_keys
+    tree = YAML.safe_load_file(File.join(engine_locales_dir, "en.yml"), aliases: true)
+    site_settings = tree.fetch("en").fetch("recording_studio").fetch("site_settings")
+
+    refute site_settings.key?("probes"),
+           "gem config/locales must not ship probe or test-only keys"
+    refute_includes File.read(File.join(engine_locales_dir, "en.yml")), "probes:"
   end
 
   def test_english_keys_match_main_literals
