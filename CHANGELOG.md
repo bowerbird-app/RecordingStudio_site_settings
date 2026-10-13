@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-13
+
 ### Changed
 - Dummy and README GitHub tags now track Accessible `v0.11.1`, Admin `v2.0.4`, Attachable `v0.7.1`, and Root Switchable `v0.5.3`. Core stays on `v4.2.2`.
 - Gemspec floors: Accessible `~> 0.11`. Attachable stays `~> 0.5` (already accepts `0.7`). Admin stays `~> 2.0`.
@@ -17,13 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hosts already on Accessible 0.8+ should run `bin/rails generate recording_studio_accessible:migrations` then `bin/rails db:migrate` so roles are strings and invitations exist.
 - Grant access through `bootstrap_owner_access!` / `grant_access`. Do not write `RecordingStudio::Access` rows directly.
 
-## [0.2.0] - 2026-10-13
-
 ### Added
 - English Rails I18n keys for the Site Settings save notice and invalid-name alert under `recording_studio.site_settings.flashes.*` (`config/locales/en.yml`), resolved through `RecordingStudioSiteSettings::Copy.t` with no English `default:` fallback.
 - English Rails I18n keys for public logo helper alt fallbacks under `recording_studio.site_settings.helpers.*` (`square_logo_alt` / `wide_logo_alt`), resolved through `Copy.t` with no English `default:` fallback.
-- Host English override coverage: test-only fixture `test/dummy/test/locales/site_settings_host_override.en.yml` loaded into a fresh `I18n::Backend::Simple` via `load_translations` (no `I18n.load_path` mutation) plus a real-page assert after redirect (flashes and helper alts).
-- Always-loaded boot-order guard `test/dummy/config/locales/recording_studio_site_settings_boot_override.en.yml` for the real, rarely shown public helper alt keys, with a dummy probe-route render assert (visible flashes stay main English in the dummy UI; no probe keys in the gem's packaged locales).
+- Host English override coverage: test-only fixture `test/dummy/test/locales/site_settings_host_override.en.yml` loaded into a fresh `I18n::Backend::Simple` via `load_translations` (no `I18n.load_path` mutation) plus real-page asserts after save redirect and invalid-name re-render (flashes and helper alts).
+- Always-loaded boot-order guard `test/dummy/config/locales/recording_studio_site_settings_boot_override.en.yml` for the real, rarely shown public helper alt keys, asserted by rendering `recording_studio_site_square_logo` / `recording_studio_site_wide_logo` for a blank-name site root with attached logos (visible flashes stay main English in the dummy UI; no probe keys in the gem's packaged locales).
 - Locale regression: French flash notice via stored translations; English render stays byte-identical to main.
 
 ### Upgrade notes
@@ -58,6 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.1.0...HEAD
-[0.2.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.1.0...v0.2.0
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.1.11...v0.2.0
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/releases/tag/v0.1.0

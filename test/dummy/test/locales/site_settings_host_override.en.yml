@@ -5,7 +5,7 @@ en:
     site_settings:
       flashes:
         saved: "HOST Saved. That's this site's name, logos, and tab icon."
-        check_name: "HOST Check the name and try again."
+        check_name: "HOST Fix the site name and retry."
       helpers:
         square_logo_alt: "HOST square-logo alt"
         wide_logo_alt: "HOST wide-logo alt"

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Blank-name logo alt fallbacks</title>
+    <style>
+      body { font-family: system-ui, sans-serif; padding: 2rem; background: #fff; color: #111; }
+      .row { display: flex; gap: 2rem; align-items: flex-start; margin-top: 1.5rem; }
+      figure { margin: 0; }
+      figcaption { margin-top: 0.75rem; font-size: 1.125rem; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <%
+      square_html = capture { concat recording_studio_site_square_logo(@root) }.to_s
+      wide_html = capture { concat recording_studio_site_wide_logo(@root) }.to_s
+      square_alt = square_html[/alt="([^"]*)"/, 1]
+      wide_alt = wide_html[/alt="([^"]*)"/, 1]
+    %>
+    <h1>Blank-name logo alt fallbacks</h1>
+    <p>Site name is blank; alts come from the public logo helpers.</p>
+    <div class="row">
+      <figure>
+        <%= square_html.html_safe %>
+        <figcaption id="square-alt-label">alt=<%= square_alt %></figcaption>
+      </figure>
+      <figure>
+        <%= wide_html.html_safe %>
+        <figcaption id="wide-alt-label">alt=<%= wide_alt %></figcaption>
+      </figure>
+    </div>
+  </body>
+</html>
