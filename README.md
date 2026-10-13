@@ -121,7 +121,7 @@ Writes check Accessible `:edit` on the site root. Name changes `revise` the site
 
 ## Locales
 
-The save notice and invalid-name alert resolve through `recording_studio.site_settings.flashes.*` in this gem's `config/locales/en.yml`. Hosts override by defining the same nested keys in their own `config/locales`. Lookups use plain `I18n.t` via `Copy.t` with no English `default:`. Admin DSL labels stay literal English Strings.
+The save notice, invalid-name alert, and public logo helper alt fallbacks resolve through `recording_studio.site_settings.*` in this gem's `config/locales/en.yml` (`flashes.*`, `helpers.*`). Hosts override by defining the same nested keys in their own `config/locales`. Lookups use plain `I18n.t` via `Copy.t` with no English `default:`. Admin DSL labels stay literal English Strings.
 
 ## Admin
 

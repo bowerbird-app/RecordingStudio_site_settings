@@ -8,6 +8,8 @@ class LocalesTest < Minitest::Test
   EXPECTED_KEYS = {
     "flashes.saved" => "Saved. That's this site's name, logos, and tab icon.",
     "flashes.check_name" => "Check the name and try again.",
+    "helpers.square_logo_alt" => "Square logo",
+    "helpers.wide_logo_alt" => "Wide logo",
     "probes.boot_override" => "Site settings boot override probe."
   }.freeze
 
@@ -67,6 +69,21 @@ class LocalesTest < Minitest::Test
                      "#{path} must not pass English default: to Copy.t (#{call})")
       end
     end
+  end
+
+  def test_helper_alts_use_copy_t_not_english_literals
+    path = File.expand_path(
+      "../app/helpers/recording_studio_site_settings/application_helper.rb",
+      __dir__
+    )
+    source = File.read(path)
+
+    assert_includes source, 'Copy.t("helpers.square_logo_alt")'
+    assert_includes source, 'Copy.t("helpers.wide_logo_alt")'
+    refute_match(/\|\|\s*"Square logo"/, source,
+                 "reverting the square logo alt to a literal must fail this test")
+    refute_match(/\|\|\s*"Wide logo"/, source,
+                 "reverting the wide logo alt to a literal must fail this test")
   end
 
   def test_gemspec_does_not_depend_on_internationalization

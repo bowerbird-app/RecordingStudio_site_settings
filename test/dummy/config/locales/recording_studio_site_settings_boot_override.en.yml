@@ -1,7 +1,11 @@
-# Always-loaded boot-order guard. Overrides a test-only probe key — not the
-# visible flashes — so dummy UI English stays main's literals.
+# Always-loaded boot-order guard. Overrides a test-only probe key and the
+# public logo helper alt keys. Visible flashes stay gem/main English so the
+# dummy settings UI is unchanged.
 en:
   recording_studio:
     site_settings:
+      helpers:
+        square_logo_alt: "HOST square-logo alt"
+        wide_logo_alt: "HOST wide-logo alt"
       probes:
         boot_override: "HOST Boot override probe."

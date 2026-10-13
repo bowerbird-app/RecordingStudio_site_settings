@@ -11,7 +11,7 @@ module RecordingStudioSiteSettings
         src: logo.preview_url,
         size: size,
         shape: :square,
-        alt: name.presence || "Square logo",
+        alt: name.presence || Copy.t("helpers.square_logo_alt"),
         **system_args
       )
     end
@@ -27,7 +27,7 @@ module RecordingStudioSiteSettings
       name = RecordingStudioSiteSettings.name_for(root_recording)
       tag.img(
         src: logo.preview_url,
-        alt: name.presence || "Wide logo",
+        alt: name.presence || Copy.t("helpers.wide_logo_alt"),
         **html_options
       )
     end

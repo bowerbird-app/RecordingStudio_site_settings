@@ -6,6 +6,9 @@ en:
       flashes:
         saved: "Saved. That's this site's name, logos, and tab icon."
         check_name: "Check the name and try again."
+      helpers:
+        square_logo_alt: "Square logo"
+        wide_logo_alt: "Wide logo"
       probes:
         # Test/host boot-order probe only — not rendered on product screens.
         boot_override: "Site settings boot override probe."
