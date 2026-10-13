@@ -11,22 +11,22 @@
     </style>
   </head>
   <body>
-    <%
-      square_html = capture { concat recording_studio_site_square_logo(@root) }.to_s
-      wide_html = capture { concat recording_studio_site_wide_logo(@root) }.to_s
-      square_alt = square_html[/alt="([^"]*)"/, 1]
-      wide_alt = wide_html[/alt="([^"]*)"/, 1]
-    %>
     <h1>Blank-name logo alt fallbacks</h1>
     <p>Site name is blank; alts come from the public logo helpers.</p>
     <div class="row">
       <figure>
-        <%= square_html.html_safe %>
-        <figcaption id="square-alt-label">alt=<%= square_alt %></figcaption>
+        <%= recording_studio_site_square_logo(@root) %>
+        <figcaption id="square-alt-label">
+          alt=<%= RecordingStudioSiteSettings.name_for(@root).presence ||
+                   RecordingStudioSiteSettings::Copy.t("helpers.square_logo_alt") %>
+        </figcaption>
       </figure>
       <figure>
-        <%= wide_html.html_safe %>
-        <figcaption id="wide-alt-label">alt=<%= wide_alt %></figcaption>
+        <%= recording_studio_site_wide_logo(@root) %>
+        <figcaption id="wide-alt-label">
+          alt=<%= RecordingStudioSiteSettings.name_for(@root).presence ||
+                   RecordingStudioSiteSettings::Copy.t("helpers.wide_logo_alt") %>
+        </figcaption>
       </figure>
     </div>
   </body>
