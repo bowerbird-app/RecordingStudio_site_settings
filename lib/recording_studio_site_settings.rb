@@ -7,6 +7,7 @@ require "recording_studio_attachable"
 require "recording_studio_site_settings/version"
 require "recording_studio_site_settings/engine"
 require "recording_studio_site_settings/configuration"
+require "recording_studio_site_settings/copy"
 require "recording_studio_site_settings/logo"
 
 module RecordingStudioSiteSettings

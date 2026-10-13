@@ -1,0 +1,8 @@
+# Test-only host override. Loaded via I18n.backend.load_translations inside one
+# integration test — never added to I18n.load_path.
+en:
+  recording_studio:
+    site_settings:
+      flashes:
+        saved: "HOST Saved. That's this site's name, logos, and tab icon."
+        check_name: "HOST Check the name and try again."

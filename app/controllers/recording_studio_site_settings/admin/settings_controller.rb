@@ -13,7 +13,7 @@ module RecordingStudioSiteSettings
       def update
         authorize_site_settings_admin!(role: :admin)
         save_site_settings
-        redirect_to settings_path, notice: "Saved. That's this site's name, logos, and tab icon."
+        redirect_to settings_path, notice: Copy.t("flashes.saved")
       rescue RecordingStudioSiteSettings::Unauthorized
         head :forbidden
       rescue ActiveRecord::RecordInvalid
@@ -56,7 +56,7 @@ module RecordingStudioSiteSettings
       def render_invalid_settings
         assign_settings
         @name = submitted_name
-        flash.now[:alert] = "Check the name and try again."
+        flash.now[:alert] = Copy.t("flashes.check_name")
         render :show, status: :unprocessable_entity
       end
 
