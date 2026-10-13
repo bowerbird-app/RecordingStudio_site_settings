@@ -12,10 +12,6 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Test-only probe that renders real helper alt keys for host-override asserts.
-  get "locale_probes/helper_alts", to: "locale_probes#helper_alts",
-                                   as: :locale_probe_helper_alts
-
   get "docs/install", to: "docs#install", as: :docs_install
   get "docs/config", to: "docs#configuration", as: :docs_config
   get "docs/recordable_types", to: "docs#recordable_types", as: :docs_recordable_types

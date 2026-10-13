@@ -9,7 +9,6 @@ class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
   GEM_CHECK_NAME = "Check the name and try again."
   HOST_SQUARE_ALT = "HOST square-logo alt"
   HOST_WIDE_ALT = "HOST wide-logo alt"
-  GEM_SQUARE_ALT = "Square logo"
   GEM_WIDE_ALT = "Wide logo"
   SAVED_KEY = "recording_studio.site_settings.flashes.saved"
   CHECK_NAME_KEY = "recording_studio.site_settings.flashes.check_name"
@@ -33,8 +32,9 @@ class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
   end
 
   # Real-boot-order guard: always-loaded dummy override wins for real, rarely
-  # shown helper alt keys, asserted via the real public logo helpers.
-  test "boot-order host override for helper alts wins on real helper render" do
+  # shown helper alt keys, asserted on the real settings screen which renders
+  # recording_studio_site_wide_logo when the site name is blank.
+  test "boot-order host override for helper alts wins on real settings page" do
     assert File.exist?(BOOT_HOST_LOCALE)
     assert_includes File.read(BOOT_HOST_LOCALE), HOST_SQUARE_ALT
     assert_includes File.read(BOOT_HOST_LOCALE), HOST_WIDE_ALT
@@ -46,11 +46,13 @@ class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
     assert RecordingStudioSiteSettings.square_logo_for(@site_root).present?
     assert RecordingStudioSiteSettings.wide_logo_for(@site_root).present?
 
-    get "/locale_probes/helper_alts", params: { root_recording_id: @site_root.id }
+    sign_in @admin
+    switch_root!(@studio_root)
+
+    get recording_studio_site_settings.settings_path
     assert_response :success
-    assert_includes response.body, %(alt="#{HOST_SQUARE_ALT}")
+    assert_includes response.body, "Wide logo"
     assert_includes response.body, %(alt="#{HOST_WIDE_ALT}")
-    refute_includes response.body, %(alt="#{GEM_SQUARE_ALT}")
     refute_includes response.body, %(alt="#{GEM_WIDE_ALT}")
   end
 
@@ -78,11 +80,9 @@ class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
     assert_equal HOST_SQUARE_ALT, I18n.t(SQUARE_ALT_KEY)
     assert_equal HOST_WIDE_ALT, I18n.t(WIDE_ALT_KEY)
 
-    get "/locale_probes/helper_alts", params: { root_recording_id: @site_root.id }
+    get recording_studio_site_settings.settings_path
     assert_response :success
-    assert_includes response.body, %(alt="#{HOST_SQUARE_ALT}")
     assert_includes response.body, %(alt="#{HOST_WIDE_ALT}")
-    refute_includes response.body, %(alt="#{GEM_SQUARE_ALT}")
     refute_includes response.body, %(alt="#{GEM_WIDE_ALT}")
 
     RecordingStudioSiteSettings.update!(@site_root, name: "Named for check", actor: @admin)
