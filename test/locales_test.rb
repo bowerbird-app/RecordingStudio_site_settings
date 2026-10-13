@@ -7,7 +7,8 @@ require "i18n"
 class LocalesTest < Minitest::Test
   EXPECTED_KEYS = {
     "flashes.saved" => "Saved. That's this site's name, logos, and tab icon.",
-    "flashes.check_name" => "Check the name and try again."
+    "flashes.check_name" => "Check the name and try again.",
+    "probes.boot_override" => "Site settings boot override probe."
   }.freeze
 
   def test_engine_ships_only_english_locale_files
@@ -72,6 +73,21 @@ class LocalesTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_site_settings.gemspec", __dir__))
 
     refute_includes gemspec, "recording_studio_internationalization"
+  end
+
+  def test_controller_flashes_use_copy_t_not_english_literals
+    path = File.expand_path(
+      "../app/controllers/recording_studio_site_settings/admin/settings_controller.rb",
+      __dir__
+    )
+    source = File.read(path)
+
+    assert_includes source, 'Copy.t("flashes.saved")'
+    assert_includes source, 'Copy.t("flashes.check_name")'
+    refute_match(/notice:\s*"Saved\./, source,
+                 "reverting the save flash to a literal must fail this test")
+    refute_match(/flash\.now\[:alert\]\s*=\s*"Check the name/, source,
+                 "reverting the invalid-name flash to a literal must fail this test")
   end
 
   private

@@ -12,6 +12,10 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Test-only probe for boot-order host locale overrides (not product UI).
+  get "locale_probes/boot_override", to: "locale_probes#boot_override",
+                                     as: :locale_probe_boot_override
+
   get "docs/install", to: "docs#install", as: :docs_install
   get "docs/config", to: "docs#configuration", as: :docs_config
   get "docs/recordable_types", to: "docs#recordable_types", as: :docs_recordable_types

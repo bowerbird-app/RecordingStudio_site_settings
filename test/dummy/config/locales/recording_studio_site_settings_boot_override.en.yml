@@ -1,0 +1,7 @@
+# Always-loaded boot-order guard. Overrides a test-only probe key — not the
+# visible flashes — so dummy UI English stays main's literals.
+en:
+  recording_studio:
+    site_settings:
+      probes:
+        boot_override: "HOST Boot override probe."

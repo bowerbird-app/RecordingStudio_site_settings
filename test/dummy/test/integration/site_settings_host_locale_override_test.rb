@@ -4,8 +4,12 @@ require "test_helper"
 
 class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
   HOST_SAVED = "HOST Saved. That's this site's name, logos, and tab icon."
+  HOST_BOOT_PROBE = "HOST Boot override probe."
+  GEM_BOOT_PROBE = "Site settings boot override probe."
   SAVED_KEY = "recording_studio.site_settings.flashes.saved"
+  BOOT_PROBE_KEY = "recording_studio.site_settings.probes.boot_override"
   FRESH_HOST_LOCALE = Rails.root.join("test/locales/site_settings_host_override.en.yml")
+  BOOT_HOST_LOCALE = Rails.root.join("config/locales/recording_studio_site_settings_boot_override.en.yml")
 
   setup do
     @load_path_before = I18n.load_path.dup
@@ -19,6 +23,23 @@ class SiteSettingsHostLocaleOverrideTest < ActionDispatch::IntegrationTest
   teardown do
     assert_equal @load_path_before, I18n.load_path,
                  "test must not leave I18n.load_path modified"
+  end
+
+  # Real-boot-order guard: always-loaded dummy override wins for a test-only
+  # probe key (not the visible flashes), asserted on a real probe render.
+  test "boot-order host override for probe key wins on real render" do
+    assert File.exist?(BOOT_HOST_LOCALE)
+    assert_includes File.read(BOOT_HOST_LOCALE), HOST_BOOT_PROBE
+    assert_equal HOST_BOOT_PROBE, I18n.t(BOOT_PROBE_KEY)
+    assert_equal @load_path_before, I18n.load_path,
+                 "boot-order test must not mutate I18n.load_path"
+
+    get locale_probe_boot_override_path
+
+    assert_response :success
+    assert_equal HOST_BOOT_PROBE, response.body
+    refute_equal GEM_BOOT_PROBE, response.body
+    refute_includes response.body, GEM_BOOT_PROBE
   end
 
   # Test-only fixture loaded into a fresh Simple backend — never mutates
