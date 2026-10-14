@@ -46,7 +46,6 @@ module RecordingStudioSiteSettings
       end
 
       def registrable?(name)
-        return false unless RecordingStudioApi.respond_to?(:register_endpoint)
         return false unless operations_api_present?
 
         !already_registered?(name)
