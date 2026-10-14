@@ -63,9 +63,10 @@ module RecordingStudioSiteSettings
       def assign_settings
         @name = RecordingStudioSiteSettings.name_for(@site_root)
         @site_setting_recording = RecordingStudioSiteSettings.recording_for(@site_root)
-        @square_logo = RecordingStudioSiteSettings.square_logo_for(@site_root, variant: :square_med)
-        @wide_logo = RecordingStudioSiteSettings.wide_logo_for(@site_root, variant: :small)
-        @favicon = RecordingStudioSiteSettings.favicon_for(@site_root, variant: :square_small)
+        variants = RecordingStudioSiteSettings::Admin::MARK_VARIANTS
+        @square_logo = RecordingStudioSiteSettings.square_logo_for(@site_root, variant: variants.fetch("square_logo"))
+        @wide_logo = RecordingStudioSiteSettings.wide_logo_for(@site_root, variant: variants.fetch("wide_logo"))
+        @favicon = RecordingStudioSiteSettings.favicon_for(@site_root, variant: variants.fetch("favicon"))
       end
 
       def submitted_name

@@ -4,6 +4,13 @@ require "recording_studio_admin"
 
 module RecordingStudioSiteSettings
   module Admin
+    # Preview variant per image slot, as shown on the Site admin screen. Keys match Store::IMAGE_SLOTS.
+    MARK_VARIANTS = {
+      "square_logo" => :square_med,
+      "wide_logo" => :small,
+      "favicon" => :square_small
+    }.freeze
+
     class SiteSettingsSection < RecordingStudioAdmin::Section
       key "site_settings"
       icon :photo

@@ -18,7 +18,7 @@ gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.17.0"
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.3.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
-gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
+gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.3"
 gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.0", require: false
 ```
 
@@ -128,6 +128,21 @@ The save notice, invalid-name alert, and public logo helper alt fallbacks resolv
 Staff open one Admin section, Site, and one screen that edits name, both logos, and the tab icon. The screen uses Recording Studio core default layout. Call `recording_studio_page_nav` so PageNav back is on the page. Back is `history.back()`. The title lives once in PageTitle.
 
 Rows stack full width, one field per row. Site name first, then wide logo, then square logo, then favicon. Square logo is a square Avatar at size `2xl` plus Attachable Add or Change. Wide logo shows the image in real proportion, or a photo icon when empty, plus the same Add or Change control. Favicon uses a smaller square Avatar. Empty square, wide, and favicon Avatars pass Flatpack `icon: "photo"`, so the empty slot is a photo, not a person. Filled square and favicon slots still show the attached image. Save and Cancel sit after the fields as separate Buttons. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used. Hosts need Flatpack `0.1.144` or newer for that empty icon.
+
+## Admin API (operations)
+
+When the host bundles `recording_studio_api` and configures an `:operations` API, this gem registers two endpoints there at boot (`config.to_prepare`). They show up as Admin MCP tools with no host code. Without `recording_studio_api`, or without `:operations` in `api_names`, nothing is registered. This gem does not depend on `recording_studio_api`.
+
+| Endpoint | Verb and path | Body |
+| --- | --- | --- |
+| `site_settings_show` | `GET site_settings` | none |
+| `site_settings_update` | `PATCH site_settings` | `name` (required) |
+
+Show returns `name` plus `square_logo`, `wide_logo`, and `favicon`. Each mark has `present`, `recording_id`, `filename`, and `preview_url`. Logos and the tab icon are read-only here; upload them on the Site admin screen.
+
+Update strips `name` and calls `RecordingStudioSiteSettings.update!`. A blank name returns 422 `validation_failed`.
+
+Access matches the Site admin screen. The token's actor needs Accessible `:view` (show) or `:admin` (update) on the access recording, and that recording must be the Admin `site_admin_recording` (the Site section's `:site` blast radius). The site root comes from `site_root_resolver`, called with no controller. Update also keeps `:edit` on that site root. A denial is 403. Hosts whose resolver only reads `current_root_recording` get 404 from the API; return a site root when `context.controller` is nil.
 
 ## Dummy app
 
