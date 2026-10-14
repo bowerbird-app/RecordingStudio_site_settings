@@ -26,7 +26,7 @@ module RecordingStudioSiteSettings
           UPDATE_ENDPOINT,
           http_verb: :patch,
           handler: Update,
-          openapi: openapi("Update the site name", update_description),
+          openapi: openapi("Update the site name and logos", update_description),
           input_contract: update_input_contract
         )
       end
@@ -72,7 +72,8 @@ module RecordingStudioSiteSettings
         {
           reject_unknown: true,
           fields: {
-            name: { type: :string, required: true }
+            name: { type: :string, required: false, description: "New site name. Stripped; blank is 422." },
+            logos: { type: :hash, required: false, description: logos_description }
           }
         }
       end
@@ -83,9 +84,15 @@ module RecordingStudioSiteSettings
       end
 
       def update_description
-        "Renames the site (name is stripped). Same access as saving the Site admin screen: " \
-          "Accessible :admin on the site admin recording and :edit on the site root. " \
-          "A blank name returns 422."
+        "Renames the site and sets or clears its marks. Send name, logos, or both. " \
+          "Same access as saving the Site admin screen: Accessible :admin on the site admin recording " \
+          "and :edit on the site root. A blank name or an unusable logo returns 422 and nothing is saved."
+      end
+
+      def logos_description
+        "Object keyed by #{RecordingStudioSiteSettings::Admin::MARK_VARIANTS.keys.join(', ')}. " \
+          "Each value is a public https URL, a file object { download_url, file_id }, or null to remove the mark. " \
+          "The server downloads the image (PNG, JPEG, or WebP; SVG is refused) up to the Site screen's file size limit."
       end
     end
   end

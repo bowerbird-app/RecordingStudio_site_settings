@@ -3,6 +3,8 @@
 require_relative "api/access"
 require_relative "api/serialize"
 require_relative "api/show"
+require_relative "api/remote_image"
+require_relative "api/update_input"
 require_relative "api/update"
 require_relative "api/registration"
 

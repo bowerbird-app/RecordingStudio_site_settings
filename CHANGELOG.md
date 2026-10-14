@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-14
+
+### Added
+- `site_settings_update` takes an optional `logos` object keyed by `square_logo`, `wide_logo`, or `favicon`. A value is an https URL, a file object `{ download_url, file_id }` (ChatGPT's file shape), or `null` to remove the mark. `name` is now optional; send `name`, `logos`, or both.
+- `RecordingStudioSiteSettings::Api::RemoteImage` downloads logos: https on 443, up to 3 redirects with every hop re-resolved, private/loopback/link-local/metadata addresses refused and the connection pinned, short timeouts, the Site screen's Attachable `max_file_size`, and PNG/JPEG/WebP sniffed from the bytes. SVG is refused.
+- `Store.update!` takes `clear:` (slot names) and removes those marks through Attachable `RemoveAttachment`. `Store::Images.remove_named_image!`.
+- `site_settings_show` marks include `variant`.
+
+### Changed
+- Logo problems, and an update with neither `name` nor `logos`, return 422 `invalid_input` with per-logo `details`. Nothing is saved when any logo fails.
+- Update checks `Store.authorize_write!` before downloading anything.
+
+### Upgrade notes
+- Clients that relied on `name` being required by the input contract now get 422 `invalid_input` from the handler instead.
+
 ## [0.3.0] - 2026-10-14
 
 ### Added

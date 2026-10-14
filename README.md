@@ -136,13 +136,33 @@ When the host bundles `recording_studio_api` and configures an `:operations` API
 | Endpoint | Verb and path | Body |
 | --- | --- | --- |
 | `site_settings_show` | `GET site_settings` | none |
-| `site_settings_update` | `PATCH site_settings` | `name` (required) |
+| `site_settings_update` | `PATCH site_settings` | `name`, `logos`, or both |
 
-Show returns `name` plus `square_logo`, `wide_logo`, and `favicon`. Each mark has `present`, `recording_id`, `filename`, and `preview_url`. Logos and the tab icon are read-only here; upload them on the Site admin screen.
+Show returns `name` plus `square_logo`, `wide_logo`, and `favicon`. Each mark has `present`, `variant` (the preview variant from `Admin::MARK_VARIANTS`), `recording_id`, `filename`, and `preview_url` (the preview path for that variant, `null` when empty).
 
-Update strips `name` and calls `RecordingStudioSiteSettings.update!`. A blank name returns 422 `validation_failed`.
+Update strips `name` and calls `RecordingStudioSiteSettings.update!`, the same path the Site screen saves through. A blank name returns 422 `validation_failed`. Leave `name` out to keep the current name. Sending neither `name` nor `logos` returns 422 `invalid_input`.
 
-Access matches the Site admin screen. The token's actor needs Accessible `:view` (show) or `:admin` (update) on the access recording, and that recording must be the Admin `site_admin_recording` (the Site section's `:site` blast radius). The site root comes from `site_root_resolver`, called with no controller. Update also keeps `:edit` on that site root. A denial is 403. Hosts whose resolver only reads `current_root_recording` get 404 from the API; return a site root when `context.controller` is nil.
+`logos` is an object keyed by `square_logo`, `wide_logo`, or `favicon`. Each value is one of:
+
+- an https URL, such as `"https://cdn.example.com/logo.png"`;
+- a file object `{ "download_url": "https://…", "file_id": "file_…" }` (the shape ChatGPT passes for an uploaded file; `mime_type` and `file_name` may also be present and are ignored);
+- `null`, which removes that mark through Attachable's `RemoveAttachment`.
+
+```json
+{ "name": "Studio", "logos": { "square_logo": "https://cdn.example.com/square.png", "favicon": null } }
+```
+
+The server downloads each image itself before anything is saved:
+
+- https on port 443 only, no credentials in the URL, at most 3 redirects, 3s connect and 5s read timeouts, 15s in total.
+- Every hop is resolved and refused if any address is private, loopback, link-local (including `169.254.169.254`), carrier-grade NAT, multicast, reserved, or a NAT64/6to4/Teredo wrapper. The connection is pinned to the checked address and never uses a proxy.
+- The size limit is the Site screen's: Attachable `max_file_size` for `SiteSetting` (5 MB if none is configured). A larger `Content-Length` or body is refused.
+- The type comes from the file's first bytes: PNG, JPEG, or WebP. SVG is refused, because the Site screen does not sanitize SVG and the API should not store script-capable files fetched from the internet.
+- The image is saved as `<slot>.<ext>` through `Store.update!`, so it gets the same Attachable validations, storage limit, and revision history as an upload on the Site screen.
+
+Any problem with a logo returns 422 `invalid_input` with one `details` entry per logo, such as `"logos.favicon host is not a public address"`, and nothing is saved.
+
+Access matches the Site admin screen. The token's actor needs Accessible `:view` (show) or `:admin` (update) on the access recording, and that recording must be the Admin `site_admin_recording` (the Site section's `:site` blast radius). The site root comes from `site_root_resolver`, called with no controller. Update also keeps `:edit` on that site root, and checks it before downloading any logo. A denial is 403. Hosts whose resolver only reads `current_root_recording` get 404 from the API; return a site root when `context.controller` is nil.
 
 ## Dummy app
 

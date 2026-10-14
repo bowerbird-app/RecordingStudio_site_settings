@@ -11,13 +11,14 @@ module RecordingStudioSiteSettings
 
       def marks(root)
         RecordingStudioSiteSettings::Admin::MARK_VARIANTS.to_h do |slot, variant|
-          [slot.to_sym, mark(Store.public_send(:"#{slot}_for", root, variant: variant))]
+          [slot.to_sym, mark(Store.public_send(:"#{slot}_for", root, variant: variant), variant)]
         end
       end
 
-      def mark(logo)
+      def mark(logo, variant)
         {
           present: logo.present?,
+          variant: variant.to_s,
           recording_id: logo.recording&.id,
           filename: logo.filename,
           preview_url: logo.preview_url

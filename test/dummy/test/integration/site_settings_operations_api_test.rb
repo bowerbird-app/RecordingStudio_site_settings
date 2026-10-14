@@ -4,6 +4,33 @@ require "test_helper"
 
 class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
   OPERATIONS_ROOT = "/recording_studio_api/apis/operations/v1"
+  RemoteImage = RecordingStudioSiteSettings::Api::RemoteImage
+  PUBLIC_ADDRESS = "93.184.216.34"
+
+  FakeResponse = Struct.new(:code, :headers, :body) do
+    def [](name)
+      headers[name.downcase]
+    end
+
+    def read_body
+      yield body
+    end
+  end
+
+  # Stands in for the network: only the URLs given here answer, and every request is recorded.
+  class FakeTransport
+    attr_reader :calls
+
+    def initialize(responses)
+      @responses = responses
+      @calls = []
+    end
+
+    def get(uri, address:)
+      @calls << [ uri.to_s, address ]
+      yield @responses.fetch(uri.to_s)
+    end
+  end
 
   setup do
     @staff = create_user("api-staff-#{SecureRandom.hex(4)}@example.com")
@@ -64,10 +91,12 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal square.id, payload.dig("square_logo", "recording_id")
     assert_equal "square-logo.png", payload.dig("square_logo", "filename")
     assert_includes payload.dig("square_logo", "preview_url"), square.id
+    assert_equal "square_med", payload.dig("square_logo", "variant")
+    assert_equal "square_small", payload.dig("favicon", "variant")
     wide = RecordingStudioSiteSettings.wide_logo_for(@site_root, variant: :small)
     assert_equal(
       {
-        "present" => wide.present?, "recording_id" => wide.recording&.id,
+        "present" => wide.present?, "variant" => "small", "recording_id" => wide.recording&.id,
         "filename" => wide.filename, "preview_url" => wide.preview_url
       },
       payload.fetch("wide_logo")
@@ -95,11 +124,234 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
   end
 
-  test "a missing name is rejected by the input contract" do
+  test "an update with neither name nor logos is a 422" do
     patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: {}, as: :json
 
     assert_response :unprocessable_entity
+    assert_equal "invalid_input", response.parsed_body.dig("error", "code")
+    assert_equal [ "Send name, logos, or both" ], response.parsed_body.dig("error", "details")
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+  end
+
+  test "unknown fields are rejected by the input contract" do
+    patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { name: "X", color: "red" },
+                                              as: :json
+
+    assert_response :unprocessable_entity
+    assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+  end
+
+  test "a site admin sets the square logo from an https URL without changing the name" do
+    transport = FakeTransport.new("https://cdn.example.com/square.png" => image_response(TEST_SQUARE_LOGO_PATH))
+
+    with_network(transport) do
+      patch_logos({ square_logo: "https://cdn.example.com/square.png" })
+    end
+
+    assert_response :success
+    assert_equal [ [ "https://cdn.example.com/square.png", PUBLIC_ADDRESS ] ], transport.calls
+    payload = response.parsed_body
+    assert_equal "Studio", payload.fetch("name")
+    assert_equal true, payload.dig("square_logo", "present")
+    assert_equal "square_logo.png", payload.dig("square_logo", "filename")
+    logo = RecordingStudioSiteSettings.square_logo_recording_for(@site_root)
+    assert_equal logo.id, payload.dig("square_logo", "recording_id")
+    assert_equal "image/png", logo.recordable.content_type
+    assert_includes payload.dig("square_logo", "preview_url"), logo.id
+  end
+
+  test "a ChatGPT file object sets the favicon and a second call replaces it" do
+    file = { download_url: "https://files.example.com/download/abc", file_id: "file_abc", mime_type: "image/png",
+             file_name: "icon.png" }
+    transport = FakeTransport.new(file[:download_url] => image_response(TEST_SQUARE_LOGO_PATH))
+
+    with_network(transport) { patch_logos({ favicon: file }) }
+    assert_response :success
+    first = RecordingStudioSiteSettings.favicon_recording_for(@site_root)
+
+    with_network(transport) { patch_logos({ favicon: file }) }
+    assert_response :success
+
+    assert_equal first.id, RecordingStudioSiteSettings.favicon_recording_for(@site_root).id
+    assert_equal true, response.parsed_body.dig("favicon", "present")
+    assert_equal 2, transport.calls.size
+  end
+
+  test "name and logos update together" do
+    transport = FakeTransport.new("https://cdn.example.com/wide.png" => image_response(TEST_WIDE_LOGO_PATH))
+
+    with_network(transport) do
+      patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token),
+                                                params: { name: "Both", logos: { wide_logo: "https://cdn.example.com/wide.png" } },
+                                                as: :json
+    end
+
+    assert_response :success
+    assert_equal "Both", response.parsed_body.fetch("name")
+    assert_equal true, response.parsed_body.dig("wide_logo", "present")
+  end
+
+  test "null clears a mark" do
+    File.open(TEST_SQUARE_LOGO_PATH, "rb") do |io|
+      RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @staff, favicon_io: io,
+                                                      favicon_filename: "favicon.png", favicon_content_type: "image/png")
+    end
+    assert RecordingStudioSiteSettings.favicon_for(@site_root).present?
+    transport = FakeTransport.new({})
+
+    with_network(transport) { patch_logos({ favicon: nil }) }
+
+    assert_response :success
+    assert_equal false, response.parsed_body.dig("favicon", "present")
+    assert_nil RecordingStudioSiteSettings.favicon_recording_for(@site_root)
+    assert_empty transport.calls
+  end
+
+  test "clearing an empty mark is a no-op" do
+    with_network(FakeTransport.new({})) { patch_logos({ wide_logo: nil }) }
+
+    assert_response :success
+    assert_equal false, response.parsed_body.dig("wide_logo", "present")
+  end
+
+  test "a URL that resolves to a private or metadata address is refused before connecting" do
+    square_logo_before = square_logo_recordable_id
+    transport = FakeTransport.new({})
+
+    with_network(transport, addresses: { "metadata.example.com" => [ "169.254.169.254" ] }) do
+      patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token),
+                                                params: { name: "Nope", logos: { square_logo: "https://metadata.example.com/latest" } },
+                                                as: :json
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "invalid_input", response.parsed_body.dig("error", "code")
+    assert_equal [ "logos.square_logo host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_empty transport.calls
+    assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+    assert_equal square_logo_before, square_logo_recordable_id
+  end
+
+  test "a redirect to a loopback address is refused" do
+    transport = FakeTransport.new(
+      "https://cdn.example.com/logo" => FakeResponse.new("302", { "location" => "https://localhost.example.com/" }, "")
+    )
+
+    with_network(transport, addresses: { "localhost.example.com" => [ "127.0.0.1" ] }) do
+      patch_logos({ square_logo: "https://cdn.example.com/logo" })
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal [ "logos.square_logo host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_equal 1, transport.calls.size
+  end
+
+  test "a plain http URL is refused" do
+    with_network(FakeTransport.new({})) { patch_logos({ square_logo: "http://cdn.example.com/logo.png" }) }
+
+    assert_response :unprocessable_entity
+    assert_equal [ "logos.square_logo must be an https URL" ], response.parsed_body.dig("error", "details")
+  end
+
+  test "a file that is not a PNG, JPEG, or WebP is refused whatever its header says" do
+    square_logo_before = square_logo_recordable_id
+    transport = FakeTransport.new(
+      "https://cdn.example.com/logo" => FakeResponse.new("200", { "content-type" => "image/png" }, "GIF89a...")
+    )
+
+    with_network(transport) { patch_logos({ square_logo: "https://cdn.example.com/logo" }) }
+
+    assert_response :unprocessable_entity
+    assert_equal [ "logos.square_logo is not a PNG, JPEG, or WebP image" ], response.parsed_body.dig("error", "details")
+    assert_equal square_logo_before, square_logo_recordable_id
+  end
+
+  test "an SVG is refused" do
+    svg = %(<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>)
+    transport = FakeTransport.new("https://cdn.example.com/logo.svg" => FakeResponse.new("200", {}, svg))
+
+    with_network(transport) { patch_logos({ wide_logo: "https://cdn.example.com/logo.svg" }) }
+
+    assert_response :unprocessable_entity
+    assert_match(/SVG is not accepted/, response.parsed_body.dig("error", "details").first)
+  end
+
+  test "a file over the Site screen's size limit is refused" do
+    limit = RecordingStudioAttachable.configuration.max_file_size
+    transport = FakeTransport.new(
+      "https://cdn.example.com/huge.png" => FakeResponse.new("200", { "content-length" => (limit + 1).to_s }, "")
+    )
+
+    with_network(transport) { patch_logos({ square_logo: "https://cdn.example.com/huge.png" }) }
+
+    assert_response :unprocessable_entity
+    assert_equal [ "logos.square_logo is larger than #{limit / 1.megabyte} MB" ],
+                 response.parsed_body.dig("error", "details")
+  end
+
+  test "one bad logo saves nothing" do
+    square_logo_before = square_logo_recordable_id
+    transport = FakeTransport.new(
+      "https://cdn.example.com/good.png" => image_response(TEST_SQUARE_LOGO_PATH),
+      "https://cdn.example.com/bad" => FakeResponse.new("404", {}, "")
+    )
+
+    with_network(transport) do
+      patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token),
+                                                params: { name: "Nope", logos: { square_logo: "https://cdn.example.com/good.png",
+                                                                                 favicon: "https://cdn.example.com/bad" } },
+                                                as: :json
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal [ "logos.favicon returned HTTP 404" ], response.parsed_body.dig("error", "details")
+    assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+    assert_equal square_logo_before, square_logo_recordable_id
+  end
+
+  test "unknown marks and bad values are 422" do
+    with_network(FakeTransport.new({})) { patch_logos({ banner: "https://cdn.example.com/a.png", favicon: 7 }) }
+
+    assert_response :unprocessable_entity
+    details = response.parsed_body.dig("error", "details")
+    assert_equal 2, details.size
+    assert_match(/logos\.banner is not a mark/, details.first)
+  end
+
+  test "a viewer cannot set or clear logos and nothing is downloaded" do
+    transport = FakeTransport.new({})
+
+    with_network(transport) do
+      patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@viewer_token),
+                                                params: { logos: { square_logo: "https://cdn.example.com/a.png", favicon: nil } },
+                                                as: :json
+    end
+
+    assert_response :forbidden
+    assert_empty transport.calls
+  end
+
+  test "an admin of another root cannot set logos" do
+    transport = FakeTransport.new({})
+
+    with_network(transport) do
+      patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@other_root_token),
+                                                params: { logos: { square_logo: "https://cdn.example.com/a.png" } }, as: :json
+    end
+
+    assert_response :forbidden
+    assert_empty transport.calls
+  end
+
+  test "a site admin without edit on the site root cannot set logos and nothing is downloaded" do
+    transport = FakeTransport.new({})
+
+    with_site_root(@other_root) do
+      with_network(transport) { patch_logos({ square_logo: "https://cdn.example.com/a.png" }) }
+    end
+
+    assert_response :forbidden
+    assert_empty transport.calls
   end
 
   test "a viewer can read but cannot rename" do
@@ -131,6 +383,28 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def square_logo_recordable_id
+    RecordingStudioSiteSettings.square_logo_recording_for(@site_root)&.recordable_id
+  end
+
+  def patch_logos(logos)
+    patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { logos: logos }, as: :json
+  end
+
+  # Minitest 6 dropped minitest/mock, so swap RemoteImage's two network seams by hand and put them back.
+  def with_network(transport, addresses: {})
+    originals = { resolve: RemoteImage.method(:resolve), transport: RemoteImage.method(:transport) }
+    RemoteImage.define_singleton_method(:resolve) { |host| addresses.fetch(host) { [ PUBLIC_ADDRESS ] } }
+    RemoteImage.define_singleton_method(:transport) { transport }
+    yield
+  ensure
+    originals.each { |name, method| RemoteImage.singleton_class.send(:define_method, name, method) }
+  end
+
+  def image_response(path)
+    FakeResponse.new("200", {}, File.binread(path))
+  end
 
   def auth(token)
     { "Authorization" => "Bearer #{token}", "Accept" => "application/json" }
