@@ -63,6 +63,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal "site_settings", update.path
     assert_equal [ "Site settings" ], update.openapi.fetch(:tags)
     assert_includes update.input_contract.as_json.fetch(:fields).keys, :name
+    file_params = update.openapi.fetch(:"x-mcp-file-params")
+    assert_equal %i[square_logo_file wide_logo_file favicon_file], file_params.keys.map(&:to_sym)
     assert_nil RecordingStudioApi.registered_endpoint(:site_settings_show, api: :public)
   end
 
@@ -124,20 +126,22 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
   end
 
-  test "an update with neither name nor logos is a 422" do
+  test "an update with neither name nor a mark is a 422" do
     patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: {}, as: :json
 
     assert_response :unprocessable_entity
     assert_equal "invalid_input", response.parsed_body.dig("error", "code")
-    assert_equal [ "Send name, logos, or both" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "Send name, at least one of square_logo_file, wide_logo_file, favicon_file, or both" ],
+                 response.parsed_body.dig("error", "details")
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
   end
 
-  test "unknown fields are rejected by the input contract" do
+  test "unknown fields are rejected" do
     patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { name: "X", color: "red" },
                                               as: :json
 
     assert_response :unprocessable_entity
+    assert_equal [ "Unknown parameters: color" ], response.parsed_body.dig("error", "details")
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
   end
 
@@ -145,7 +149,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     transport = FakeTransport.new("https://cdn.example.com/square.png" => image_response(TEST_SQUARE_LOGO_PATH))
 
     with_network(transport) do
-      patch_logos({ square_logo: "https://cdn.example.com/square.png" })
+      patch_marks({ square_logo_file: "https://cdn.example.com/square.png" })
     end
 
     assert_response :success
@@ -165,11 +169,11 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
              file_name: "icon.png" }
     transport = FakeTransport.new(file[:download_url] => image_response(TEST_SQUARE_LOGO_PATH))
 
-    with_network(transport) { patch_logos({ favicon: file }) }
+    with_network(transport) { patch_marks({ favicon_file: file }) }
     assert_response :success
     first = RecordingStudioSiteSettings.favicon_recording_for(@site_root)
 
-    with_network(transport) { patch_logos({ favicon: file }) }
+    with_network(transport) { patch_marks({ favicon_file: file }) }
     assert_response :success
 
     assert_equal first.id, RecordingStudioSiteSettings.favicon_recording_for(@site_root).id
@@ -177,12 +181,12 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal 2, transport.calls.size
   end
 
-  test "name and logos update together" do
+  test "name and a mark update together" do
     transport = FakeTransport.new("https://cdn.example.com/wide.png" => image_response(TEST_WIDE_LOGO_PATH))
 
     with_network(transport) do
       patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token),
-                                                params: { name: "Both", logos: { wide_logo: "https://cdn.example.com/wide.png" } },
+                                                params: { name: "Both", wide_logo_file: "https://cdn.example.com/wide.png" },
                                                 as: :json
     end
 
@@ -199,7 +203,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert RecordingStudioSiteSettings.favicon_for(@site_root).present?
     transport = FakeTransport.new({})
 
-    with_network(transport) { patch_logos({ favicon: nil }) }
+    with_network(transport) { patch_marks({ favicon_file: nil }) }
 
     assert_response :success
     assert_equal false, response.parsed_body.dig("favicon", "present")
@@ -208,7 +212,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "clearing an empty mark is a no-op" do
-    with_network(FakeTransport.new({})) { patch_logos({ wide_logo: nil }) }
+    with_network(FakeTransport.new({})) { patch_marks({ wide_logo_file: nil }) }
 
     assert_response :success
     assert_equal false, response.parsed_body.dig("wide_logo", "present")
@@ -220,13 +224,13 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     with_network(transport, addresses: { "metadata.example.com" => [ "169.254.169.254" ] }) do
       patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token),
-                                                params: { name: "Nope", logos: { square_logo: "https://metadata.example.com/latest" } },
+                                                params: { name: "Nope", square_logo_file: "https://metadata.example.com/latest" },
                                                 as: :json
     end
 
     assert_response :unprocessable_entity
     assert_equal "invalid_input", response.parsed_body.dig("error", "code")
-    assert_equal [ "logos.square_logo host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file host is not a public address" ], response.parsed_body.dig("error", "details")
     assert_empty transport.calls
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
     assert_equal square_logo_before, square_logo_recordable_id
@@ -238,19 +242,19 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     )
 
     with_network(transport, addresses: { "localhost.example.com" => [ "127.0.0.1" ] }) do
-      patch_logos({ square_logo: "https://cdn.example.com/logo" })
+      patch_marks({ square_logo_file: "https://cdn.example.com/logo" })
     end
 
     assert_response :unprocessable_entity
-    assert_equal [ "logos.square_logo host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file host is not a public address" ], response.parsed_body.dig("error", "details")
     assert_equal 1, transport.calls.size
   end
 
   test "a plain http URL is refused" do
-    with_network(FakeTransport.new({})) { patch_logos({ square_logo: "http://cdn.example.com/logo.png" }) }
+    with_network(FakeTransport.new({})) { patch_marks({ square_logo_file: "http://cdn.example.com/logo.png" }) }
 
     assert_response :unprocessable_entity
-    assert_equal [ "logos.square_logo must be an https URL" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file must be an https URL" ], response.parsed_body.dig("error", "details")
   end
 
   test "a file that is not a PNG, JPEG, or WebP is refused whatever its header says" do
@@ -259,10 +263,10 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
       "https://cdn.example.com/logo" => FakeResponse.new("200", { "content-type" => "image/png" }, "GIF89a...")
     )
 
-    with_network(transport) { patch_logos({ square_logo: "https://cdn.example.com/logo" }) }
+    with_network(transport) { patch_marks({ square_logo_file: "https://cdn.example.com/logo" }) }
 
     assert_response :unprocessable_entity
-    assert_equal [ "logos.square_logo is not a PNG, JPEG, or WebP image" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file is not a PNG, JPEG, or WebP image" ], response.parsed_body.dig("error", "details")
     assert_equal square_logo_before, square_logo_recordable_id
   end
 
@@ -270,7 +274,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     svg = %(<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>)
     transport = FakeTransport.new("https://cdn.example.com/logo.svg" => FakeResponse.new("200", {}, svg))
 
-    with_network(transport) { patch_logos({ wide_logo: "https://cdn.example.com/logo.svg" }) }
+    with_network(transport) { patch_marks({ wide_logo_file: "https://cdn.example.com/logo.svg" }) }
 
     assert_response :unprocessable_entity
     assert_match(/SVG is not accepted/, response.parsed_body.dig("error", "details").first)
@@ -282,10 +286,10 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
       "https://cdn.example.com/huge.png" => FakeResponse.new("200", { "content-length" => (limit + 1).to_s }, "")
     )
 
-    with_network(transport) { patch_logos({ square_logo: "https://cdn.example.com/huge.png" }) }
+    with_network(transport) { patch_marks({ square_logo_file: "https://cdn.example.com/huge.png" }) }
 
     assert_response :unprocessable_entity
-    assert_equal [ "logos.square_logo is larger than #{limit / 1.megabyte} MB" ],
+    assert_equal [ "square_logo_file is larger than #{limit / 1.megabyte} MB" ],
                  response.parsed_body.dig("error", "details")
   end
 
@@ -298,24 +302,25 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     with_network(transport) do
       patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token),
-                                                params: { name: "Nope", logos: { square_logo: "https://cdn.example.com/good.png",
-                                                                                 favicon: "https://cdn.example.com/bad" } },
+                                                params: { name: "Nope", square_logo_file: "https://cdn.example.com/good.png",
+                                                          favicon_file: "https://cdn.example.com/bad" },
                                                 as: :json
     end
 
     assert_response :unprocessable_entity
-    assert_equal [ "logos.favicon returned HTTP 404" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "favicon_file returned HTTP 404" ], response.parsed_body.dig("error", "details")
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
     assert_equal square_logo_before, square_logo_recordable_id
   end
 
-  test "unknown marks and bad values are 422" do
-    with_network(FakeTransport.new({})) { patch_logos({ banner: "https://cdn.example.com/a.png", favicon: 7 }) }
+  test "the old nested logos object, unknown fields, and bad values are 422" do
+    with_network(FakeTransport.new({})) { patch_marks({ logos: { square_logo: "https://cdn.example.com/a.png" }, favicon_file: 7 }) }
 
     assert_response :unprocessable_entity
     details = response.parsed_body.dig("error", "details")
     assert_equal 2, details.size
-    assert_match(/logos\.banner is not a mark/, details.first)
+    assert_equal "Unknown parameters: logos", details.first
+    assert_match(/favicon_file must be a file object/, details.last)
   end
 
   test "a viewer cannot set or clear logos and nothing is downloaded" do
@@ -323,7 +328,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     with_network(transport) do
       patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@viewer_token),
-                                                params: { logos: { square_logo: "https://cdn.example.com/a.png", favicon: nil } },
+                                                params: { square_logo_file: "https://cdn.example.com/a.png", favicon_file: nil },
                                                 as: :json
     end
 
@@ -336,7 +341,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     with_network(transport) do
       patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@other_root_token),
-                                                params: { logos: { square_logo: "https://cdn.example.com/a.png" } }, as: :json
+                                                params: { square_logo_file: "https://cdn.example.com/a.png" }, as: :json
     end
 
     assert_response :forbidden
@@ -347,7 +352,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     transport = FakeTransport.new({})
 
     with_site_root(@other_root) do
-      with_network(transport) { patch_logos({ square_logo: "https://cdn.example.com/a.png" }) }
+      with_network(transport) { patch_marks({ square_logo_file: "https://cdn.example.com/a.png" }) }
     end
 
     assert_response :forbidden
@@ -388,8 +393,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     RecordingStudioSiteSettings.square_logo_recording_for(@site_root)&.recordable_id
   end
 
-  def patch_logos(logos)
-    patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { logos: logos }, as: :json
+  def patch_marks(params)
+    patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: params, as: :json
   end
 
   # Minitest 6 dropped minitest/mock, so swap RemoteImage's two network seams by hand and put them back.

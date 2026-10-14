@@ -136,21 +136,23 @@ When the host bundles `recording_studio_api` and configures an `:operations` API
 | Endpoint | Verb and path | Body |
 | --- | --- | --- |
 | `site_settings_show` | `GET site_settings` | none |
-| `site_settings_update` | `PATCH site_settings` | `name`, `logos`, or both |
+| `site_settings_update` | `PATCH site_settings` | `name`, mark fields, or both |
 
 Show returns `name` plus `square_logo`, `wide_logo`, and `favicon`. Each mark has `present`, `variant` (the preview variant from `Admin::MARK_VARIANTS`), `recording_id`, `filename`, and `preview_url` (the preview path for that variant, `null` when empty).
 
-Update strips `name` and calls `RecordingStudioSiteSettings.update!`, the same path the Site screen saves through. A blank name returns 422 `validation_failed`. Leave `name` out to keep the current name. Sending neither `name` nor `logos` returns 422 `invalid_input`.
+Update strips `name` and calls `RecordingStudioSiteSettings.update!`, the same path the Site screen saves through. A blank name returns 422 `validation_failed`. Leave `name` out to keep the current name. Sending neither `name` nor a mark field returns 422 `invalid_input`, and so do unknown fields.
 
-`logos` is an object keyed by `square_logo`, `wide_logo`, or `favicon`. Each value is one of:
+Each mark has its own top-level field, `<slot>_file` for each `Admin::MARK_VARIANTS` slot: `square_logo_file`, `wide_logo_file`, and `favicon_file`. Each value is one of:
 
-- an https URL, such as `"https://cdn.example.com/logo.png"`;
-- a file object `{ "download_url": "https://…", "file_id": "file_…" }` (the shape ChatGPT passes for an uploaded file; `mime_type` and `file_name` may also be present and are ignored);
+- a file object `{ "download_url": "https://…", "file_id": "file_…" }`, the shape ChatGPT sends for an uploaded file (`mime_type` and `file_name` may also be present and are ignored);
+- an https URL string, such as `"https://cdn.example.com/logo.png"`;
 - `null`, which removes that mark through Attachable's `RemoveAttachment`.
 
 ```json
-{ "name": "Studio", "logos": { "square_logo": "https://cdn.example.com/square.png", "favicon": null } }
+{ "name": "Studio", "square_logo_file": "https://cdn.example.com/square.png", "favicon_file": null }
 ```
+
+The endpoint's openapi metadata declares these fields under `x-mcp-file-params` (nullable). RecordingStudio MCP 0.14 or newer reads that key: the Admin MCP tool gives each field ChatGPT's file object schema and lists them in `_meta["openai/fileParams"]`, so ChatGPT hands over images the user uploads in chat. Older MCP versions ignore the key, and this gem does not depend on MCP. Because a mark field can be an object, a string, or null, the input contract only types `name` and passes the rest through, and the handler validates them.
 
 The server downloads each image itself before anything is saved:
 
@@ -160,7 +162,7 @@ The server downloads each image itself before anything is saved:
 - The type comes from the file's first bytes: PNG, JPEG, or WebP. SVG is refused, because the Site screen does not sanitize SVG and the API should not store script-capable files fetched from the internet.
 - The image is saved as `<slot>.<ext>` through `Store.update!`, so it gets the same Attachable validations, storage limit, and revision history as an upload on the Site screen.
 
-Any problem with a logo returns 422 `invalid_input` with one `details` entry per logo, such as `"logos.favicon host is not a public address"`, and nothing is saved.
+Any problem with a mark returns 422 `invalid_input` with one `details` entry per field, such as `"favicon_file host is not a public address"`, and nothing is saved.
 
 Access matches the Site admin screen. The token's actor needs Accessible `:view` (show) or `:admin` (update) on the access recording, and that recording must be the Admin `site_admin_recording` (the Site section's `:site` blast radius). The site root comes from `site_root_resolver`, called with no controller. Update also keeps `:edit` on that site root, and checks it before downloading any logo. A denial is 403. Hosts whose resolver only reads `current_root_recording` get 404 from the API; return a site root when `context.controller` is nil.
 

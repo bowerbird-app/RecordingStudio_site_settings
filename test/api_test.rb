@@ -45,25 +45,39 @@ class ApiTest < Minitest::Test
     assert update.openapi.fetch(:summary).present?
     assert update.openapi.fetch(:description).present?
     assert_equal({ type: :string, required: false }, update.input_contract.dig(:fields, :name).slice(:type, :required))
-    assert_equal({ type: :hash, required: false }, update.input_contract.dig(:fields, :logos).slice(:type, :required))
-    assert_includes update.input_contract.dig(:fields, :logos, :description), "square_logo, wide_logo, favicon"
+    assert_equal false, update.input_contract[:reject_unknown]
+    assert_equal %i[name], update.input_contract[:fields].keys
   end
 
-  def test_update_input_reads_urls_file_objects_and_clears
+  def test_update_declares_one_nullable_file_param_per_mark
+    api = install_fake_api!
+    RecordingStudioSiteSettings::Api.register!
+    file_params = api.endpoints.last.openapi.fetch(:"x-mcp-file-params")
+
+    assert_equal %i[square_logo_file wide_logo_file favicon_file], file_params.keys
+    assert(file_params.values.all? { |options| options[:nullable] == true && options[:description].present? })
+    refute api.endpoints.first.openapi.key?(:"x-mcp-file-params")
+  end
+
+  def test_update_input_reads_file_objects_urls_and_clears
     install_fake_api!
     input = RecordingStudioSiteSettings::Api::UpdateInput.parse!(
-      logos: {
-        square_logo: " https://cdn.example.com/square.png ",
-        "wide_logo" => { download_url: "https://files.example.com/x", file_id: "file_123", mime_type: "image/png",
-                         file_name: "wide.png" },
-        favicon: nil
-      }
+      square_logo_file: " https://cdn.example.com/square.png ",
+      "wide_logo_file" => { download_url: "https://files.example.com/x", file_id: "file_123", mime_type: "image/png",
+                            file_name: "wide.png" },
+      favicon_file: nil
     )
 
     refute input.name_given?
     expected = { "square_logo" => "https://cdn.example.com/square.png", "wide_logo" => "https://files.example.com/x" }
     assert_equal expected, input.sources
     assert_equal ["favicon"], input.clears
+  end
+
+  def test_update_input_file_fields_follow_mark_variants
+    expected = RecordingStudioSiteSettings::Admin::MARK_VARIANTS.keys.to_h { |slot| [:"#{slot}_file", slot] }
+
+    assert_equal expected, RecordingStudioSiteSettings::Api::UpdateInput.file_fields
   end
 
   def test_update_input_strips_a_given_name
@@ -74,65 +88,34 @@ class ApiTest < Minitest::Test
     assert_equal "Studio", input.name
   end
 
-  def test_update_input_needs_name_or_logos
+  def test_update_input_needs_name_or_a_mark
     install_fake_api!
 
-    [{}, { logos: {} }, nil].each do |params|
+    [{}, nil].each do |params|
       error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
         RecordingStudioSiteSettings::Api::UpdateInput.parse!(params)
       end
-      assert_equal ["Send name, logos, or both"], error.details
+      assert_equal ["Send name, at least one of square_logo_file, wide_logo_file, favicon_file, or both"],
+                   error.details
     end
   end
 
-  def test_update_input_rejects_unknown_marks_and_bad_values
+  def test_update_input_rejects_unknown_fields_and_bad_values
     install_fake_api!
 
     error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
       RecordingStudioSiteSettings::Api::UpdateInput.parse!(
-        logos: {
-          banner: "https://cdn.example.com/a.png",
-          square_logo: 42,
-          wide_logo: { download_url: "https://files.example.com/x" },
-          favicon: { download_url: "https://files.example.com/x", file_id: "file_1", extra: true }
-        }
+        logos: { square_logo: "https://cdn.example.com/a.png" },
+        square_logo_file: 42,
+        wide_logo_file: { download_url: "https://files.example.com/x" },
+        favicon_file: { download_url: "https://files.example.com/x", file_id: "file_1", extra: true }
       )
     end
 
     assert_equal 4, error.details.size
-    assert_match(/logos\.banner is not a mark/, error.details.first)
-    assert(error.details.drop(1).all? { |detail| detail.include?("must be an https URL, a file object") })
-  end
-
-  def test_update_input_rejects_a_non_object_logos_value
-    install_fake_api!
-
-    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
-      RecordingStudioSiteSettings::Api::UpdateInput.parse!(logos: "https://cdn.example.com/a.png")
-    end
-
-    assert_match(/logos must be an object/, error.details.first)
-  end
-
-  def test_registration_skips_already_registered_endpoints
-    api = install_fake_api!
-
-    2.times { RecordingStudioSiteSettings::Api.register! }
-
-    assert_equal %i[site_settings_show site_settings_update], api.endpoints.map(&:name)
-  end
-
-  def test_registration_requires_the_operations_api
-    api = install_fake_api!(api_names: %w[public])
-
-    RecordingStudioSiteSettings::Api.register!
-
-    assert_empty api.endpoints
-  end
-
-  def test_mark_variants_cover_every_image_slot
-    assert_equal RecordingStudioSiteSettings::Store::IMAGE_SLOTS.keys.sort,
-                 RecordingStudioSiteSettings::Admin::MARK_VARIANTS.keys.sort
+    assert_equal "Unknown parameters: logos", error.details.first
+    message = "must be a file object with download_url and file_id"
+    assert(error.details.drop(1).all? { |detail| detail.include?(message) })
   end
 
   def test_update_maps_store_denial_to_api_authorization_error

@@ -4,6 +4,9 @@ module RecordingStudioSiteSettings
   module Api
     module Registration
       OPENAPI_TAGS = ["Site settings"].freeze
+      # Read by RecordingStudio MCP (0.14+) to give each mark field ChatGPT's file object schema and
+      # list it in the tool's _meta["openai/fileParams"]. Other consumers ignore this OpenAPI extension.
+      FILE_PARAMS_KEY = :"x-mcp-file-params"
 
       module_function
 
@@ -26,7 +29,7 @@ module RecordingStudioSiteSettings
           UPDATE_ENDPOINT,
           http_verb: :patch,
           handler: Update,
-          openapi: openapi("Update the site name and logos", update_description),
+          openapi: openapi("Update the site name and logos", update_description).merge(FILE_PARAMS_KEY => file_params),
           input_contract: update_input_contract
         )
       end
@@ -69,13 +72,20 @@ module RecordingStudioSiteSettings
       end
 
       def update_input_contract
+        # Mark fields take an object, a string, or null, which contract types cannot express, so the
+        # contract passes them through and UpdateInput validates them and rejects unknown keys.
         {
-          reject_unknown: true,
+          reject_unknown: false,
           fields: {
-            name: { type: :string, required: false, description: "New site name. Stripped; blank is 422." },
-            logos: { type: :hash, required: false, description: logos_description }
+            name: { type: :string, required: false, description: "New site name. Stripped; blank is 422." }
           }
         }
+      end
+
+      def file_params
+        UpdateInput.file_fields.transform_values do |slot|
+          { nullable: true, description: file_param_description(slot) }
+        end
       end
 
       def show_description
@@ -84,15 +94,14 @@ module RecordingStudioSiteSettings
       end
 
       def update_description
-        "Renames the site and sets or clears its marks. Send name, logos, or both. " \
+        "Renames the site and sets or clears its marks. Send name, one or more mark fields, or both. " \
           "Same access as saving the Site admin screen: Accessible :admin on the site admin recording " \
           "and :edit on the site root. A blank name or an unusable logo returns 422 and nothing is saved."
       end
 
-      def logos_description
-        "Object keyed by #{RecordingStudioSiteSettings::Admin::MARK_VARIANTS.keys.join(', ')}. " \
-          "Each value is a public https URL, a file object { download_url, file_id }, or null to remove the mark. " \
-          "The server downloads the image (PNG, JPEG, or WebP; SVG is refused) up to the Site screen's file size limit."
+      def file_param_description(slot)
+        "The #{slot.tr('_', ' ')} image: an uploaded file, a public https URL, or null to remove it. " \
+          "PNG, JPEG, or WebP (SVG is refused), up to the Site screen's file size limit."
       end
     end
   end

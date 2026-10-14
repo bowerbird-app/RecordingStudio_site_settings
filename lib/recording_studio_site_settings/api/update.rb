@@ -40,7 +40,7 @@ module RecordingStudioSiteSettings
         files = sources.each_with_object({}) do |(slot, url), output|
           output.merge!(file_args(slot, RemoteImage.fetch(url, max_bytes: max_bytes)))
         rescue RemoteImage::Error => e
-          errors << "logos.#{slot} #{e.message}"
+          errors << "#{UpdateInput.file_field(slot)} #{e.message}"
         end
         raise RecordingStudioApi::InvalidActionInputError.new("Logo could not be used", details: errors) if errors.any?
 
