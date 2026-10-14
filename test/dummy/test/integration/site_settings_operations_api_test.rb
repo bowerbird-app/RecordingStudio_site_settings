@@ -64,11 +64,19 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal square.id, payload.dig("square_logo", "recording_id")
     assert_equal "square-logo.png", payload.dig("square_logo", "filename")
     assert_includes payload.dig("square_logo", "preview_url"), square.id
+    wide = RecordingStudioSiteSettings.wide_logo_for(@site_root, variant: :small)
     assert_equal(
-      { "present" => false, "recording_id" => nil, "filename" => nil, "preview_url" => nil },
+      {
+        "present" => wide.present?, "recording_id" => wide.recording&.id,
+        "filename" => wide.filename, "preview_url" => wide.preview_url
+      },
       payload.fetch("wide_logo")
     )
-    assert_equal false, payload.dig("favicon", "present")
+    favicon = RecordingStudioSiteSettings.favicon_for(@site_root, variant: :square_small)
+    assert_equal(
+      { "present" => favicon.present?, "recording_id" => favicon.recording&.id },
+      payload.fetch("favicon").slice("present", "recording_id")
+    )
   end
 
   test "a site admin renames the site with a stripped name" do
@@ -111,13 +119,15 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "a site admin without edit on a different site root fails authorize_write!" do
+    before = RecordingStudioSiteSettings.name_for(@other_root)
     with_site_root(@other_root) do
       patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { name: "Elsewhere" },
                                                 as: :json
     end
 
     assert_response :forbidden
-    assert_nil RecordingStudioSiteSettings.name_for(@other_root)
+    assert_equal [ before ], [ RecordingStudioSiteSettings.name_for(@other_root) ]
+    refute_equal "Elsewhere", RecordingStudioSiteSettings.name_for(@other_root)
   end
 
   private
