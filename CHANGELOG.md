@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-10-14
+
+### Fixed
+- `preview_url` values from `site_settings_show` / `site_settings_update` came back as relative paths (`/rails/active_storage/...`) when the MCP tool call was streamed over SSE (ChatGPT sends a `progressToken` with `Accept: text/event-stream`). The streamed tool runs while the server iterates the response body, after `RecordingStudioSiteSettings::RequestBaseUrl#call` had returned and cleared the request base URL. The middleware now wraps the response body and re-establishes the base URL during `#each` (and `#call` for callable streaming bodies), forwarding `#close`. Plain JSON responses were unaffected.
+
 ## [0.4.2] - 2026-10-14
 
 ### Fixed
