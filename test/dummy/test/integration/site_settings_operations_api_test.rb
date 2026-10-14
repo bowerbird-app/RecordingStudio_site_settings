@@ -77,22 +77,23 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     get "#{OPERATIONS_ROOT}/site_settings", headers: auth(@viewer_token), as: :json
     url = response.parsed_body.dig("square_logo", "preview_url")
     path = URI.parse(url).path
-    reset!
+    anonymous = open_session
 
-    get path
-    assert_response :redirect
-    follow_redirect!
-    assert_response :success
-    assert_equal "image/png", response.media_type
+    anonymous.get path
+    assert_equal 302, anonymous.response.status
+    anonymous.follow_redirect!
+    assert_equal 200, anonymous.response.status
+    assert_equal "image/png", anonymous.response.media_type
 
-    reset!
     tampered = path.sub(%r{redirect/([^/]+)/}) { "redirect/#{Regexp.last_match(1).reverse}/" }
-    get tampered
-    assert_response :not_found
+    forged = open_session
+    forged.get tampered
+    assert_equal 404, forged.response.status
 
     travel RecordingStudioSiteSettings.configuration.preview_url_expires_in + 1 do
-      get path
-      assert_response :not_found
+      expired = open_session
+      expired.get path
+      assert_equal 404, expired.response.status
     end
   end
 
