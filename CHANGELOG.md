@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.0] - 2026-10-14
 
 ### Changed
-- `ApplicationController` uses `RecordingStudioAccessible::ControllerAuth` for authenticate / actor / `Current.actor` wiring instead of a local copy. Public names stay the same: `authenticate_recording_studio_site_settings!`, `current_actor`, and `set_current_actor`, still driven by `RecordingStudioAdmin.configuration` (`authentication_method` / `current_actor_method`) with `actor_resolution: :configured_as_is`.
+- `ApplicationController` uses `RecordingStudioAccessible::ControllerAuth` for authenticate / actor / `Current.actor` wiring instead of a local copy. Public names stay the same: `authenticate_recording_studio_site_settings!`, `current_actor`, and `set_current_actor`, still driven by `RecordingStudioAdmin.configuration` (`authentication_method` / `current_actor_method`). Actor resolution matches main via `actor_resolver` (configured method when present, else `Current.actor`).
 - `include ControllerAuth` / `recording_studio_auth` sit after `protect_from_forgery`, so `:verify_authenticity_token` still runs before the auth and set-actor filters (same order as main).
+- `current_site_settings_root` is not exposed as a view helper (main did not have it).
 - Requires Accessible `~> 0.18`. Root, dummy, and README GitHub tags track Accessible `v0.18.0`.
 
 ### Upgrade notes

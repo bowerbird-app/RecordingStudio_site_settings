@@ -21,11 +21,12 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
     assert controller.private_method_defined?(:authenticate_recording_studio_site_settings!)
     assert controller.private_method_defined?(:current_actor)
     assert controller.private_method_defined?(:set_current_actor)
-    assert controller.private_method_defined?(:current_site_settings_root)
-    assert_includes controller._helper_methods.map(&:to_s), "current_site_settings_root"
+    refute_includes controller._helper_methods.map(&:to_s), "current_site_settings_root"
+    refute_includes RecordingStudioSiteSettings::Admin::SettingsController._helper_methods.map(&:to_s),
+                    "current_site_settings_root"
 
     options = controller.recording_studio_auth_options
-    assert_equal :configured_as_is, options.fetch(:actor_resolution)
+    assert options.fetch(:actor_resolver).respond_to?(:call)
     assert_equal :authenticate_recording_studio_site_settings!, options.fetch(:authenticate_method)
     assert_equal :current_actor, options.fetch(:actor_method)
     assert_equal :set_current_actor, options.fetch(:set_current_actor_method)
@@ -116,16 +117,16 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "configured_as_is keeps a nil current_actor without falling back to Current.actor" do
-    sign_in @admin
-    switch_root!(@studio_root)
+  test "current_actor falls back to Current.actor when current_actor_method is unset" do
+    previous = RecordingStudioAdmin.configuration.current_actor_method
+    RecordingStudioAdmin.configuration.current_actor_method = nil
     Current.actor = @admin
 
     controller = RecordingStudioSiteSettings::Admin::SettingsController.new
-    controller.define_singleton_method(:current_user) { nil }
 
-    assert_nil controller.send(:current_actor)
+    assert_equal @admin, controller.send(:current_actor)
   ensure
+    RecordingStudioAdmin.configuration.current_actor_method = previous
     Current.actor = nil if defined?(Current)
   end
 

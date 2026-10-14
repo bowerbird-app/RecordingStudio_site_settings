@@ -34,8 +34,15 @@ module RecordingStudioSiteSettings
       authenticate_method: :authenticate_recording_studio_site_settings!,
       set_current_actor_method: :set_current_actor,
       actor_method: :current_actor,
-      actor_resolution: :configured_as_is
+      actor_resolver: lambda {
+        method_name = RecordingStudioAdmin.configuration.current_actor_method
+        next send(method_name) if method_name && respond_to?(method_name, true)
+
+        Current.actor if defined?(Current)
+      }
     )
+    _helpers.send(:remove_method, :current_site_settings_root)
+    self._helper_methods -= [ :current_site_settings_root ]
 
     private
 
