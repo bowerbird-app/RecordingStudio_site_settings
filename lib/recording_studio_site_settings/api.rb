@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "api/access"
+require_relative "api/preview_url"
 require_relative "api/serialize"
 require_relative "api/show"
 require_relative "api/remote_image"

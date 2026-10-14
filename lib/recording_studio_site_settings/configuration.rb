@@ -1,19 +1,41 @@
 # frozen_string_literal: true
 
+require "ipaddr"
+
 module RecordingStudioSiteSettings
   class Configuration
+    REMOTE_IMAGE_ALLOWED_NETWORKS_ENV = "RECORDING_STUDIO_SITE_SETTINGS_REMOTE_IMAGE_ALLOWED_NETWORKS"
+
     attr_accessor :site_root_resolver
-    attr_reader :site_root_types, :hooks
+    attr_reader :site_root_types, :hooks, :remote_image_allowed_networks
+    # Host/protocol/port for absolute preview URLs in API payloads, e.g. { host: "example.com", protocol: "https" }.
+    # When nil, Rails.application.routes.default_url_options is used, then the current request's base URL.
+    attr_accessor :public_url_options
+    # Lifetime of the signed preview_url returned by the API.
+    attr_accessor :preview_url_expires_in
 
     def initialize
       @site_root_types = ["Workspace"]
       @site_root_resolver = default_site_root_resolver
       @hooks = RecordingStudio::Hooks.new
+      @public_url_options = nil
+      @preview_url_expires_in = 10 * 60
+      self.remote_image_allowed_networks = ENV.fetch(REMOTE_IMAGE_ALLOWED_NETWORKS_ENV, "")
+    end
+
+    # CIDRs a logo download may reach even though they are private or reserved, for hosts whose egress
+    # proxy answers DNS with its own address (for example 198.18.0.0/15 fake-IP sandboxes). Loopback,
+    # link-local (cloud metadata), and unspecified addresses stay refused. Empty by default.
+    def remote_image_allowed_networks=(networks)
+      list = networks.is_a?(String) ? networks.split(/[\s,]+/) : Array(networks)
+      cidrs = list.map { |cidr| cidr.to_s.strip }.reject(&:empty?)
+      @remote_image_allowed_networks = cidrs.map { |cidr| IPAddr.new(cidr) }.freeze
     end
 
     def to_h
       {
         site_root_types: site_root_types,
+        remote_image_allowed_networks: remote_image_allowed_networks.map { |ip| "#{ip}/#{ip.prefix}" },
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
     end

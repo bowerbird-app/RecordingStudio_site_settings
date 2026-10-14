@@ -70,6 +70,10 @@ module RecordingStudioSiteSettings
       RecordingStudioSiteSettings.configuration.hooks.run(:after_initialize, self)
     end
 
+    initializer "recording_studio_site_settings.request_base_url" do |app|
+      app.middleware.use RecordingStudioSiteSettings::RequestBaseUrl
+    end
+
     initializer "recording_studio_site_settings.helpers" do
       ActiveSupport.on_load(:action_view) do
         include RecordingStudioSiteSettings::ApplicationHelper

@@ -9,6 +9,7 @@ require "recording_studio_site_settings/engine"
 require "recording_studio_site_settings/configuration"
 require "recording_studio_site_settings/copy"
 require "recording_studio_site_settings/logo"
+require "recording_studio_site_settings/request_base_url"
 
 module RecordingStudioSiteSettings
   class Error < StandardError; end

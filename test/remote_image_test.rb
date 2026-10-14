@@ -88,7 +88,7 @@ class RemoteImageTest < Minitest::Test
     error = assert_fetch_error(addresses: { "cdn.example.com" => ["93.184.216.34", "169.254.169.254"] },
                                transport: transport)
 
-    assert_equal "host is not a public address", error.message
+    assert_equal "host resolves to a non-public address (169.254.169.254)", error.message
     assert_empty transport.calls
   end
 
@@ -108,7 +108,7 @@ class RemoteImageTest < Minitest::Test
       transport: transport
     )
 
-    assert_equal "host is not a public address", error.message
+    assert_equal "host resolves to a non-public address (169.254.169.254)", error.message
     assert_equal 1, transport.calls.size
   end
 
@@ -169,7 +169,54 @@ class RemoteImageTest < Minitest::Test
     transport = Object.new
     def transport.get(*, **) = raise(Net::OpenTimeout)
 
-    assert_equal "could not be downloaded", assert_fetch_error(transport: transport).message
+    assert_equal "could not be downloaded: the host timed out", assert_fetch_error(transport: transport).message
+  end
+
+  def test_allowed_networks_lift_reserved_ranges_but_never_loopback_or_metadata
+    policy = RemoteImage::AddressPolicy
+    fake_ip = [IPAddr.new("198.18.0.0/15")]
+
+    assert policy.blocked?("198.18.0.1")
+    refute policy.blocked?("198.18.0.1", allowed: fake_ip)
+    assert policy.blocked?("10.0.0.5", allowed: fake_ip)
+    assert policy.blocked?("127.0.0.1", allowed: [IPAddr.new("127.0.0.0/8")])
+    assert policy.blocked?("169.254.169.254", allowed: [IPAddr.new("169.254.0.0/16")])
+    assert policy.blocked?("0.0.0.0", allowed: [IPAddr.new("0.0.0.0/0")])
+    assert policy.blocked?("::1", allowed: [IPAddr.new("::/0")])
+  end
+
+  def test_fake_ip_egress_host_downloads_only_when_its_network_is_allowed
+    addresses = { "cdn.example.com" => ["198.18.0.1"] }
+    blocked = assert_fetch_error(addresses: addresses)
+    assert_equal "host resolves to a non-public address (198.18.0.1)", blocked.message
+
+    config = RecordingStudioSiteSettings.configuration
+    original = config.remote_image_allowed_networks
+    config.remote_image_allowed_networks = "198.18.0.0/15"
+    transport = FakeTransport.new("https://cdn.example.com/logo" => ok(JPEG))
+
+    download = fetch("https://cdn.example.com/logo", transport: transport, addresses: addresses)
+
+    assert_equal "image/jpeg", download.content_type
+    assert_equal [["https://cdn.example.com/logo", "198.18.0.1"]], transport.calls
+  ensure
+    config&.remote_image_allowed_networks = original if original
+  end
+
+  def test_jpeg_variants_are_sniffed
+    [0xE0, 0xE1, 0xDB, 0xEE, 0xC0].each do |marker|
+      assert_equal "image/jpeg", fetch_body("\xFF\xD8\xFF".b + marker.chr + "rest".b).content_type
+    end
+  end
+
+  def test_network_failures_name_the_failing_step
+    { OpenSSL::SSL::SSLError => "the TLS handshake or certificate check failed",
+      Errno::ECONNREFUSED => "the connection failed",
+      Net::HTTPBadResponse => "the response was invalid" }.each do |error_class, reason|
+      transport = Object.new
+      transport.define_singleton_method(:get) { |*, **| raise error_class }
+      assert_equal "could not be downloaded: #{reason}", assert_fetch_error(transport: transport).message
+    end
   end
 
   private

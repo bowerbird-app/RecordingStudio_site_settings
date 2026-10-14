@@ -68,6 +68,40 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_nil RecordingStudioApi.registered_endpoint(:site_settings_show, api: :public)
   end
 
+  test "preview_url loads without a session, expires, and rejects tampering" do
+    # CI has no libvips, so Active Storage has no transformer; this test is about the signed URL, not resizing.
+    original_transformer = ActiveStorage.variant_transformer
+    ActiveStorage.variant_transformer = ActiveStorage::Transformers::NullTransformer if original_transformer.nil?
+    File.open(TEST_SQUARE_LOGO_PATH, "rb") do |io|
+      RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @staff, square_logo_io: io,
+                                                      square_logo_filename: "square-logo.png",
+                                                      square_logo_content_type: "image/png")
+    end
+    get "#{OPERATIONS_ROOT}/site_settings", headers: auth(@viewer_token), as: :json
+    url = response.parsed_body.dig("square_logo", "preview_url")
+    path = URI.parse(url).path
+    anonymous = open_session
+
+    anonymous.get path
+    assert_equal 302, anonymous.response.status
+    anonymous.follow_redirect!
+    assert_equal 200, anonymous.response.status
+    assert_equal "image/png", anonymous.response.media_type
+
+    tampered = path.sub(%r{redirect/([^/]+)/}) { "redirect/#{Regexp.last_match(1).reverse}/" }
+    forged = open_session
+    forged.get tampered
+    assert_equal 404, forged.response.status
+
+    travel RecordingStudioSiteSettings.configuration.preview_url_expires_in + 1 do
+      expired = open_session
+      expired.get path
+      assert_equal 404, expired.response.status
+    end
+  ensure
+    ActiveStorage.variant_transformer = original_transformer
+  end
+
   test "missing token is unauthorized" do
     get "#{OPERATIONS_ROOT}/site_settings", as: :json
 
@@ -92,16 +126,17 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal true, payload.dig("square_logo", "present")
     assert_equal square.id, payload.dig("square_logo", "recording_id")
     assert_equal "square-logo.png", payload.dig("square_logo", "filename")
-    assert_includes payload.dig("square_logo", "preview_url"), square.id
+    assert_match %r{\Ahttp://www\.example\.com/rails/active_storage/representations/redirect/[^/]+/[^/]+/square-logo\.png\z},
+                 payload.dig("square_logo", "preview_url")
     assert_equal "square_med", payload.dig("square_logo", "variant")
     assert_equal "square_small", payload.dig("favicon", "variant")
     wide = RecordingStudioSiteSettings.wide_logo_for(@site_root, variant: :small)
     assert_equal(
       {
         "present" => wide.present?, "variant" => "small", "recording_id" => wide.recording&.id,
-        "filename" => wide.filename, "preview_url" => wide.preview_url
+        "filename" => wide.filename
       },
-      payload.fetch("wide_logo")
+      payload.fetch("wide_logo").except("preview_url")
     )
     favicon = RecordingStudioSiteSettings.favicon_for(@site_root, variant: :square_small)
     assert_equal(
@@ -161,7 +196,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     logo = RecordingStudioSiteSettings.square_logo_recording_for(@site_root)
     assert_equal logo.id, payload.dig("square_logo", "recording_id")
     assert_equal "image/png", logo.recordable.content_type
-    assert_includes payload.dig("square_logo", "preview_url"), logo.id
+    assert_includes payload.dig("square_logo", "preview_url"), "/rails/active_storage/representations/redirect/"
   end
 
   test "a ChatGPT file object sets the favicon and a second call replaces it" do
@@ -230,10 +265,21 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_equal "invalid_input", response.parsed_body.dig("error", "code")
-    assert_equal [ "square_logo_file host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file host resolves to a non-public address (169.254.169.254)" ], response.parsed_body.dig("error", "details")
     assert_empty transport.calls
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
     assert_equal square_logo_before, square_logo_recordable_id
+  end
+
+  test "the 422 message names the failing check for each mark" do
+    with_network(FakeTransport.new({}), addresses: { "files.example.com" => [ "198.18.0.1" ] }) do
+      patch_marks({ square_logo_file: { download_url: "https://files.example.com/raw?sig=secret", file_id: "file_1" } })
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "Logo could not be used: square_logo_file host resolves to a non-public address (198.18.0.1)",
+                 response.parsed_body.dig("error", "message")
+    refute_includes response.body, "sig=secret"
   end
 
   test "a redirect to a loopback address is refused" do
@@ -246,7 +292,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
-    assert_equal [ "square_logo_file host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file host resolves to a non-public address (127.0.0.1)" ], response.parsed_body.dig("error", "details")
     assert_equal 1, transport.calls.size
   end
 

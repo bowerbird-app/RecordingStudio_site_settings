@@ -5,7 +5,7 @@ require "test_helper"
 class RecordingStudioSiteSettingsTest < Minitest::Test
   def test_that_it_has_a_version_number
     refute_nil ::RecordingStudioSiteSettings::VERSION
-    assert_equal "0.4.0", ::RecordingStudioSiteSettings::VERSION
+    assert_equal "0.4.1", ::RecordingStudioSiteSettings::VERSION
   end
 
   def test_readme_is_the_public_product

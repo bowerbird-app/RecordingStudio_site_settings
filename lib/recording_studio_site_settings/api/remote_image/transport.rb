@@ -11,6 +11,13 @@ module RecordingStudioSiteSettings
         OPEN_TIMEOUT = 3
         READ_TIMEOUT = 5
         ACCEPT = "image/png, image/jpeg, image/webp"
+        # Which step failed, without hostnames, addresses, or library messages.
+        FAILURES = {
+          [Timeout::Error] => "the host timed out",
+          [OpenSSL::SSL::SSLError] => "the TLS handshake or certificate check failed",
+          [SocketError, SystemCallError] => "the connection failed",
+          [IOError, Net::HTTPBadResponse] => "the response was invalid"
+        }.freeze
 
         module_function
 
@@ -18,6 +25,10 @@ module RecordingStudioSiteSettings
           build(uri, address).start do |connection|
             connection.request(Net::HTTP::Get.new(uri, "Accept" => ACCEPT)) { |response| return yield(response) }
           end
+        end
+
+        def failure_reason(error)
+          FAILURES.find { |classes, _reason| classes.any? { |klass| error.is_a?(klass) } }&.last
         end
 
         def build(uri, address)
