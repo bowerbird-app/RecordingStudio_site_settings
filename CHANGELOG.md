@@ -11,10 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - `ApplicationController` uses `RecordingStudioAccessible::ControllerAuth` for authenticate / actor / `Current.actor` wiring instead of a local copy. Public names stay the same: `authenticate_recording_studio_site_settings!`, `current_actor`, and `set_current_actor`, still driven by `RecordingStudioAdmin.configuration` (`authentication_method` / `current_actor_method`) with `actor_resolution: :configured_as_is`.
-- Requires Accessible `>= 0.18.0`. Root, dummy, and README GitHub tags track Accessible `v0.18.0`.
+- `include ControllerAuth` / `recording_studio_auth` sit after `protect_from_forgery`, so `:verify_authenticity_token` still runs before the auth and set-actor filters (same order as main).
+- Requires Accessible `~> 0.18`. Root, dummy, and README GitHub tags track Accessible `v0.18.0`.
 
 ### Upgrade notes
-- Pin Accessible `>= 0.18.0` (GitHub tag `v0.18.0`). No migration.
+- Pin Accessible `~> 0.18` (GitHub tag `v0.18.0`). No migration.
 - Host overrides of `authenticate_recording_studio_site_settings!`, `current_actor`, or `set_current_actor` keep working.
 - Site admin authorization (`authorize_site_settings_admin!`, BlastRadius, `require_site_root!`) is unchanged.
 

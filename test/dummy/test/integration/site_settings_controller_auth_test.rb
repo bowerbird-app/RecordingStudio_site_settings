@@ -43,6 +43,39 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
     refute_includes methods, "require_root!"
   end
 
+  test "verify_authenticity_token runs before ControllerAuth auth filters" do
+    filters = RecordingStudioSiteSettings::ApplicationController
+      ._process_action_callbacks
+      .select { |callback| callback.kind == :before }
+      .map(&:filter)
+
+    csrf_at = filters.index(:verify_authenticity_token)
+    auth_at = filters.index(:authenticate_recording_studio_site_settings!)
+    actor_at = filters.index(:set_current_actor)
+
+    assert csrf_at, "expected :verify_authenticity_token in before filters"
+    assert auth_at, "expected :authenticate_recording_studio_site_settings! in before filters"
+    assert actor_at, "expected :set_current_actor in before filters"
+    assert csrf_at < auth_at, "CSRF must run before authenticate"
+    assert csrf_at < actor_at, "CSRF must run before set_current_actor"
+  end
+
+  test "signed-out write with a bad CSRF token returns 422 instead of an auth redirect" do
+    previous = ActionController::Base.allow_forgery_protection
+    ActionController::Base.allow_forgery_protection = true
+
+    patch recording_studio_site_settings.settings_path,
+          params: {
+            authenticity_token: "not-a-real-token",
+            site_setting: { name: "CSRF should win" }
+          }
+
+    assert_response :unprocessable_entity
+    refute_predicate response, :redirect?
+  ensure
+    ActionController::Base.allow_forgery_protection = previous
+  end
+
   test "settings screen redirects unauthenticated callers through Admin authentication_method" do
     get recording_studio_site_settings.settings_path
 

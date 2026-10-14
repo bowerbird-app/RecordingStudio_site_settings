@@ -9,8 +9,6 @@ module RecordingStudioSiteSettings
       include RecordingStudio::RootSwitchable::ControllerSupport
     end
 
-    include RecordingStudioAccessible::ControllerAuth
-
     protect_from_forgery with: :exception
     layout "recording_studio/default_layout"
 
@@ -25,6 +23,10 @@ module RecordingStudioSiteSettings
     rescue_from RecordingStudioAdmin::AuthorizationFailed, with: :render_forbidden
     rescue_from RecordingStudioAdmin::DefinitionNotFound, with: :render_forbidden
     rescue_from RecordingStudioSiteSettings::Unauthorized, with: :render_forbidden
+
+    # After protect_from_forgery so :verify_authenticity_token stays ahead of auth /
+    # set-actor filters (same order as main's before_action list).
+    include RecordingStudioAccessible::ControllerAuth
 
     recording_studio_auth(
       config: -> { RecordingStudioAdmin.configuration },
