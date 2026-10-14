@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-14
+
+### Changed
+- `ApplicationController` uses `RecordingStudioAccessible::ControllerAuth` for authenticate / actor / `Current.actor` wiring instead of a local copy. Public names stay the same: `authenticate_recording_studio_site_settings!`, `current_actor`, and `set_current_actor`, still driven by `RecordingStudioAdmin.configuration` (`authentication_method` / `current_actor_method`) with `actor_resolution: :configured_as_is`.
+- Requires Accessible `>= 0.18.0`. Root, dummy, and README GitHub tags track Accessible `v0.18.0`.
+
+### Upgrade notes
+- Pin Accessible `>= 0.18.0` (GitHub tag `v0.18.0`). No migration.
+- Host overrides of `authenticate_recording_studio_site_settings!`, `current_actor`, or `set_current_actor` keep working.
+- Site admin authorization (`authorize_site_settings_admin!`, BlastRadius, `require_site_root!`) is unchanged.
+
 ## [0.4.3] - 2026-10-14
 
 ### Fixed
@@ -109,6 +120,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.3...v0.5.0
+[0.4.3]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.1.11...v0.2.0
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/releases/tag/v0.1.0

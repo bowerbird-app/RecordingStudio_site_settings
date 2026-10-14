@@ -5,7 +5,7 @@
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
 - Recording Studio `~> 4.2`
-- Accessible `~> 0.11`
+- Accessible `>= 0.18.0`
 - Admin `~> 2.0`
 - Attachable `~> 0.5`
 - Flatpack `>= 0.1.144`

@@ -66,6 +66,8 @@ recording_studio_admin_for :admin, at: "/admin", root_section: :site_settings
 
 Enable the `site_settings` section on the admin root. Grant Accessible access on that admin root. People without that grant get 403.
 
+Point Admin's `authentication_method` and `current_actor_method` at the host sign-in helpers (usually Devise `authenticate_user!` / `current_user`). This gem's `ApplicationController` uses Accessible `ControllerAuth` with those hooks; it does not reinvent sign-in.
+
 ## Read name, logos, and favicon
 
 ```ruby
