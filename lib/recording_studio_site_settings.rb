@@ -17,6 +17,7 @@ end
 
 require "recording_studio_site_settings/store"
 require "recording_studio_site_settings/admin"
+require "recording_studio_site_settings/api"
 
 module RecordingStudioSiteSettings
   class << self

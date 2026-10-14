@@ -80,6 +80,10 @@ module RecordingStudioSiteSettings
       config.to_prepare { RecordingStudioSiteSettings::Admin.register! }
     end
 
+    initializer "recording_studio_site_settings.api" do
+      config.to_prepare { RecordingStudioSiteSettings::Api.register! }
+    end
+
     initializer "recording_studio_site_settings.sync_parent_types" do
       config.to_prepare { RecordingStudioSiteSettings.sync_site_setting_parent_types!(load_site_setting: true) }
     end

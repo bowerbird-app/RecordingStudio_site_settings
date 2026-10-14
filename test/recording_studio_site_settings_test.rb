@@ -5,7 +5,7 @@ require "test_helper"
 class RecordingStudioSiteSettingsTest < Minitest::Test
   def test_that_it_has_a_version_number
     refute_nil ::RecordingStudioSiteSettings::VERSION
-    assert_equal "0.2.0", ::RecordingStudioSiteSettings::VERSION
+    assert_equal "0.3.0", ::RecordingStudioSiteSettings::VERSION
   end
 
   def test_readme_is_the_public_product
@@ -39,7 +39,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio", tag: "v4.6.0"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.17.0"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
+    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.3"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v4.6.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.17.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"'
@@ -49,7 +49,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.9.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.21.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.3"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.10.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.0"'
     assert_match(

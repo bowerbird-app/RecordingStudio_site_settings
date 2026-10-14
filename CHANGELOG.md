@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-14
+
+### Added
+- Operations (Admin) API endpoints `site_settings_show` (`GET site_settings`) and `site_settings_update` (`PATCH site_settings`), registered from `config.to_prepare` when `recording_studio_api` is loaded and `:operations` is configured. They appear as Admin MCP tools. Update advertises `name` in its input contract.
+- `RecordingStudioSiteSettings::Api` (`registration`, `access`, `show`, `update`, `serialize`). Access matches the Site admin screen: role on the access recording, which must be the `site_admin_recording`; site root from `site_root_resolver` with a nil controller; update keeps `Store.authorize_write!`.
+- `RecordingStudioSiteSettings::Admin::MARK_VARIANTS`, the preview variant per image slot. The settings screen and the API both use it.
+
+### Changed
+- Root and dummy pin `recording_studio_metrics` `v0.2.3` (needed by `recording_studio_api`). Dummy bundles `recording_studio_api` `v0.7.0` with its migrations; `AdminRoot` is an API access point and `RecordingStudioApi::ApiClient` is an access actor type in dummy.
+
+### Upgrade notes
+- No runtime dependency added. Hosts without `recording_studio_api` see no change.
+- Hosts with a custom `site_root_resolver` that only reads the controller should also return a site root when `context.controller` is nil, or the API answers 404.
+
 ## [0.2.0] - 2026-10-13
 
 ### Changed

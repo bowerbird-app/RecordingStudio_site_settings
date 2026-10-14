@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
   mount RecordingStudioRootSwitchable::Engine, at: "/recording_studio_root_switchable"
   mount RecordingStudioSiteSettings::Engine, at: "/recording_studio_site_settings"
+  mount RecordingStudioApi::Engine, at: "/recording_studio_api"
   recording_studio_admin_for :admin, at: "/admin", root_section: :site_settings
   mount RecordingStudioUser::Engine => RecordingStudioUser.config.mount_path, as: :recording_studio_users
 
