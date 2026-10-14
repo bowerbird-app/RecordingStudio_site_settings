@@ -42,9 +42,14 @@ module RecordingStudioSiteSettings
         rescue RemoteImage::Error => e
           errors << "#{UpdateInput.file_field(slot)} #{e.message}"
         end
-        raise RecordingStudioApi::InvalidActionInputError.new("Logo could not be used", details: errors) if errors.any?
+        raise_logo_errors!(errors) if errors.any?
 
         files
+      end
+
+      def raise_logo_errors!(errors)
+        raise RecordingStudioApi::InvalidActionInputError.new("Logo could not be used: #{errors.join('; ')}",
+                                                              details: errors)
       end
 
       # Keys Store.update! reads for a slot, as in Store::IMAGE_SLOTS.

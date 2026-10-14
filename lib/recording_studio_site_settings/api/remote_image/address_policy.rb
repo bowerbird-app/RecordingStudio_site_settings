@@ -16,9 +16,20 @@ module RecordingStudioSiteSettings
 
         module_function
 
-        def blocked?(address)
+        # allowed: CIDRs (IPAddr) the host app opted in to. They can lift private and reserved ranges,
+        # never loopback, link-local, or the unspecified address.
+        def blocked?(address, allowed: [])
           ip = IPAddr.new(address.to_s.split("%").first).native
-          ip.private? || ip.loopback? || ip.link_local? || BLOCKED_RANGES.any? { |range| range.include?(ip) }
+          return true if never_allowed?(ip)
+          return false if Array(allowed).any? { |range| range.include?(ip) }
+
+          ip.private? || BLOCKED_RANGES.any? { |range| range.include?(ip) }
+        rescue IPAddr::Error
+          true
+        end
+
+        def never_allowed?(ip)
+          ip.loopback? || ip.link_local? || ip.to_i.zero?
         rescue IPAddr::Error
           true
         end

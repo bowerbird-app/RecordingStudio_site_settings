@@ -28,4 +28,16 @@ class ConfigurationTest < Minitest::Test
 
     assert_equal ["Account"], RecordingStudioSiteSettings.configuration.site_root_types
   end
+
+  def test_remote_image_allowed_networks_parse_strings_and_arrays
+    config = RecordingStudioSiteSettings::Configuration.new
+    assert_empty config.remote_image_allowed_networks
+
+    config.remote_image_allowed_networks = "198.18.0.0/15, 100.64.0.0/10"
+    assert_equal 2, config.remote_image_allowed_networks.size
+    assert config.remote_image_allowed_networks.first.include?(IPAddr.new("198.19.1.1"))
+
+    config.remote_image_allowed_networks = ["198.18.0.0/15"]
+    assert_equal ["198.18.0.0/15"], config.to_h[:remote_image_allowed_networks]
+  end
 end

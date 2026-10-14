@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-14
+
+### Fixed
+- `site_settings_show` / `site_settings_update` return absolute `preview_url`s. They were app-relative paths (`/recording_studio_attachable/attachments/<id>/preview/<variant>`), which API clients such as ChatGPT cannot open. The base is `config.public_url_options`, else `Rails.application.routes.default_url_options` with a host, else the current request's base URL (captured by the new `RecordingStudioSiteSettings::RequestBaseUrl` middleware); with none of these the path is returned as before.
+- Logo download failures now say which check failed. The 422 `message` is `Logo could not be used: <field> <reason>` (it was only `Logo could not be used`), a refused address names the address (`host resolves to a non-public address (198.18.0.1)`), and network failures say whether the host timed out, TLS/certificate verification failed, the connection failed, or the response was invalid.
+
+### Added
+- `config.remote_image_allowed_networks` (or `RECORDING_STUDIO_SITE_SETTINGS_REMOTE_IMAGE_ALLOWED_NETWORKS`, comma-separated CIDRs): opt-in ranges a logo download may reach even though they are private or reserved, for sandboxes whose egress proxy answers every DNS lookup with its own address (e.g. fake-IP `198.18.0.0/15`). Loopback, link-local/metadata, and unspecified addresses stay refused. Empty by default, so production behavior is unchanged.
+
 ## [0.4.0] - 2026-10-14
 
 ### Added

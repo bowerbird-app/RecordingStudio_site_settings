@@ -92,14 +92,16 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal true, payload.dig("square_logo", "present")
     assert_equal square.id, payload.dig("square_logo", "recording_id")
     assert_equal "square-logo.png", payload.dig("square_logo", "filename")
-    assert_includes payload.dig("square_logo", "preview_url"), square.id
+    assert_equal "http://www.example.com/recording_studio_attachable/attachments/#{square.id}/preview/square_med",
+                 payload.dig("square_logo", "preview_url")
     assert_equal "square_med", payload.dig("square_logo", "variant")
     assert_equal "square_small", payload.dig("favicon", "variant")
     wide = RecordingStudioSiteSettings.wide_logo_for(@site_root, variant: :small)
     assert_equal(
       {
         "present" => wide.present?, "variant" => "small", "recording_id" => wide.recording&.id,
-        "filename" => wide.filename, "preview_url" => wide.preview_url
+        "filename" => wide.filename,
+        "preview_url" => wide.preview_url && "http://www.example.com#{wide.preview_url}"
       },
       payload.fetch("wide_logo")
     )
@@ -230,10 +232,21 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_equal "invalid_input", response.parsed_body.dig("error", "code")
-    assert_equal [ "square_logo_file host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file host resolves to a non-public address (169.254.169.254)" ], response.parsed_body.dig("error", "details")
     assert_empty transport.calls
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
     assert_equal square_logo_before, square_logo_recordable_id
+  end
+
+  test "the 422 message names the failing check for each mark" do
+    with_network(FakeTransport.new({}), addresses: { "files.example.com" => [ "198.18.0.1" ] }) do
+      patch_marks({ square_logo_file: { download_url: "https://files.example.com/raw?sig=secret", file_id: "file_1" } })
+    end
+
+    assert_response :unprocessable_entity
+    assert_equal "Logo could not be used: square_logo_file host resolves to a non-public address (198.18.0.1)",
+                 response.parsed_body.dig("error", "message")
+    refute_includes response.body, "sig=secret"
   end
 
   test "a redirect to a loopback address is refused" do
@@ -246,7 +259,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_entity
-    assert_equal [ "square_logo_file host is not a public address" ], response.parsed_body.dig("error", "details")
+    assert_equal [ "square_logo_file host resolves to a non-public address (127.0.0.1)" ], response.parsed_body.dig("error", "details")
     assert_equal 1, transport.calls.size
   end
 

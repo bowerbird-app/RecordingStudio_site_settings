@@ -40,7 +40,8 @@ module RecordingStudioSiteSettings
         end
 
         def blocked_address?(address)
-          AddressPolicy.blocked?(address)
+          AddressPolicy.blocked?(address,
+                                 allowed: RecordingStudioSiteSettings.configuration.remote_image_allowed_networks)
         end
       end
 
@@ -80,14 +81,16 @@ module RecordingStudioSiteSettings
         self.class.transport.get(uri, address: address) { |response| handle(response, uri) }
       rescue Error
         raise
-      rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError, Net::HTTPBadResponse
-        raise Error, "could not be downloaded"
+      rescue *Transport::FAILURES.keys.flatten => e
+        raise Error, "could not be downloaded: #{Transport.failure_reason(e)}"
       end
 
       def public_address!(host)
         addresses = self.class.resolve(host)
         raise Error, "host could not be resolved" if addresses.empty?
-        raise Error, "host is not a public address" if addresses.any? { |address| self.class.blocked_address?(address) }
+
+        blocked = addresses.find { |address| self.class.blocked_address?(address) }
+        raise Error, "host resolves to a non-public address (#{blocked})" if blocked
 
         addresses.first
       end
