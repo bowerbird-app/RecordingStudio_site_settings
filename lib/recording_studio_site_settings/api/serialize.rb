@@ -21,11 +21,11 @@ module RecordingStudioSiteSettings
           variant: variant.to_s,
           recording_id: logo.recording&.id,
           filename: logo.filename,
-          preview_url: absolute_url(logo.preview_url)
+          preview_url: absolute_url(PreviewUrl.path_for(logo, variant))
         }
       end
 
-      # API clients (ChatGPT, scripts) have no page to resolve a path against, so preview URLs are absolute.
+      # API clients (ChatGPT, scripts) have no page or session, so preview URLs are absolute, signed, and expiring.
       # Base: configuration.public_url_options, else routes.default_url_options with a host, else the
       # current request. With none of those the path is returned unchanged.
       def absolute_url(path)

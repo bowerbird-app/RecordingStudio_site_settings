@@ -68,6 +68,34 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_nil RecordingStudioApi.registered_endpoint(:site_settings_show, api: :public)
   end
 
+  test "preview_url loads without a session, expires, and rejects tampering" do
+    File.open(TEST_SQUARE_LOGO_PATH, "rb") do |io|
+      RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @staff, square_logo_io: io,
+                                                      square_logo_filename: "square-logo.png",
+                                                      square_logo_content_type: "image/png")
+    end
+    get "#{OPERATIONS_ROOT}/site_settings", headers: auth(@viewer_token), as: :json
+    url = response.parsed_body.dig("square_logo", "preview_url")
+    path = URI.parse(url).path
+    reset!
+
+    get path
+    assert_response :redirect
+    follow_redirect!
+    assert_response :success
+    assert_equal "image/png", response.media_type
+
+    reset!
+    tampered = path.sub(%r{redirect/([^/]+)/}) { "redirect/#{Regexp.last_match(1).reverse}/" }
+    get tampered
+    assert_response :not_found
+
+    travel RecordingStudioSiteSettings.configuration.preview_url_expires_in + 1 do
+      get path
+      assert_response :not_found
+    end
+  end
+
   test "missing token is unauthorized" do
     get "#{OPERATIONS_ROOT}/site_settings", as: :json
 
@@ -92,7 +120,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal true, payload.dig("square_logo", "present")
     assert_equal square.id, payload.dig("square_logo", "recording_id")
     assert_equal "square-logo.png", payload.dig("square_logo", "filename")
-    assert_equal "http://www.example.com/recording_studio_attachable/attachments/#{square.id}/preview/square_med",
+    assert_match %r{\Ahttp://www\.example\.com/rails/active_storage/representations/redirect/[^/]+/[^/]+/square-logo\.png\z},
                  payload.dig("square_logo", "preview_url")
     assert_equal "square_med", payload.dig("square_logo", "variant")
     assert_equal "square_small", payload.dig("favicon", "variant")
@@ -100,10 +128,9 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal(
       {
         "present" => wide.present?, "variant" => "small", "recording_id" => wide.recording&.id,
-        "filename" => wide.filename,
-        "preview_url" => wide.preview_url && "http://www.example.com#{wide.preview_url}"
+        "filename" => wide.filename
       },
-      payload.fetch("wide_logo")
+      payload.fetch("wide_logo").except("preview_url")
     )
     favicon = RecordingStudioSiteSettings.favicon_for(@site_root, variant: :square_small)
     assert_equal(
@@ -163,7 +190,7 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     logo = RecordingStudioSiteSettings.square_logo_recording_for(@site_root)
     assert_equal logo.id, payload.dig("square_logo", "recording_id")
     assert_equal "image/png", logo.recordable.content_type
-    assert_includes payload.dig("square_logo", "preview_url"), logo.id
+    assert_includes payload.dig("square_logo", "preview_url"), "/rails/active_storage/representations/redirect/"
   end
 
   test "a ChatGPT file object sets the favicon and a second call replaces it" do

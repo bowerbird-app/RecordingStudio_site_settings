@@ -138,7 +138,7 @@ When the host bundles `recording_studio_api` and configures an `:operations` API
 | `site_settings_show` | `GET site_settings` | none |
 | `site_settings_update` | `PATCH site_settings` | `name`, mark fields, or both |
 
-Show returns `name` plus `square_logo`, `wide_logo`, and `favicon`. Each mark has `present`, `variant` (the preview variant from `Admin::MARK_VARIANTS`), `recording_id`, `filename`, and `preview_url` (an absolute URL to the preview for that variant, `null` when empty). The base comes from `config.public_url_options`, else `Rails.application.routes.default_url_options` with a host, else the current request.
+Show returns `name` plus `square_logo`, `wide_logo`, and `favicon`. Each mark has `present`, `variant` (the preview variant from `Admin::MARK_VARIANTS`), `recording_id`, `filename`, and `preview_url` (`null` when empty). `preview_url` is an absolute, session-free Active Storage redirect URL for that variant. Its blob id is signed and expires after `config.preview_url_expires_in` (default 10 minutes), so fetch it again from show when it expires. The host comes from `config.public_url_options`, else `Rails.application.routes.default_url_options` with a host, else the current request. Site screen and `Logo#preview_url` still use the session-checked Attachable preview path.
 
 Update strips `name` and calls `RecordingStudioSiteSettings.update!`, the same path the Site screen saves through. A blank name returns 422 `validation_failed`. Leave `name` out to keep the current name. Sending neither `name` nor a mark field returns 422 `invalid_input`, and so do unknown fields.
 

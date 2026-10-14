@@ -11,12 +11,15 @@ module RecordingStudioSiteSettings
     # Host/protocol/port for absolute preview URLs in API payloads, e.g. { host: "example.com", protocol: "https" }.
     # When nil, Rails.application.routes.default_url_options is used, then the current request's base URL.
     attr_accessor :public_url_options
+    # Lifetime of the signed preview_url returned by the API.
+    attr_accessor :preview_url_expires_in
 
     def initialize
       @site_root_types = ["Workspace"]
       @site_root_resolver = default_site_root_resolver
       @hooks = RecordingStudio::Hooks.new
       @public_url_options = nil
+      @preview_url_expires_in = 10 * 60
       self.remote_image_allowed_networks = ENV.fetch(REMOTE_IMAGE_ALLOWED_NETWORKS_ENV, "")
     end
 
