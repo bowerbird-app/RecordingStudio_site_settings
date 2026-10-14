@@ -42,17 +42,32 @@ module RecordingStudioSiteSettings
       recording_for(root_recording)&.recordable
     end
 
-    def update!(root_recording, name:, actor:, **file)
+    # clear: slots whose image is removed, e.g. ["favicon"]. A slot given a file in the same call is not cleared.
+    def update!(root_recording, name:, actor:, clear: [], **file)
       authorize_write!(root_recording, actor)
       recording = ensure_recording!(root_recording, name: name, actor: actor)
       revise_name!(recording, name: name, actor: actor)
+      update_images!(recording, actor: actor, clear: Array(clear).map(&:to_s), file: file)
+      recording.reload
+    end
+
+    def update_images!(recording, actor:, clear:, file:)
       IMAGE_SLOTS.each do |slot, keys|
         args = file_args_for(file, slot, keys)
-        next if args.blank?
-
-        Images.attach_named_image!(recording, actor: actor, slot: slot, **args)
+        if args.present?
+          Images.attach_named_image!(recording, actor: actor, slot: slot, **args)
+        elsif clear.include?(slot)
+          remove_image!(recording, actor: actor, slot: slot)
+        end
       end
-      recording.reload
+    end
+
+    def remove_image!(recording, actor:, slot:)
+      existing = Images.named_image(recording, slot)
+      return if existing.blank?
+
+      result = RecordingStudioAttachable::Services::RemoveAttachment.call(attachment_recording: existing, actor:)
+      raise result.error if result.failure?
     end
 
     def file_args_for(file, slot, keys)
