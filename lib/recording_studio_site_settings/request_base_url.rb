@@ -30,7 +30,51 @@ module RecordingStudioSiteSettings
       rescue StandardError
         nil
       end
-      self.class.with(base_url) { @app.call(env) }
+      status, headers, body = self.class.with(base_url) { @app.call(env) }
+      [status, headers, BodyProxy.new(body, base_url)]
+    end
+
+    # Streamed bodies (e.g. MCP Streamable HTTP SSE) run their work inside #each, after #call has returned and the
+    # thread-local has been cleared. Re-establish the base URL while the server iterates the body.
+    class BodyProxy
+      def initialize(body, base_url)
+        @body = body
+        @base_url = base_url
+      end
+
+      def each(&block)
+        RequestBaseUrl.with(@base_url) { @body.each(&block) }
+      end
+
+      # Only exposed when the wrapped body is itself a streaming (callable) body.
+      def call(stream)
+        raise NoMethodError, "undefined method `call' for body" unless @body.respond_to?(:call)
+
+        RequestBaseUrl.with(@base_url) { @body.call(stream) }
+      end
+
+      def respond_to?(name, include_private = false) # rubocop:disable Style/OptionalBooleanParameter
+        return @body.respond_to?(:call) if name.to_sym == :call
+        return @body.respond_to?(:each) if name.to_sym == :each
+
+        super
+      end
+
+      def close
+        @body.close if @body.respond_to?(:close)
+      end
+
+      def respond_to_missing?(name, include_private = false)
+        return false if name.to_sym == :to_ary
+
+        @body.respond_to?(name, include_private)
+      end
+
+      def method_missing(name, *, &)
+        return super if name.to_sym == :to_ary
+
+        @body.respond_to?(name) ? @body.public_send(name, *, &) : super
+      end
     end
   end
 end
