@@ -42,7 +42,7 @@ module RecordingStudioSiteSettings
       }
     )
     _helpers.send(:remove_method, :current_site_settings_root)
-    self._helper_methods -= [ :current_site_settings_root ]
+    self._helper_methods -= [:current_site_settings_root]
 
     private
 
