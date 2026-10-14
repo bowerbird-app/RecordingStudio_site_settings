@@ -69,6 +69,9 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "preview_url loads without a session, expires, and rejects tampering" do
+    # CI has no libvips, so Active Storage has no transformer; this test is about the signed URL, not resizing.
+    original_transformer = ActiveStorage.variant_transformer
+    ActiveStorage.variant_transformer = ActiveStorage::Transformers::NullTransformer if original_transformer.nil?
     File.open(TEST_SQUARE_LOGO_PATH, "rb") do |io|
       RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @staff, square_logo_io: io,
                                                       square_logo_filename: "square-logo.png",
@@ -95,6 +98,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
       expired.get path
       assert_equal 404, expired.response.status
     end
+  ensure
+    ActiveStorage.variant_transformer = original_transformer
   end
 
   test "missing token is unauthorized" do
