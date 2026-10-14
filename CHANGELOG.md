@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.1] - 2026-10-14
+## [0.4.2] - 2026-10-14
 
 ### Fixed
 - `site_settings_show` / `site_settings_update` return a `preview_url` per mark that API clients such as ChatGPT can open. It was an app-relative path to the Attachable preview route (`/recording_studio_attachable/attachments/<id>/preview/<variant>`), which needs a signed-in session. It is now an absolute Active Storage redirect URL (`/rails/active_storage/representations/redirect/<signed blob id>/<variation key>/<filename>`) with a blob id that is signed, tamper-proof, and expires after `config.preview_url_expires_in` (default 10 minutes); no session needed. The host comes from `config.public_url_options`, else `Rails.application.routes.default_url_options` with a host, else the current request's base URL (captured by the new `RecordingStudioSiteSettings::RequestBaseUrl` middleware). The Attachable preview route is not opened up, and `Logo#preview_url` and the Site screen keep using it.
@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `config.remote_image_allowed_networks` (or `RECORDING_STUDIO_SITE_SETTINGS_REMOTE_IMAGE_ALLOWED_NETWORKS`, comma-separated CIDRs): opt-in ranges a logo download may reach even though they are private or reserved, for sandboxes whose egress proxy answers every DNS lookup with its own address (e.g. fake-IP `198.18.0.0/15`). Loopback, link-local/metadata, and unspecified addresses stay refused. Empty by default, so production behavior is unchanged.
+
+## [0.4.1] - 2026-10-14
+
+### Changed
+- Dependency bump only: `recording_studio_accessible` to `v0.18.0` (#25). The `v0.4.1` tag points at that commit, whose `VERSION` still read `0.4.0`; the preview URL, logo error and allowed-network changes listed under 0.4.2 are not in `v0.4.1`.
 
 ## [0.4.0] - 2026-10-14
 
