@@ -5,7 +5,7 @@ require "test_helper"
 class RecordingStudioSiteSettingsTest < Minitest::Test
   def test_that_it_has_a_version_number
     refute_nil ::RecordingStudioSiteSettings::VERSION
-    assert_equal "0.4.3", ::RecordingStudioSiteSettings::VERSION
+    assert_equal "0.5.0", ::RecordingStudioSiteSettings::VERSION
   end
 
   def test_readme_is_the_public_product
@@ -32,8 +32,9 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
 
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.144"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio", "~> 4.2"'
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.11"'
-    refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.8"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.18"'
+    refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", ">= 0.18.0"'
+    refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.11"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.5"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio", tag: "v4.6.0"'

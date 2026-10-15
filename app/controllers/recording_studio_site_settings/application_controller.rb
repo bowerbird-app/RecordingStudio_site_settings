@@ -24,30 +24,27 @@ module RecordingStudioSiteSettings
     rescue_from RecordingStudioAdmin::DefinitionNotFound, with: :render_forbidden
     rescue_from RecordingStudioSiteSettings::Unauthorized, with: :render_forbidden
 
-    before_action :authenticate_recording_studio_site_settings!
-    before_action :set_current_actor
+    # After protect_from_forgery so :verify_authenticity_token stays ahead of auth /
+    # set-actor filters (same order as main's before_action list).
+    include RecordingStudioAccessible::ControllerAuth
+
+    recording_studio_auth(
+      config: -> { RecordingStudioAdmin.configuration },
+      prefix: :site_settings,
+      authenticate_method: :authenticate_recording_studio_site_settings!,
+      set_current_actor_method: :set_current_actor,
+      actor_method: :current_actor,
+      actor_resolver: lambda {
+        method_name = RecordingStudioAdmin.configuration.current_actor_method
+        next send(method_name) if method_name && respond_to?(method_name, true)
+
+        Current.actor if defined?(Current)
+      }
+    )
+    _helpers.send(:remove_method, :current_site_settings_root)
+    self._helper_methods -= [:current_site_settings_root]
 
     private
-
-    def authenticate_recording_studio_site_settings!
-      method_name = RecordingStudioAdmin.configuration.authentication_method
-      return send(method_name) if method_name && respond_to?(method_name, true)
-
-      head :unauthorized
-    end
-
-    def set_current_actor
-      return unless defined?(Current) && Current.respond_to?(:actor=)
-
-      Current.actor = current_actor
-    end
-
-    def current_actor
-      method_name = RecordingStudioAdmin.configuration.current_actor_method
-      return send(method_name) if method_name && respond_to?(method_name, true)
-
-      Current.actor if defined?(Current)
-    end
 
     def recording_studio_admin_context
       @recording_studio_admin_context ||= RecordingStudioAdmin::Context.new(

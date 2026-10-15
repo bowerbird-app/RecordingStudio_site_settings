@@ -3,6 +3,12 @@
 module RecordingStudioSiteSettings
   module Admin
     class SettingsController < ApplicationController
+      # ControllerAuth adds current_site_settings_root as a helper; main never exposed it.
+      if _helpers.method_defined?(:current_site_settings_root)
+        _helpers.send(:remove_method, :current_site_settings_root)
+      end
+      self._helper_methods -= [:current_site_settings_root]
+
       before_action :authorize_site_settings_admin!
       before_action :require_site_root!
 
