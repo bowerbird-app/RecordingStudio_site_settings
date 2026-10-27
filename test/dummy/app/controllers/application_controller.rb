@@ -20,9 +20,11 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # Root Switchable calls this method by name (`config.layout = :application_layout`).
+  # Root Switchable calls this method by name from `config.layout`.
   def application_layout
-    recording_studio_resolved_layout
+    return "application" if devise_controller?
+
+    "recording_studio/default_layout"
   end
 
   def set_current_actor

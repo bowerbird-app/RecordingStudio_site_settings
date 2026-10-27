@@ -39,9 +39,7 @@ RecordingStudio.configure do |config|
   config.recordable_types = [
     "Workspace",
     "RecordingStudioSiteSettings::SiteSetting",
-    "RecordingStudioAttachable::Attachment",
-    "RecordingStudioAttachable::Library",
-    "RecordingStudioAttachable::Placement"
+    "RecordingStudioAttachable::Attachment"
   ]
 end
 ```

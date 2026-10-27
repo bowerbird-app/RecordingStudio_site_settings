@@ -57,7 +57,7 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select %(body[data-recording-studio-default-layout="true"]), count: 1
-    assert_select %(body[data-theme="rounded"]), count: 1
+    assert_select %(html[data-theme="rounded"]), count: 1
     assert_select "nav.flat-pack-page-nav", count: 1
     assert_match(/flat-pack--page-nav#back/, response.body)
     assert_select %(nav.flat-pack-page-nav [aria-label="Go back"]), count: 1

@@ -103,6 +103,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes view, "content_for :title"
     assert_includes view, "content_for :subtitle"
     assert_includes view, "flat_pack_page_nav"
+    assert_includes view, 'back_tooltip: "Go back"'
     assert_includes view, "anchor_href: main_app.root_path"
     refute_includes view, "recording_studio_page_nav"
     refute_includes view, "page_nav_back_url"
