@@ -1,12 +1,11 @@
-<% dummy_page_nav(title: "Install", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "Install",
+  subtitle: "Add this gem so a host can store site name, logos, and tab icon outside core and outside the root.",
+  back_url: root_path
+) %>
 
 <%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Install",
-    subtitle: "Add this gem so a host can store site name, logos, and tab icon outside core and outside the root.",
-    variant: :h1
-  ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "Add the gem",
@@ -17,12 +16,12 @@
     language: :ruby,
     code: <<~CODE
       gem "recording_studio_site_settings"
-      gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.7.0"
-      gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.18.0"
-      gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.3.0"
-      gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
-      gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.2.0"
-      gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.11.0", require: false
+      gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"
+      gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.22.1"
+      gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.5.1"
+      gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.22.0"
+      gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.0"
+      gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.0", require: false
     CODE
   ) %>
 
