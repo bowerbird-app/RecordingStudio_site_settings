@@ -39,7 +39,10 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     @other_root = empty_admin_root_recording
     grant_site_settings_admin!(@staff)
     bootstrap_owner_access!(@staff, @other_root)
-    RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @staff)
+    # db:prepare seeds Admin with logos; these tests start from a blank site.
+    RecordingStudioSiteSettings.update!(
+      @site_root, name: "Studio", actor: @staff, clear: %i[square_logo wide_logo favicon]
+    )
 
     @admin_token = provision_token(name: "Site admin", access_point: @site_root, role: :edit, grant_role: :admin)
     @viewer_token = provision_token(name: "Site viewer", access_point: @site_root, role: :view, grant_role: :view)

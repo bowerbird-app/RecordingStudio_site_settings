@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Require `recording_studio` `>= 6.1.0`. The test stack pins Recording Studio `v6.1.0`, Flatpack `v0.1.320`, Accessible `v0.22.1`, Admin `v2.5.1` (newest Admin tag that does not depend on Logs), Attachable `v0.22.0`, Metrics `v0.7.0`, and Trashable `v0.12.0`. Dummy also pins Users `v0.26.0`, Root Switchable `v0.11.0`, Cache `v0.6.0`, and API `v0.17.0`.
+- `.ruby-version` is `3.3.13` so lint and security jobs can install Ruby on GitHub `ubuntu-latest` (26.04).
 - Engine and dummy controllers call `recording_studio_layout`. The Site screen and dummy pages set `content_for :title` / `:subtitle`, use `flat_pack_page_nav` for back, and `register_page_nav` for dummy sign-out.
 
 ### Upgrade notes

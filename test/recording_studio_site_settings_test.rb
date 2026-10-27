@@ -29,6 +29,8 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_site_settings.gemspec", __dir__))
     readme = File.read(File.expand_path("../README.md", __dir__))
     dummy_gemfile = File.read(File.expand_path("../test/dummy/Gemfile", __dir__))
+    ruby_version = File.read(File.expand_path("../.ruby-version", __dir__)).strip
+    dummy_ruby_version = File.read(File.expand_path("../test/dummy/.ruby-version", __dir__)).strip
 
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.144"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 6.1.0"'
@@ -54,6 +56,8 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.0"'
+    assert_equal "3.3.13", ruby_version
+    assert_equal "3.3.13", dummy_ruby_version
     assert_match(
       %r{spec\.homepage\s+=\s+"https://github.com/bowerbird-app/RecordingStudio_site_settings"},
       gemspec
