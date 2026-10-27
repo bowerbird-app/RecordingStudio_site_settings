@@ -39,7 +39,10 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     @other_root = empty_admin_root_recording
     grant_site_settings_admin!(@staff)
     bootstrap_owner_access!(@staff, @other_root)
-    RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @staff)
+    # db:prepare seeds Admin with logos; these tests start from a blank site.
+    RecordingStudioSiteSettings.update!(
+      @site_root, name: "Studio", actor: @staff, clear: %i[square_logo wide_logo favicon]
+    )
 
     @admin_token = provision_token(name: "Site admin", access_point: @site_root, role: :edit, grant_role: :admin)
     @viewer_token = provision_token(name: "Site viewer", access_point: @site_root, role: :view, grant_role: :view)
@@ -268,7 +271,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal [ "square_logo_file host resolves to a non-public address (169.254.169.254)" ], response.parsed_body.dig("error", "details")
     assert_empty transport.calls
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
-    assert_equal square_logo_before, square_logo_recordable_id
+    assert_nil square_logo_before
+    assert_nil square_logo_recordable_id
   end
 
   test "the 422 message names the failing check for each mark" do
@@ -313,7 +317,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_equal [ "square_logo_file is not a PNG, JPEG, or WebP image" ], response.parsed_body.dig("error", "details")
-    assert_equal square_logo_before, square_logo_recordable_id
+    assert_nil square_logo_before
+    assert_nil square_logo_recordable_id
   end
 
   test "an SVG is refused" do
@@ -356,7 +361,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_equal [ "favicon_file returned HTTP 404" ], response.parsed_body.dig("error", "details")
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
-    assert_equal square_logo_before, square_logo_recordable_id
+    assert_nil square_logo_before
+    assert_nil square_logo_recordable_id
   end
 
   test "the old nested logos object, unknown fields, and bad values are 422" do

@@ -1,12 +1,11 @@
-<% dummy_page_nav(title: "Config", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "Config",
+  subtitle: "Tell the gem which recordable is a site root. Name, logos, and favicon still live in this gem.",
+  back_url: root_path
+) %>
 
 <%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Config",
-    subtitle: "Tell the gem which recordable is a site root. Name, logos, and favicon still live in this gem.",
-    variant: :h1
-  ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,

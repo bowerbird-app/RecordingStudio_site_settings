@@ -9,9 +9,7 @@ RecordingStudio.configure do |config|
     "RecordingStudioUser::People",
     "RecordingStudioUser::Profile",
     "RecordingStudioSiteSettings::SiteSetting",
-    "RecordingStudioAttachable::Attachment",
-    "RecordingStudioAttachable::Library",
-    "RecordingStudioAttachable::Placement"
+    "RecordingStudioAttachable::Attachment"
   ]
 
   config.require_recordable_declarations = true

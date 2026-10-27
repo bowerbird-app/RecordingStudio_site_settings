@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-10-27
+
+### Changed
+- Require `recording_studio` `>= 6.1.0`. The test stack pins Recording Studio `v6.1.0`, Flatpack `v0.1.320`, Accessible `v0.22.1`, Admin `v2.5.1` (newest Admin tag that does not depend on Logs), Attachable `v0.22.0`, Metrics `v0.7.0`, and Trashable `v0.12.0`. Dummy also pins Users `v0.26.0`, Root Switchable `v0.11.0`, Cache `v0.6.0`, and API `v0.17.0`.
+- `.ruby-version` is `3.3.13` so lint and security jobs can install Ruby on GitHub `ubuntu-latest` (26.04).
+- Dummy lockfile `crass` is `1.0.8` and `net-ssh` is `7.3.8` (existing transitives; no new Gemfile gems). `view_component` is unchanged.
+- Engine and dummy controllers call `recording_studio_layout`. The Site screen and dummy pages set `content_for :title` / `:subtitle`, use `flat_pack_page_nav` for back, and `register_page_nav` for dummy sign-out.
+
+### Upgrade notes
+- Pin Recording Studio `>= 6.1.0` (GitHub tag `v6.1.0`). This gem no longer supports Recording Studio 4.2.
+- Replace `include RecordingStudio::UsesDefaultLayout` and `layout "recording_studio/default_layout"` with `recording_studio_layout`.
+- Replace `recording_studio_page_nav` with `content_for :title` (and `:subtitle`) plus `flat_pack_page_nav`. The layout prints the heading.
+
 ## [0.5.0] - 2026-10-14
 
 ### Changed
@@ -122,7 +135,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.1...v0.5.2
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.1...v0.4.2

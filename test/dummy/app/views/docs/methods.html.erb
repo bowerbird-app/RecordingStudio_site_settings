@@ -1,12 +1,11 @@
-<% dummy_page_nav(title: "Methods", back_url: root_path) %>
+<% dummy_page_nav(
+  title: "Methods",
+  subtitle: "Other gems read name, logos, and favicon here. Do not call Attachable just to print a mark.",
+  back_url: root_path
+) %>
 
 <%= dummy_wide_logo_sidebar do %>
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Methods",
-    subtitle: "Other gems read name, logos, and favicon here. Do not call Attachable just to print a mark.",
-    variant: :h1
-  ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "Read the name",

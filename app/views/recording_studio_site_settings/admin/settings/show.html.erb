@@ -1,12 +1,10 @@
-<% recording_studio_page_nav(
-  title: "Site name and logos",
-  page_nav_anchor_url: main_app.root_path
-) %>
-
-<%= render FlatPack::PageTitle::Component.new(
-  title: "Site name and logos",
-  subtitle: "Name, wide mark, square mark, and the icon in the browser tab.",
-  variant: :h1
+<% content_for :title, "Site name and logos" %>
+<% content_for :subtitle, "Name, wide mark, square mark, and the icon in the browser tab." %>
+<% flat_pack_page_nav(
+  round: true,
+  style: :default,
+  back_tooltip: "Go back",
+  anchor_href: main_app.root_path
 ) %>
 
 <%= render FlatPack::Grid::Component.new(cols: 2) do %>
