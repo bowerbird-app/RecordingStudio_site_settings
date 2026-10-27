@@ -66,8 +66,8 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_logs.git
-  revision: 09a98f29000e2b89e78bf30ded857e6afd84d91b
-  ref: 09a98f29000e2b89e78bf30ded857e6afd84d91b
+  revision: 33a9511bd88b9d0199faac0e2889b5a607e27def
+  tag: v0.7.1
   specs:
     recording_studio_logs (0.7.1)
       rails (~> 8.1.0)
