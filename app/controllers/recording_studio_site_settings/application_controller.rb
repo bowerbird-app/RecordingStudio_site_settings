@@ -3,16 +3,14 @@
 module RecordingStudioSiteSettings
   class ApplicationController < ActionController::Base
     include Devise::Controllers::Helpers if defined?(Devise::Controllers::Helpers)
-    include RecordingStudio::UsesDefaultLayout
+    include RecordingStudio::ControllerLayout
 
     if defined?(RecordingStudio::RootSwitchable::ControllerSupport)
       include RecordingStudio::RootSwitchable::ControllerSupport
     end
 
     protect_from_forgery with: :exception
-    layout "recording_studio/default_layout"
-
-    helper RecordingStudio::LayoutHelper if defined?(RecordingStudio::LayoutHelper)
+    recording_studio_layout { RecordingStudio::DEFAULT_LAYOUT }
     helper RecordingStudioAttachable::ApplicationHelper if defined?(RecordingStudioAttachable::ApplicationHelper)
     include Rails.application.routes.mounted_helpers
 
