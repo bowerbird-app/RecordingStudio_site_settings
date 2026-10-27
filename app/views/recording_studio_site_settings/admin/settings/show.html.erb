@@ -1,6 +1,8 @@
-<% recording_studio_page_nav(
-  title: "Site name and logos",
-  page_nav_anchor_url: main_app.root_path
+<% content_for :title, "Site name and logos" %>
+<% flat_pack_page_nav(
+  round: true,
+  style: :default,
+  anchor_href: main_app.root_path
 ) %>
 
 <%= render FlatPack::PageTitle::Component.new(

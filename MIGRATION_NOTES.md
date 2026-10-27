@@ -4,7 +4,7 @@
 
 - Ruby 3.3 or newer
 - Rails 8.1 or newer
-- Recording Studio `~> 4.2`
+- Recording Studio `>= 6.1.0`
 - Accessible `~> 0.18`
 - Admin `~> 2.0`
 - Attachable `~> 0.5`
