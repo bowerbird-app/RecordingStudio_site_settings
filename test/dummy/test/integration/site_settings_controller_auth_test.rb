@@ -89,42 +89,37 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
     switch_root!(@studio_root)
     Current.reset if Current.respond_to?(:reset)
 
-    assigned = nil
-    RecordingStudioSiteSettings::ApplicationController.class_eval do
-      alias_method :__original_set_current_actor_for_test, :set_current_actor
-
-      define_method(:set_current_actor) do
-        __original_set_current_actor_for_test
-        Thread.current[:site_settings_controller_auth_actor] = Current.actor
-      end
-      private :set_current_actor
-    end
-
     get recording_studio_site_settings.settings_path
 
-    assigned = Thread.current[:site_settings_controller_auth_actor]
     assert_response :success
-    assert_equal @admin, assigned
-  ensure
-    Thread.current[:site_settings_controller_auth_actor] = nil
-    RecordingStudioSiteSettings::ApplicationController.class_eval do
-      if private_method_defined?(:__original_set_current_actor_for_test) ||
-         method_defined?(:__original_set_current_actor_for_test)
-        alias_method :set_current_actor, :__original_set_current_actor_for_test
-        remove_method :__original_set_current_actor_for_test
-        private :set_current_actor
-      end
-    end
+    assert_equal @admin, Current.actor
+
+    patch recording_studio_site_settings.settings_path, params: { site_setting: { name: "Controller Auth Saved" } }
+
+    assert_redirected_to recording_studio_site_settings.settings_path
+    recording = RecordingStudioSiteSettings.recording_for(@site_root)
+    assert recording.events(actions: "updated", actor: @admin).exists?
+    assert_equal "Controller Auth Saved", RecordingStudioSiteSettings.name_for(@site_root)
+    assert_equal @admin, Current.actor
   end
 
   test "current_actor falls back to Current.actor when current_actor_method is unset" do
     previous = RecordingStudioAdmin.configuration.current_actor_method
     RecordingStudioAdmin.configuration.current_actor_method = nil
+    RecordingStudioSiteSettings.update!(@site_root, name: "Controller Auth Site", actor: @admin)
+    sign_in @admin
+    switch_root!(@studio_root)
+    Current.reset if Current.respond_to?(:reset)
+
+    get recording_studio_site_settings.settings_path
+
+    assert_response :forbidden
+
     Current.actor = @admin
+    get recording_studio_site_settings.settings_path
 
-    controller = RecordingStudioSiteSettings::Admin::SettingsController.new
-
-    assert_equal @admin, controller.send(:current_actor)
+    assert_response :success
+    assert_equal @admin, Current.actor
   ensure
     RecordingStudioAdmin.configuration.current_actor_method = previous
     Current.actor = nil if defined?(Current)
