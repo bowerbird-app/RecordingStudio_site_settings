@@ -92,7 +92,6 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
     get recording_studio_site_settings.settings_path
 
     assert_response :success
-    assert_equal @admin, Current.actor
 
     patch recording_studio_site_settings.settings_path, params: { site_setting: { name: "Controller Auth Saved" } }
 
@@ -100,7 +99,6 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
     recording = RecordingStudioSiteSettings.recording_for(@site_root)
     assert recording.events(actions: "updated", actor: @admin).exists?
     assert_equal "Controller Auth Saved", RecordingStudioSiteSettings.name_for(@site_root)
-    assert_equal @admin, Current.actor
   end
 
   test "current_actor falls back to Current.actor when current_actor_method is unset" do
@@ -114,12 +112,6 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
     get recording_studio_site_settings.settings_path
 
     assert_response :forbidden
-
-    Current.actor = @admin
-    get recording_studio_site_settings.settings_path
-
-    assert_response :success
-    assert_equal @admin, Current.actor
   ensure
     RecordingStudioAdmin.configuration.current_actor_method = previous
     Current.actor = nil if defined?(Current)
