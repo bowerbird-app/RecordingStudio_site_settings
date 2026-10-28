@@ -103,6 +103,35 @@ class SiteSettingsControllerAuthTest < ActionDispatch::IntegrationTest
 
   test "current_actor falls back to Current.actor when current_actor_method is unset" do
     previous = RecordingStudioAdmin.configuration.current_actor_method
+    set_actor = nil
+    RecordingStudioAdmin.configuration.current_actor_method = nil
+    RecordingStudioSiteSettings.update!(@site_root, name: "Controller Auth Fallback", actor: @admin)
+    sign_in @admin
+    switch_root!(@studio_root)
+
+    actor = @admin
+    set_actor = lambda { Current.actor = actor }
+    Rails.application.executor.set_callback(:run, :after, set_actor)
+
+    get recording_studio_site_settings.settings_path
+
+    assert_response :success
+    assert_includes response.body, "Controller Auth Fallback"
+
+    patch recording_studio_site_settings.settings_path, params: { site_setting: { name: "Controller Auth Fallback Saved" } }
+
+    assert_redirected_to recording_studio_site_settings.settings_path
+    recording = RecordingStudioSiteSettings.recording_for(@site_root)
+    assert recording.events(actions: "updated", actor: @admin).exists?
+    assert_equal "Controller Auth Fallback Saved", RecordingStudioSiteSettings.name_for(@site_root)
+  ensure
+    Rails.application.executor.skip_callback(:run, :after, set_actor) if set_actor
+    RecordingStudioAdmin.configuration.current_actor_method = previous
+    Current.actor = nil if defined?(Current)
+  end
+
+  test "settings screen forbids a signed-in caller when current_actor_method is unset and Current.actor is empty" do
+    previous = RecordingStudioAdmin.configuration.current_actor_method
     RecordingStudioAdmin.configuration.current_actor_method = nil
     RecordingStudioSiteSettings.update!(@site_root, name: "Controller Auth Site", actor: @admin)
     sign_in @admin

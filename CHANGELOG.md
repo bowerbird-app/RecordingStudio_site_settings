@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stop tracking SimpleCov output (`coverage/` and `test/dummy/coverage/`) and the dummy `install_page.html` dump. Gitignore them.
 - Agent docs use `RecordingStudioSiteSettings` instead of leftover template module names. Drop the unused nested dummy workflow `test/dummy/.github/workflows/ci.yml`. Real `.github/workflows` is unchanged.
 - Gem suite API tests no longer mint a fake API constant. Registration, input errors, and write denial stay on dummy against the real API gem. Controller auth tests assert `Current.actor` through the Site screen instead of rewriting controller methods.
+- When `current_actor_method` is unset, the Site screen uses `Current.actor` for the request (and 403s when that actor is missing).
 
 ### Removed
 - Stale `UPDATE_SUMMARY.md` and `MIGRATION_NOTES.md` (they still said Recording Studio `~> 4.2` and Accessible `v0.11.1`). Install and pins live in the README (`recording_studio` `>= 6.1.0`).
