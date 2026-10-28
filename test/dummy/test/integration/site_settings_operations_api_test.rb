@@ -65,10 +65,38 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal :patch, update.http_verb
     assert_equal "site_settings", update.path
     assert_equal [ "Site settings" ], update.openapi.fetch(:tags)
-    assert_includes update.input_contract.as_json.fetch(:fields).keys, :name
+    assert update.openapi.fetch(:summary).present?
+    assert update.openapi.fetch(:description).present?
+    contract = update.input_contract.as_json
+    assert_includes contract.fetch(:fields).keys, :name
+    assert_equal false, contract.fetch(:reject_unknown)
+    assert_equal false, contract.dig(:fields, :name, :required)
     file_params = update.openapi.fetch(:"x-mcp-file-params")
     assert_equal %i[square_logo_file wide_logo_file favicon_file], file_params.keys.map(&:to_sym)
+    assert(file_params.values.all? { |options| options[:nullable] == true && options[:description].present? })
+    refute show.openapi.key?(:"x-mcp-file-params")
     assert_nil RecordingStudioApi.registered_endpoint(:site_settings_show, api: :public)
+  end
+
+  test "UpdateInput parse errors raise RecordingStudioApi::InvalidActionInputError" do
+    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+      RecordingStudioSiteSettings::Api::UpdateInput.parse!({})
+    end
+    assert_equal [ "Send name, at least one of square_logo_file, wide_logo_file, favicon_file, or both" ],
+                 error.details
+
+    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+      RecordingStudioSiteSettings::Api::UpdateInput.parse!(
+        logos: { square_logo: "https://cdn.example.com/a.png" },
+        square_logo_file: 42,
+        wide_logo_file: { download_url: "https://files.example.com/x" },
+        favicon_file: { download_url: "https://files.example.com/x", file_id: "file_1", extra: true }
+      )
+    end
+    assert_equal 4, error.details.size
+    assert_equal "Unknown parameters: logos", error.details.first
+    message = "must be a file object with download_url and file_id"
+    assert(error.details.drop(1).all? { |detail| detail.include?(message) })
   end
 
   test "preview_url loads without a session, expires, and rejects tampering" do
