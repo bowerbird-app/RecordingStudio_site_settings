@@ -7,16 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-11-02
+
+### Changed
+- Dummy and development pins move Admin to `v2.7.0` and Logs to `v0.7.2` so Admin can resolve against Recording Studio `>= 6.1.0`. The gemspec still requires Admin `~> 2.0` and does not depend on Logs.
+
+### Upgrade notes
+- Bump to `0.5.4`. No migration. Hosts that pin Admin `v2.7.0` also need Logs `v0.7.2` (GitHub tag) because that Admin tag depends on Logs and Logs is not on RubyGems.
+
+## [0.5.3] - 2026-10-28
+
+### Changed
+- Stop tracking SimpleCov output (`coverage/` and `test/dummy/coverage/`) and the dummy `install_page.html` dump. Gitignore them.
+- Agent docs use `RecordingStudioSiteSettings` instead of leftover template module names. Drop the unused nested dummy workflow `test/dummy/.github/workflows/ci.yml`. Real `.github/workflows` is unchanged.
+- Gem suite API tests no longer mint a fake API constant. Registration, input errors, and write denial stay on dummy against the real API gem. Controller auth tests assert `Current.actor` through the Site screen instead of rewriting controller methods.
+- When `current_actor_method` is unset, the Site screen uses `Current.actor` for the request (and 403s when that actor is missing).
+
+### Removed
+- Stale `UPDATE_SUMMARY.md` and `MIGRATION_NOTES.md` (they still said Recording Studio `~> 4.2` and Accessible `v0.11.1`). Install and pins live in the README (`recording_studio` `>= 6.1.0`).
+
+### Upgrade notes
+- Bump to `0.5.3`. No migration. No host changes.
+
 ## [0.5.2] - 2026-10-27
 
 ### Changed
-- `recording_studio` is `>= 6.1.0` (no 4.2 support). Other gemspec floors are unchanged: Flatpack `>= 0.1.144`, Accessible `~> 0.18`, Admin `~> 2.0`, Attachable `~> 0.5`.
-- Dummy and development pins move to Recording Studio `v6.1.0`, Flatpack `v0.1.320`, Accessible `v0.22.1`, Admin `v2.7.0`, Attachable `v0.22.0`, Metrics `v0.7.0`, Trashable `v0.12.0`, Cache `v0.6.0`, Root Switchable `v0.11.0`, Users `v0.26.0`, and API `v0.17.0`.
-- Engine and dummy controllers use `recording_studio_layout`. Dummy pages use `content_for :title`, `flat_pack_page_nav`, and `register_page_nav` (`UsesDefaultLayout` is gone in 6.1).
+- Require `recording_studio` `>= 6.1.0`. The test stack pins Recording Studio `v6.1.0`, Flatpack `v0.1.320`, Accessible `v0.22.1`, Admin `v2.5.1` (newest Admin tag that does not depend on Logs), Attachable `v0.22.0`, Metrics `v0.7.0`, and Trashable `v0.12.0`. Dummy also pins Users `v0.26.0`, Root Switchable `v0.11.0`, Cache `v0.6.0`, and API `v0.17.0`.
+- `.ruby-version` is `3.3.13` so lint and security jobs can install Ruby on GitHub `ubuntu-latest` (26.04).
+- Dummy lockfile `crass` is `1.0.8` and `net-ssh` is `7.3.8` (existing transitives; no new Gemfile gems). `view_component` is unchanged.
+- Engine and dummy controllers call `recording_studio_layout`. The Site screen and dummy pages set `content_for :title` / `:subtitle`, use `flat_pack_page_nav` for back, and `register_page_nav` for dummy sign-out.
 
 ### Upgrade notes
-- Hosts need Recording Studio 6.1.0 or newer. Pin the GitHub tags above (or newer tags that still satisfy the gemspec).
-- Call `recording_studio_layout` instead of `UsesDefaultLayout`. Set the page title with `content_for :title` and page nav with `flat_pack_page_nav` / `register_page_nav`.
+- Pin Recording Studio `>= 6.1.0` (GitHub tag `v6.1.0`). This gem no longer supports Recording Studio 4.2.
+- Replace `include RecordingStudio::UsesDefaultLayout` and `layout "recording_studio/default_layout"` with `recording_studio_layout`.
+- Replace `recording_studio_page_nav` with `content_for :title` (and `:subtitle`) plus `flat_pack_page_nav`. The layout prints the heading.
+
+## [0.5.1] - 2026-10-16
+
+### Changed
+- Tag-only Trashable bump. The `v0.5.1` tag points at #28 (`recording_studio_trashable` `v0.11.0` and Recording Studio `v4.7.0`). That commit's `VERSION` still read `0.5.0`. Do not retag.
 
 ## [0.5.0] - 2026-10-14
 
@@ -133,7 +162,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.3...v0.5.4
+[0.5.3]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.4.3...v0.5.0

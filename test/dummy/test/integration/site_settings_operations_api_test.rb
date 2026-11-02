@@ -39,7 +39,10 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     @other_root = empty_admin_root_recording
     grant_site_settings_admin!(@staff)
     bootstrap_owner_access!(@staff, @other_root)
-    RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @staff)
+    # db:prepare seeds Admin with logos; these tests start from a blank site.
+    RecordingStudioSiteSettings.update!(
+      @site_root, name: "Studio", actor: @staff, clear: %i[square_logo wide_logo favicon]
+    )
 
     @admin_token = provision_token(name: "Site admin", access_point: @site_root, role: :edit, grant_role: :admin)
     @viewer_token = provision_token(name: "Site viewer", access_point: @site_root, role: :view, grant_role: :view)
@@ -62,10 +65,38 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal :patch, update.http_verb
     assert_equal "site_settings", update.path
     assert_equal [ "Site settings" ], update.openapi.fetch(:tags)
-    assert_includes update.input_contract.as_json.fetch(:fields).keys, :name
+    assert update.openapi.fetch(:summary).present?
+    assert update.openapi.fetch(:description).present?
+    contract = update.input_contract.as_json
+    assert_includes contract.fetch(:fields).keys, :name
+    assert_equal false, contract.fetch(:reject_unknown)
+    assert_equal false, contract.dig(:fields, :name, :required)
     file_params = update.openapi.fetch(:"x-mcp-file-params")
     assert_equal %i[square_logo_file wide_logo_file favicon_file], file_params.keys.map(&:to_sym)
+    assert(file_params.values.all? { |options| options[:nullable] == true && options[:description].present? })
+    refute show.openapi.key?(:"x-mcp-file-params")
     assert_nil RecordingStudioApi.registered_endpoint(:site_settings_show, api: :public)
+  end
+
+  test "UpdateInput parse errors raise RecordingStudioApi::InvalidActionInputError" do
+    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+      RecordingStudioSiteSettings::Api::UpdateInput.parse!({})
+    end
+    assert_equal [ "Send name, at least one of square_logo_file, wide_logo_file, favicon_file, or both" ],
+                 error.details
+
+    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+      RecordingStudioSiteSettings::Api::UpdateInput.parse!(
+        logos: { square_logo: "https://cdn.example.com/a.png" },
+        square_logo_file: 42,
+        wide_logo_file: { download_url: "https://files.example.com/x" },
+        favicon_file: { download_url: "https://files.example.com/x", file_id: "file_1", extra: true }
+      )
+    end
+    assert_equal 4, error.details.size
+    assert_equal "Unknown parameters: logos", error.details.first
+    message = "must be a file object with download_url and file_id"
+    assert(error.details.drop(1).all? { |detail| detail.include?(message) })
   end
 
   test "preview_url loads without a session, expires, and rejects tampering" do
@@ -268,7 +299,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal [ "square_logo_file host resolves to a non-public address (169.254.169.254)" ], response.parsed_body.dig("error", "details")
     assert_empty transport.calls
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
-    assert_equal square_logo_before, square_logo_recordable_id
+    assert_nil square_logo_before
+    assert_nil square_logo_recordable_id
   end
 
   test "the 422 message names the failing check for each mark" do
@@ -313,7 +345,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_equal [ "square_logo_file is not a PNG, JPEG, or WebP image" ], response.parsed_body.dig("error", "details")
-    assert_equal square_logo_before, square_logo_recordable_id
+    assert_nil square_logo_before
+    assert_nil square_logo_recordable_id
   end
 
   test "an SVG is refused" do
@@ -356,7 +389,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_equal [ "favicon_file returned HTTP 404" ], response.parsed_body.dig("error", "details")
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
-    assert_equal square_logo_before, square_logo_recordable_id
+    assert_nil square_logo_before
+    assert_nil square_logo_recordable_id
   end
 
   test "the old nested logos object, unknown fields, and bad values are 422" do

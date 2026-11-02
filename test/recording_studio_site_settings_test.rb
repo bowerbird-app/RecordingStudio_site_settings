@@ -5,7 +5,7 @@ require "test_helper"
 class RecordingStudioSiteSettingsTest < Minitest::Test
   def test_that_it_has_a_version_number
     refute_nil ::RecordingStudioSiteSettings::VERSION
-    assert_equal "0.5.2", ::RecordingStudioSiteSettings::VERSION
+    assert_equal "0.5.4", ::RecordingStudioSiteSettings::VERSION
   end
 
   def test_readme_is_the_public_product
@@ -29,6 +29,8 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_site_settings.gemspec", __dir__))
     readme = File.read(File.expand_path("../README.md", __dir__))
     dummy_gemfile = File.read(File.expand_path("../test/dummy/Gemfile", __dir__))
+    ruby_version = File.read(File.expand_path("../.ruby-version", __dir__)).strip
+    dummy_ruby_version = File.read(File.expand_path("../test/dummy/.ruby-version", __dir__)).strip
 
     assert_includes gemspec, 'spec.add_dependency "flat_pack", ">= 0.1.144"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio", ">= 6.1.0"'
@@ -39,7 +41,6 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", "~> 2.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", "~> 0.5"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio", tag: "v6.1.0"'
-    refute_includes readme, 'tag: "v4.7.0"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.22.1"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.22.0"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.0"'
@@ -48,14 +49,17 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.22.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.320"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.7.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v0.17.0"'
+    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.2"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.7.0"'
+    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.2"'
     assert_includes readme, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.11.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.26.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.7.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.0"'
     assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.0"'
+    assert_equal "3.3.13", ruby_version
+    assert_equal "3.3.13", dummy_ruby_version
     assert_match(
       %r{spec\.homepage\s+=\s+"https://github.com/bowerbird-app/RecordingStudio_site_settings"},
       gemspec
@@ -103,7 +107,9 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     refute_includes view, "Upload a file or drag and drop"
     refute_includes view, "md:grid-cols-3"
     assert_includes view, "content_for :title"
+    assert_includes view, "content_for :subtitle"
     assert_includes view, "flat_pack_page_nav"
+    assert_includes view, 'back_tooltip: "Go back"'
     assert_includes view, "anchor_href: main_app.root_path"
     refute_includes view, "recording_studio_page_nav"
     refute_includes view, "page_nav_back_url"
@@ -147,9 +153,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
       )
     )
 
-    assert_includes source, "include RecordingStudio::ControllerLayout"
     assert_includes source, "recording_studio_layout"
-    assert_includes source, "RecordingStudio::DEFAULT_LAYOUT"
     refute_includes source, "UsesDefaultLayout"
     refute_includes source, 'layout "recording_studio/default_layout"'
   end

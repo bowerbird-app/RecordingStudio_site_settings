@@ -50,6 +50,11 @@ test/dummy/config/credentials/*.key
 # Build artifacts
 *.gem
 pkg/
+coverage/
+test/dummy/coverage/
+
+# Generated dummy HTML dump
+test/dummy/install_page.html
 
 # Rename script state
 .rename_state.yml
