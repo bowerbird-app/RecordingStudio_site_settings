@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Dummy and development pins move Admin to `v2.7.0` and Logs to `v0.7.2` so Admin can resolve against Recording Studio `>= 6.1.0`. The gemspec still requires Admin `~> 2.0` and does not depend on Logs.
 - Bump development `rack` to `3.2.8` in root and dummy lockfiles (GHSA-2j8w-xcrc-x985, GHSA-5v64-555j-wjxm, GHSA-p8x9-v4hv-2w4g, GHSA-wvg4-6p58-3gh3).
+- Bump development `nokogiri` to `1.19.7` and `rails-html-sanitizer` to `1.7.2` in both lockfiles.
 
 ### Upgrade notes
 - Bump to `0.5.4`. No migration. Hosts that pin Admin `v2.7.0` also need Logs `v0.7.2` (GitHub tag) because that Admin tag depends on Logs and Logs is not on RubyGems.
