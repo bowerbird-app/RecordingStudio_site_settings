@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-11-05
+
+### Changed
+- Lock Rails to `8.1.4.1` in root and dummy Gemfile.lock (rack `3.2.8`, nokogiri `1.19.7`, loofah `2.25.3`, rails-html-sanitizer `1.7.2`; dummy `net-ssh` stays `7.3.8`).
+
+### Upgrade notes
+- Bump to `0.5.5`. No migration. Hosts should lock Rails `8.1.4.1`.
+
 ## [0.5.4] - 2026-11-02
 
 ### Changed
@@ -164,7 +172,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.4...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.5...HEAD
+[0.5.5]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.1...v0.5.2
