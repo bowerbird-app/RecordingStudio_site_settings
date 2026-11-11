@@ -97,6 +97,27 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert_equal "Unknown parameters: logos", error.details.first
     message = "must be a file object with download_url and file_id"
     assert(error.details.drop(1).all? { |detail| detail.include?(message) })
+
+    ["", nil].each do |name|
+      error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+        RecordingStudioSiteSettings::Api::UpdateInput.parse!(name: name)
+      end
+      assert_equal ["name can't be blank"], error.details
+    end
+  end
+
+  test "Update raises InvalidActionInputError for a blank name and saves nothing" do
+    context = Struct.new(:params, :access_grant).new(
+      { name: "   " },
+      Struct.new(:actor).new(@staff)
+    )
+
+    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+      RecordingStudioSiteSettings::Api::Update.call(context)
+    end
+
+    assert_equal ["name can't be blank"], error.details
+    assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
   end
 
   test "preview_url loads without a session, expires, and rejects tampering" do
@@ -185,11 +206,14 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
   end
 
   test "a blank name is a 422 validation failure" do
-    patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { name: "   " }, as: :json
+    ["   ", "", nil].each do |name|
+      patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { name: name }, as: :json
 
-    assert_response :unprocessable_entity
-    assert_equal "validation_failed", response.parsed_body.dig("error", "code")
-    assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+      assert_response :unprocessable_entity
+      assert_equal "invalid_input", response.parsed_body.dig("error", "code")
+      assert_equal ["name can't be blank"], response.parsed_body.dig("error", "details")
+      assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+    end
   end
 
   test "an update with neither name nor a mark is a 422" do
