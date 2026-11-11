@@ -2,10 +2,10 @@
 
 module RecordingStudioSiteSettings
   module Api
-    # ActiveRecord::RecordInvalid is left to the API controller, which renders it as 422.
-    # Logos are downloaded only after the caller passes the same checks as a name change, and all of
-    # them are downloaded and checked before anything is saved. Saving goes through Store.update!,
-    # the same path the Site screen uses.
+    # A blank name raises InvalidActionInputError (HTTP 422, MCP tool error). Logos are downloaded
+    # only after the caller passes the same checks as a name change, and all of them are downloaded
+    # and checked before anything is saved. Saving goes through Store.update!, the same path the
+    # Site screen uses.
     class Update
       def self.call(context)
         new(context).call
@@ -19,7 +19,7 @@ module RecordingStudioSiteSettings
         root = Access.write(context)
         actor = Access.actor_for(context)
         RecordingStudioSiteSettings::Store.authorize_write!(root, actor)
-        input = UpdateInput.parse!(context&.params)
+        input = parsed_update_input
         RecordingStudioSiteSettings.update!(root, name: name_for(input, root), actor: actor, clear: input.clears,
                                                   **downloaded_files(input.sources))
         Serialize.site_settings(root)
@@ -30,6 +30,12 @@ module RecordingStudioSiteSettings
       private
 
       attr_reader :context
+
+      def parsed_update_input
+        UpdateInput.parse!(context&.params).tap do |input|
+          raise_blank_name! if input.name_given? && input.name.blank?
+        end
+      end
 
       def name_for(input, root)
         input.name_given? ? input.name : Store.name_for(root)
@@ -45,6 +51,10 @@ module RecordingStudioSiteSettings
         raise_logo_errors!(errors) if errors.any?
 
         files
+      end
+
+      def raise_blank_name!
+        raise RecordingStudioApi::InvalidActionInputError.new("Name can't be blank", details: ["name can't be blank"])
       end
 
       def raise_logo_errors!(errors)

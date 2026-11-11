@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-11-11
+
+### Fixed
+- `site_settings_update` raises `RecordingStudioApi::InvalidActionInputError` for a blank or whitespace name, with a `name` detail. HTTP still returns 422. MCP gets a tool error instead of `-32603`. Nothing is saved.
+
+### Upgrade notes
+- Bump to `0.5.6`. No migration. A blank name on `site_settings_update` is now `invalid_input` (was `validation_failed`).
+
 ## [0.5.5] - 2026-11-05
 
 ### Changed
@@ -172,7 +180,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.5...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.6...HEAD
+[0.5.6]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.2...v0.5.3

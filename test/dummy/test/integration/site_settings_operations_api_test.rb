@@ -99,6 +99,20 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     assert(error.details.drop(1).all? { |detail| detail.include?(message) })
   end
 
+  test "Update raises InvalidActionInputError for a blank name and saves nothing" do
+    context = Struct.new(:params, :access_grant).new(
+      { name: "   " },
+      Struct.new(:actor).new(@staff)
+    )
+
+    error = assert_raises(RecordingStudioApi::InvalidActionInputError) do
+      RecordingStudioSiteSettings::Api::Update.call(context)
+    end
+
+    assert_equal ["name can't be blank"], error.details
+    assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
+  end
+
   test "preview_url loads without a session, expires, and rejects tampering" do
     # CI has no libvips, so Active Storage has no transformer; this test is about the signed URL, not resizing.
     original_transformer = ActiveStorage.variant_transformer
@@ -188,7 +202,8 @@ class SiteSettingsOperationsApiTest < ActionDispatch::IntegrationTest
     patch "#{OPERATIONS_ROOT}/site_settings", headers: auth(@admin_token), params: { name: "   " }, as: :json
 
     assert_response :unprocessable_entity
-    assert_equal "validation_failed", response.parsed_body.dig("error", "code")
+    assert_equal "invalid_input", response.parsed_body.dig("error", "code")
+    assert_equal ["name can't be blank"], response.parsed_body.dig("error", "details")
     assert_equal "Studio", RecordingStudioSiteSettings.name_for(@site_root)
   end
 
