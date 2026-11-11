@@ -37,6 +37,7 @@ module RecordingStudioSiteSettings
       end
 
       def validate!
+        @errors << "name can't be blank" if name_given? && name.blank?
         read_marks
         @errors << "Send name, at least one of #{file_fields.keys.join(', ')}, or both" if nothing_sent?
         return if errors.empty?
