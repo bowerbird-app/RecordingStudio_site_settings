@@ -18,6 +18,10 @@ RecordingStudio.configure do |config|
 
   config.actor = -> { Current.actor }
 
+  # Recording Studio 6.5 denies writes unless an authorizer is set. This dummy
+  # still records from seeds and tests that do not pass an actor.
+  config.allow_unauthorized_writes = true
+
   config.event_notifications_enabled = true
 
   config.idempotency_mode = :return_existing
