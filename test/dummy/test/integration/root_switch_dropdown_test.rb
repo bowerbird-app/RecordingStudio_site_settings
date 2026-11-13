@@ -44,8 +44,8 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
 
     sign_in user
 
-    workspace = Workspace.create!(name: "Switch Page Workspace")
-    RecordingStudio.root_recording_for(workspace)
+    Workspace.create!(name: "Switch Page Workspace")
+    grant_view_on_workspace_roots!(user)
 
     get "/recording_studio_root_switchable/v1/root_switch?scope=all_workspaces"
 
@@ -66,6 +66,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     target_workspace = Workspace.create!(name: "Target Workspace")
     target_root_recording = RecordingStudio.root_recording_for(target_workspace)
     RecordingStudio.root_recording_for(source_workspace)
+    grant_view_on_workspace_roots!(user)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -90,6 +91,7 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     target_workspace = Workspace.create!(name: "Fallback Target Workspace")
     target_root_recording = RecordingStudio.root_recording_for(target_workspace)
     RecordingStudio.root_recording_for(source_workspace)
+    grant_view_on_workspace_roots!(user)
 
     patch "/recording_studio_root_switchable/v1/root_switch", params: {
       scope: "all_workspaces",
@@ -100,5 +102,15 @@ class RootSwitchDropdownTest < ActionDispatch::IntegrationTest
     }
 
     assert_redirected_to "/"
+  end
+
+  private
+
+  # Root Switchable 0.15 requires Accessible :view on the current root. The
+  # all_workspaces scope defaults to the first workspace, including seeds.
+  def grant_view_on_workspace_roots!(user)
+    Workspace.order(:name).find_each do |workspace|
+      bootstrap_owner_access!(user, RecordingStudio.root_recording_for(workspace))
+    end
   end
 end
