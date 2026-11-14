@@ -1,4 +1,15 @@
 Rails.application.routes.draw do
+  # Active Storage's route file stays off (config.active_storage.draw_routes).
+  # Disk service direct upload still needs its own PUT, and API preview_url still
+  # needs the signed representation redirect. The public direct_uploads route is not drawn.
+  scope ActiveStorage.routes_prefix do
+    get "/blobs/redirect/:signed_id/*filename" => "active_storage/blobs/redirect#show", as: :rails_service_blob
+    get "/representations/redirect/:signed_blob_id/:variation_key/*filename" => "active_storage/representations/redirect#show",
+        as: :rails_blob_representation
+    get "/disk/:encoded_key/*filename" => "active_storage/disk#show", as: :rails_disk_service
+    put "/disk/:encoded_token" => "active_storage/disk#update", as: :update_rails_disk_service
+  end
+
   devise_for :users
 
   get "/recording_studio", to: redirect("/"), as: nil

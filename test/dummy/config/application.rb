@@ -41,6 +41,11 @@ module Dummy
       g.orm :active_record, primary_key_type: :uuid
     end
 
+    # Leave POST /rails/active_storage/direct_uploads undrawn. Mark uploads use
+    # Attachable's recording-scoped endpoint. Disk byte transfer and the API
+    # preview redirect are drawn in config/routes.rb.
+    config.active_storage.draw_routes = false
+
     # Don't generate system test files.
     config.generators.system_tests = nil
   end

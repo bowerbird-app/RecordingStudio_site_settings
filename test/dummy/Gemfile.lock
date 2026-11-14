@@ -173,7 +173,7 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_site_settings (0.5.6)
+    recording_studio_site_settings (0.5.7)
       flat_pack (>= 0.1.144)
       rails (~> 8.1.0)
       recording_studio (>= 6.1.0)
@@ -428,11 +428,11 @@ GEM
       rack (>= 1.2, < 4)
       snaky_hash (~> 2.0, >= 2.0.7)
       version_gem (~> 1.1, >= 1.1.14)
-    omniauth (2.1.4)
-      hashie (>= 3.4.6)
+    omniauth (2.4.1)
+      hashie (>= 3.5.2)
       logger
-      rack (>= 2.2.3)
-      rack-protection
+      rack (>= 2.2.8)
+      rack-protection (>= 2.2.0)
     omniauth-apple (1.4.0)
       json-jwt
       omniauth-oauth2
@@ -804,7 +804,7 @@ CHECKSUMS
   nokogiri (1.19.7-x86_64-linux-gnu) sha256=25865ccb462f714e712fdf8906fde07849cb6704a808e3d629d75baa5af5dd3b
   nokogiri (1.19.7-x86_64-linux-musl) sha256=464d1f3dfb0d53cf54c0c6a7e23e8e91cf68ec3cafc2b27dc4a7682f2d9bf546
   oauth2 (2.0.25) sha256=2f736a2f93c2caa67c1b08dc3c9889bb907d62643f3183fefaa1723cba6a82ac
-  omniauth (2.1.4) sha256=42a05b0496f0d22e1dd85d42aaf602f064e36bb47a6826a27ab55e5ba608763c
+  omniauth (2.4.1) sha256=99950c2cf9231d4e960d2bda87e7efec5ace7c3e2d1860016ad3f2e40366489c
   omniauth-apple (1.4.0) sha256=f449ce4c206e784536cbaf64b7c36072ac5e7c73103b1a01ba3c1d9454bf6e24
   omniauth-google-oauth2 (1.2.3) sha256=bdbab67e64e50b7902eee2dcfc2225575cefba15ab89a3b6e92c8947987c1da9
   omniauth-instagram-api (0.1.0) sha256=b4f65cf9d01ef3e7c2a40f64e82a62d317b446a44ce1d76c764b2b5280c8d1ce
@@ -855,7 +855,7 @@ CHECKSUMS
   recording_studio_metrics (0.8.0)
   recording_studio_moveable (4.1.1)
   recording_studio_root_switchable (0.15.0)
-  recording_studio_site_settings (0.5.6)
+  recording_studio_site_settings (0.5.7)
   recording_studio_trashable (0.14.0)
   recording_studio_user (0.28.1)
   redis (5.4.1) sha256=b5e675b57ad22b15c9bcc765d5ac26f60b675408af916d31527af9bd5a81faae
