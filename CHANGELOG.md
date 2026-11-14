@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Development Gemfiles pin the current GitHub release tags (Recording Studio `v6.7.0`, Flatpack `v0.1.357`, Accessible `v0.32.0`, Admin `v2.13.0`, API `v0.23.0`, Attachable `v0.23.0`, Icons `v0.2.1`, Logs `v0.7.4`, Metrics `v0.8.0`, Moveable `v4.1.1`, Trashable `v0.14.0`; dummy also Users `v0.28.1`, Root Switchable `v0.15.0`, Cache `v0.6.3`). Gemspec bounds are unchanged. This is already-merged #34.
+- Dummy lockfile bumps `omniauth` to `2.4.1` (CVE-2026-63183). The gem does not depend on OmniAuth.
 
 ### Upgrade notes
 - Bump to `0.5.7`. No migration. Public methods are unchanged.
