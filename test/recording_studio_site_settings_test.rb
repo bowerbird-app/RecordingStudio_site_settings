@@ -5,7 +5,7 @@ require "test_helper"
 class RecordingStudioSiteSettingsTest < Minitest::Test
   def test_that_it_has_a_version_number
     refute_nil ::RecordingStudioSiteSettings::VERSION
-    assert_equal "0.5.6", ::RecordingStudioSiteSettings::VERSION
+    assert_equal "0.5.7", ::RecordingStudioSiteSettings::VERSION
   end
 
   def test_readme_is_the_public_product
@@ -190,6 +190,8 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes docs_install, "dummy_wide_logo_sidebar"
     assert_includes button, "attachment_import[attachments][][name]"
     assert_includes button, "mark_name"
+    assert_includes button, "recording_studio_attachable.recording_direct_uploads_path(recording)"
+    refute_includes button, "rails_direct_uploads_path"
   end
 
   def test_public_helpers_include_favicon

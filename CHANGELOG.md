@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.7] - 2026-11-14
+
+### Fixed
+- Mark Add and Change upload through Attachable's recording direct upload on the site-settings recording (`POST recordings/:id/attachments/direct_uploads`). That endpoint authorizes `:upload` and runs `DirectUpload.prepare!` (type, size, pending uploads, storage) before it returns a signed id. A new mark posts that id to the import. Changing a mark patches the attachment. Both accept only a signed id issued for that site-settings recording. The screen no longer posts to `POST /rails/active_storage/direct_uploads`.
+
+### Changed
+- Development Gemfiles pin the current GitHub release tags (Recording Studio `v6.7.0`, Flatpack `v0.1.357`, Accessible `v0.32.0`, Admin `v2.13.0`, API `v0.23.0`, Attachable `v0.23.0`, Icons `v0.2.1`, Logs `v0.7.4`, Metrics `v0.8.0`, Moveable `v4.1.1`, Trashable `v0.14.0`; dummy also Users `v0.28.1`, Root Switchable `v0.15.0`, Cache `v0.6.3`). Gemspec bounds are unchanged. This is already-merged #34.
+
+### Upgrade notes
+- Bump to `0.5.7`. No migration. Public methods are unchanged.
+- Hosts can set `config.active_storage.draw_routes = false`. Mark uploads do not need `POST /rails/active_storage/direct_uploads`.
+- A Disk service still needs its disk routes so the browser can PUT the bytes. Operations `preview_url` is still an Active Storage representation redirect (Attachable's preview route needs a session), so that redirect has to stay drawn if API clients open mark previews.
+
 ## [0.5.6] - 2026-11-11
 
 ### Fixed
@@ -180,7 +193,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.6...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.7...HEAD
+[0.5.7]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.3...v0.5.4

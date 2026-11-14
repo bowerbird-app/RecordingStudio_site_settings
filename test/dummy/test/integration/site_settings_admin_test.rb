@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require "base64"
 require "cgi"
+require "digest"
 require "test_helper"
 
 class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
@@ -371,6 +373,70 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_equal "favicon", RecordingStudioSiteSettings.favicon_recording_for(@site_root).recordable.name
   end
 
+  test "mark add and change use the site settings recording direct upload" do
+    assert_not Rails.application.routes.named_routes.names.include?(:rails_direct_uploads)
+    assert_equal false, ActiveStorage.draw_routes
+
+    RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @admin)
+    recording = RecordingStudioSiteSettings.recording_for(@site_root)
+    settings_path = recording_studio_site_settings.settings_path
+    upload_path = recording_studio_attachable.recording_direct_uploads_path(recording)
+    sign_in @admin
+    switch_root!(@studio_root)
+
+    get settings_path
+
+    assert_response :success
+    assert_equal 3, response.body.scan(upload_path).size
+    refute_includes response.body, "/rails/active_storage"
+
+    signed_id = upload_bytes!("square-logo.png", TEST_SQUARE_LOGO_PATH)
+    assert_equal recording.id.to_s, issued_blob(signed_id).metadata["parent_recording_id"]
+    assert_equal 1, RecordingStudioAttachable::DirectUpload.pending_count(recording, @admin)
+
+    post recording_studio_attachable.recording_attachment_imports_path(
+      recording, redirect_mode: "return_to", return_to: settings_path
+    ), params: {
+      attachment_import: { attachments: [{ signed_blob_id: signed_id, name: "square_logo" }] }
+    }
+
+    assert_redirected_to settings_path
+    square = RecordingStudioSiteSettings.square_logo_recording_for(@site_root)
+    assert_equal "square-logo.png", square.recordable.original_filename
+    assert_equal 0, RecordingStudioAttachable::DirectUpload.pending_count(recording, @admin)
+
+    get settings_path
+
+    square_frame = CGI.unescapeHTML(frame_html("site-square-logo"))
+    assert_includes square_frame, %(direct-upload-url-value="#{upload_path}")
+    assert_includes square_frame, recording_studio_attachable.attachment_path(
+      square, redirect_mode: "return_to", return_to: settings_path
+    )
+
+    replacement_id = upload_bytes!("wide-logo.png", TEST_WIDE_LOGO_PATH)
+    assert_equal 1, RecordingStudioAttachable::DirectUpload.pending_count(recording, @admin)
+    patch recording_studio_attachable.attachment_path(
+      square, redirect_mode: "return_to", return_to: settings_path
+    ), params: { attachment: { signed_blob_id: replacement_id } }
+
+    assert_redirected_to settings_path
+    assert_equal square.id, RecordingStudioSiteSettings.square_logo_recording_for(@site_root).id
+    assert_equal "wide-logo.png", RecordingStudioSiteSettings.square_logo_recording_for(@site_root).recordable.original_filename
+    assert_equal 0, RecordingStudioAttachable::DirectUpload.pending_count(recording, @admin)
+
+    forged = ActiveStorage::Blob.create_before_direct_upload!(
+      filename: "forged.png", byte_size: 1, checksum: file_checksum("x"), content_type: "image/png"
+    )
+    patch recording_studio_attachable.attachment_path(
+      square, redirect_mode: "return_to", return_to: settings_path
+    ), params: { attachment: { signed_blob_id: forged.signed_id } }
+
+    assert_redirected_to settings_path
+    assert_equal "mismatched purpose", flash[:alert]
+    assert_equal "wide-logo.png", RecordingStudioSiteSettings.square_logo_recording_for(@site_root).recordable.original_filename
+    assert_equal 0, RecordingStudioAttachable::DirectUpload.pending_count(recording, @admin)
+  end
+
   test "the dummy layout prints a favicon link when a tab icon is attached" do
     RecordingStudioSiteSettings.update!(@site_root, name: "Studio", actor: @admin)
     File.open(TEST_LOGO_PATH, "rb") do |io|
@@ -439,6 +505,38 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
 
   def unescaped_page
     CGI.unescapeHTML(response.body)
+  end
+
+  def upload_bytes!(filename, path)
+    bytes = File.binread(path)
+    post recording_studio_attachable.recording_direct_uploads_path(
+      RecordingStudioSiteSettings.recording_for(@site_root)
+    ), params: {
+      blob: {
+        filename: filename,
+        byte_size: bytes.bytesize,
+        checksum: file_checksum(bytes),
+        content_type: "image/png"
+      }
+    }, as: :json
+    assert_response :success, response.body
+    ticket = response.parsed_body
+    put_direct_upload(ticket, bytes)
+    ticket.fetch("signed_id")
+  end
+
+  def put_direct_upload(ticket, bytes)
+    uri = URI(ticket.dig("direct_upload", "url"))
+    put "#{uri.path}?#{uri.query}", params: bytes, headers: ticket.dig("direct_upload", "headers")
+    assert_response :no_content, response.body
+  end
+
+  def file_checksum(bytes)
+    Base64.strict_encode64(Digest::MD5.digest(bytes))
+  end
+
+  def issued_blob(signed_id)
+    ActiveStorage::Blob.find_signed!(signed_id, purpose: RecordingStudioAttachable::DirectUpload::PURPOSE)
   end
 
   def frame_html(id)
