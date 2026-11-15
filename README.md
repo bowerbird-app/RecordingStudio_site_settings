@@ -14,16 +14,16 @@ Add the gem and its Recording Studio majors:
 
 ```ruby
 gem "recording_studio_site_settings"
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v6.7.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.32.0"
-gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.13.0"
-gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.23.0"
-gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.23.0"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v7.0.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.44.0"
+gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.16.0"
+gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.24.0"
+gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.28.0"
 gem "recording_studio_icons", github: "bowerbird-app/RecordingStudio_icons", tag: "v0.2.1"
-gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.4", require: false
-gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.8.0"
-gem "recording_studio_moveable", github: "bowerbird-app/RecordingStudio_moveable", tag: "v4.1.1"
-gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.14.0", require: false
+gem "recording_studio_logs", github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.0", require: false
+gem "recording_studio_metrics", github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.0"
+gem "recording_studio_moveable", github: "bowerbird-app/RecordingStudio_moveable", tag: "v5.0.0"
+gem "recording_studio_trashable", github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.17.0", require: false
 ```
 
 Then:
@@ -71,6 +71,8 @@ Enable the `site_settings` section on the admin root. Grant Accessible access on
 Point Admin's `authentication_method` and `current_actor_method` at the host sign-in helpers (usually Devise `authenticate_user!` / `current_user`). This gem's `ApplicationController` uses Accessible `ControllerAuth` with those hooks; it does not reinvent sign-in.
 
 ## Read name, logos, and favicon
+
+Create the workspace root first with `RecordingStudio.create_root_recording!(workspace, actor: current_user)`. `root_recording_for` finds that root.
 
 ```ruby
 root = RecordingStudio.root_recording_for(workspace)
@@ -129,7 +131,7 @@ The save notice, invalid-name alert, and public logo helper alt fallbacks resolv
 
 ## Admin
 
-Staff open one Admin section, Site, and one screen that edits name, both logos, and the tab icon. The screen uses Recording Studio core default layout. Set `content_for :title` (and `:subtitle`) so the layout prints the heading once. Call `flat_pack_page_nav` for back. Hosts on Recording Studio 6.1 call `recording_studio_layout` instead of `UsesDefaultLayout`.
+Staff open one Admin section, Site, and one screen that edits name, both logos, and the tab icon. The screen uses Recording Studio core default layout. Set `content_for :title` (and `:subtitle`) so the layout prints the heading once. Call `flat_pack_page_nav` for back. Call `recording_studio_layout` on the controller.
 
 Rows stack full width, one field per row. Site name first, then wide logo, then square logo, then favicon. Square logo is a square Avatar at size `2xl` plus Attachable Add or Change. Wide logo shows the image in real proportion, or a photo icon when empty, plus the same Add or Change control. Favicon uses a smaller square Avatar. Empty square, wide, and favicon Avatars pass Flatpack `icon: "photo"`, so the empty slot is a photo, not a person. Filled square and favicon slots still show the attached image. Save and Cancel sit after the fields as separate Buttons. Name has its own Save. Cancel goes back. Accessible on the admin root gates the page. `user.admin?` is not used. Hosts need Flatpack `0.1.144` or newer for that empty icon.
 
@@ -172,7 +174,7 @@ Any problem with a mark returns 422 `invalid_input` with one `details` entry per
 
 If your sandbox or egress proxy answers DNS with a reserved address (for example fake-IP `198.18.0.0/15`), every logo is refused. Opt that range in with `config.remote_image_allowed_networks = ["198.18.0.0/15"]` (or `RECORDING_STUDIO_SITE_SETTINGS_REMOTE_IMAGE_ALLOWED_NETWORKS=198.18.0.0/15`). Loopback, link-local/metadata, and unspecified addresses can never be allowed.
 
-Access matches the Site admin screen. The token's actor needs Accessible `:view` (show) or `:admin` (update) on the access recording, and that recording must be the Admin `site_admin_recording` (the Site section's `:site` blast radius). The site root comes from `site_root_resolver`, called with no controller. Update also keeps `:edit` on that site root, and checks it before downloading any logo. A denial is 403. Hosts whose resolver only reads `current_root_recording` get 404 from the API; return a site root when `context.controller` is nil.
+Access matches the Site admin screen. The token's actor needs Accessible `:view` (show) or `:admin` (update) on the access recording, and that recording must be `RecordingStudioAccessible.admin_root` (the Site section's `:site` blast radius). Set `RecordingStudioAccessible.configuration.admin_root_resolver` to the kept admin root recording. The site root comes from `site_root_resolver`, called with no controller. Update also keeps `:edit` on that site root, and checks it before downloading any logo. A denial is 403. Hosts whose resolver only reads `current_root_recording` get 404 from the API; return a site root when `context.controller` is nil.
 
 ## Dummy app
 

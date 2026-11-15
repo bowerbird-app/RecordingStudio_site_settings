@@ -51,7 +51,7 @@ module SiteSettingsTestHelper
 
   def admin_root_recording(name = "Admin")
     admin_root = AdminRoot.find_or_create_by!(name: name)
-    RecordingStudio.root_recording_for(admin_root)
+    RecordingStudio.create_root_recording!(admin_root, actor: root_writer)
   end
 
   def empty_admin_root_recording
@@ -60,7 +60,16 @@ module SiteSettingsTestHelper
 
   def workspace_root(name)
     workspace = Workspace.find_or_create_by!(name: name)
-    RecordingStudio.root_recording_for(workspace)
+    RecordingStudio.create_root_recording!(workspace, actor: root_writer)
+  end
+
+  def root_writer
+    return Current.actor if Current.actor.present?
+
+    @root_writer ||= User.find_or_create_by!(email: "root-writer@example.com") do |user|
+      user.password = "Password123!"
+      user.password_confirmation = "Password123!"
+    end
   end
 
   def grant_site_settings_admin!(actor, workspace_root: nil)

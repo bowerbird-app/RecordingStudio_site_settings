@@ -10,6 +10,16 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     assert_includes ApplicationController.ancestors, RecordingStudio::ControllerLayout
   end
 
+  test "dummy authorizes writes with a callback" do
+    authorizer = RecordingStudio.configuration.authorize_write
+
+    assert_respond_to authorizer, :call
+    assert authorizer.call(actor: User.new)
+    refute RecordingStudio.configuration.allow_unauthorized_writes
+    refute_respond_to RecordingStudioAdmin.configuration, :site_admin_recording_resolver
+    assert_respond_to RecordingStudioAccessible.configuration.admin_root_resolver, :call
+  end
+
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_includes RecordingStudio.root_recordable_types, "Workspace"
@@ -23,6 +33,9 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     connection = ActiveRecord::Base.connection
 
     assert connection.column_exists?(:recording_studio_recordings, :root_recording_id)
+    assert connection.column_exists?(:recording_studio_events, :root_recording_id)
+    event_root = connection.columns(:recording_studio_events).find { |column| column.name == "root_recording_id" }
+    assert_equal false, event_root.null
     assert connection.table_exists?(:recording_studio_accesses)
     assert connection.table_exists?(:recording_studio_access_constraints)
     assert connection.table_exists?(:recording_studio_access_rules)

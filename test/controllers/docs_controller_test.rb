@@ -19,6 +19,11 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     end
 
     sign_in @user
+    Current.actor = @user
+  end
+
+  teardown do
+    Current.actor = nil
   end
 
   test "install page renders successfully" do
@@ -27,7 +32,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Install"
     assert_includes response.body, "Add the gem"
     assert_includes response.body, "recording_studio_site_settings"
-    assert_includes response.body, "v0.23.0"
+    assert_includes response.body, "v0.28.0"
     assert_includes response.body, "bin/rails generate recording_studio_site_settings:install"
   end
 
@@ -75,13 +80,13 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
 
   test "recordings tree page renders successfully" do
     workspace = Workspace.create!(name: "Tree Workspace")
-    root_recording = RecordingStudio.root_recording_for(workspace)
+    root_recording = RecordingStudio.create_root_recording!(workspace, actor: @user)
     folder = Folder.create!(name: "Reference")
     folder_recording = record_child(folder, root_recording, root_recording)
     page = Page.create!(title: "API")
     record_child(page, root_recording, folder_recording)
     admin = AdminRoot.create!(name: "Tree Admin")
-    admin_root = RecordingStudio.root_recording_for(admin)
+    admin_root = RecordingStudio.create_root_recording!(admin, actor: @user)
     site_setting = RecordingStudioSiteSettings::SiteSetting.create!(name: "Tree Site")
     record_child(site_setting, admin_root, admin_root)
 
@@ -144,10 +149,13 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Counted Workspace")
     2.times do
-      RecordingStudio.root_recording_for(Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"))
+      RecordingStudio.create_root_recording!(
+        Workspace.create!(name: "Counted Workspace #{SecureRandom.hex(4)}"),
+        actor: @user
+      )
     end
 
-    root_recording = RecordingStudio.root_recording_for(workspace)
+    root_recording = RecordingStudio.create_root_recording!(workspace, actor: @user)
     folder = Folder.create!(name: "Counted Folder")
     record_child(folder, root_recording, root_recording)
 
