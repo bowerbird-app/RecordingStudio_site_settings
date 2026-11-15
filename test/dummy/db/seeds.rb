@@ -1,9 +1,8 @@
 find_or_record_child = lambda do |recordable, root_recording, parent_recording|
-  RecordingStudio::Recording.find_by(
+  RecordingStudio::Recording.kept.find_by(
     root_recording: root_recording,
     parent_recording: parent_recording,
-    recordable: recordable,
-    trashed_at: nil
+    recordable: recordable
   ) || RecordingStudio.record!(
     action: "created",
     recordable: recordable,
@@ -75,15 +74,15 @@ begin
   folder = Folder.find_or_create_by!(name: "Product Docs")
   page = Page.find_or_create_by!(title: "Getting Started")
 
-  root_recording = RecordingStudio.root_recording_for(workspace)
-  empty_logo_root = RecordingStudio.root_recording_for(empty_logo_workspace)
+  root_recording = RecordingStudio.create_root_recording!(workspace, actor: user)
+  empty_logo_root = RecordingStudio.create_root_recording!(empty_logo_workspace, actor: user)
   folder_recording = find_or_record_child.call(folder, root_recording, root_recording)
   find_or_record_child.call(page, root_recording, folder_recording)
 
   admin_root = AdminRoot.find_or_create_by!(name: "Admin")
-  admin_root_recording = RecordingStudio.root_recording_for(admin_root)
+  admin_root_recording = RecordingStudio.create_root_recording!(admin_root, actor: user)
   empty_admin = AdminRoot.find_or_create_by!(name: "Empty Admin")
-  empty_admin_recording = RecordingStudio.root_recording_for(empty_admin)
+  empty_admin_recording = RecordingStudio.create_root_recording!(empty_admin, actor: user)
 
   bootstrap_owner_access.call(user, admin_root_recording)
   bootstrap_owner_access.call(user, empty_admin_recording)

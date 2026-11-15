@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-15
+
+### Changed
+- Require `recording_studio` `>= 7.0`, `< 8.0`. Accessible is `>= 0.44.0`, `< 1.0`. Admin is `>= 2.16.0`, `< 3.0`. Attachable is `>= 0.28.0`, `< 1.0`.
+- Development Gemfiles pin Recording Studio `v7.0.0`, Flatpack `v0.1.376`, Accessible `v0.44.0`, Admin `v2.16.0`, API `v0.24.0`, Attachable `v0.28.0`, Logs `v0.8.0`, Metrics `v0.9.0`, Moveable `v5.0.0`, and Trashable `v0.17.0`. Dummy also pins Users `v0.30.0` and Root Switchable `v0.16.0`. Icons stay `v0.2.1`. Cache stays `v0.6.3`. Flatpack moves to `v0.1.376` because Attachable `v0.28.0` requires `flat_pack >= 0.1.376`.
+- Dummy seeds and tests that created a root with `RecordingStudio.root_recording_for` now call `RecordingStudio.create_root_recording!(recordable, actor:)`. Lookups stay on `root_recording_for`.
+- The dummy app sets `config.authorize_write` to allow a write.
+- The dummy app copies core migration `20261114090000_add_root_recording_id_to_recording_studio_events`, which stores `root_recording_id` on events.
+- Dummy seed lookup of an existing child uses `Recording.kept`.
+- Dummy pins `puma` `8.1.0` and `msgpack` `>= 1.8.7` after Bundler Audit flagged `puma` `8.0.2` and `msgpack` `1.8.3`.
+- The dummy sets `RecordingStudioUser` `minimum_password_length` to `8` so the seeded `Password` accounts still sign in. Users `v0.30.0` defaults that minimum to `12`.
+
+### Upgrade notes
+- Bump to `0.6.0`. This gem ships no new migration. Public methods are unchanged.
+- Require Recording Studio `>= 7.0`, `< 8.0` (GitHub tag `v7.0.0`). This gem no longer supports Recording Studio 6.
+- Pin Accessible `>= 0.44.0` (tag `v0.44.0`), Admin `>= 2.16.0` (tag `v2.16.0`), and Attachable `>= 0.28.0` (tag `v0.28.0`).
+- `RecordingStudio.root_recording_for` only finds a root. Create one with `RecordingStudio.create_root_recording!(recordable, actor:)`.
+- Set `config.authorize_write` and pass an actor on writes.
+- Name the admin root with `RecordingStudioAccessible.configuration.admin_root_resolver`. Admin `2.16.0` no longer has `site_admin_recording_resolver`. Point the mounted admin `access_recording_resolver` at `RecordingStudioAccessible.admin_root`.
+- Copy core migration `20261114090000_add_root_recording_id_to_recording_studio_events` into the host before writing events.
+- Hosts that copy the development pin set should use the tags above, including Flatpack `v0.1.376`.
+
 ## [0.5.7] - 2026-11-14
 
 ### Fixed
@@ -194,7 +216,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.7...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.7...v0.6.0
 [0.5.7]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.4...v0.5.5

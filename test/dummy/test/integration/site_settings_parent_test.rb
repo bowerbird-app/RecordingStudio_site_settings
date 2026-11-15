@@ -27,7 +27,8 @@ class SiteSettingsParentTest < ActiveSupport::TestCase
       action: "created",
       recordable: RecordingStudioSiteSettings::SiteSetting.new(name: "Harbor"),
       root_recording: @admin_root,
-      parent_recording: @admin_root
+      parent_recording: @admin_root,
+      actor: @owner
     ).recording
 
     assert_equal @admin_root.id, allowed.parent_recording_id
@@ -38,7 +39,8 @@ class SiteSettingsParentTest < ActiveSupport::TestCase
         action: "created",
         recordable: RecordingStudioSiteSettings::SiteSetting.new(name: "Nope"),
         root_recording: @workspace_root,
-        parent_recording: @workspace_root
+        parent_recording: @workspace_root,
+        actor: @owner
       )
     end
     assert_match(/cannot be recorded under Workspace/, error.message)
