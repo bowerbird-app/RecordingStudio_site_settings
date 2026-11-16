@@ -32,7 +32,7 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Install"
     assert_includes response.body, "Add the gem"
     assert_includes response.body, "recording_studio_site_settings"
-    assert_includes response.body, "v0.28.0"
+    assert_includes response.body, "v0.31.0"
     assert_includes response.body, "bin/rails generate recording_studio_site_settings:install"
   end
 
