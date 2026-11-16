@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Dummy Gemfile pins the current GitHub release tags: Recording Studio `v7.3.0`, Flatpack `v0.1.377`, Accessible `v0.45.1`, Admin `v2.18.0`, API `v1.2.1`, Attachable `v0.31.0`, Cache `v0.7.0`, Icons `v0.4.0`, Moveable `v6.0.0`, Trashable `v1.0.1`, and Users `v0.32.0`. Logs stay `v0.8.0`. Metrics stay `v0.9.0`. Root Switchable stays `v0.16.0`. Dummy Puma is `8.1.1`. Gemspec bounds are unchanged.
+- Dummy `User` records skip Devise confirmation on create. Users `v0.32.0` adds confirmable and refuses password sign-in until `confirmed_at` is set. Seeded and test accounts stay able to sign in with their passwords.
+
 ## [0.6.0] - 2026-11-15
 
 ### Changed

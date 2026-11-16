@@ -20,6 +20,17 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     assert_respond_to RecordingStudioAccessible.configuration.admin_root_resolver, :call
   end
 
+  test "dummy users are confirmed so password sign-in still works" do
+    user = User.create!(
+      email: "confirmed-#{SecureRandom.hex(4)}@example.com",
+      password: "Password123!",
+      password_confirmation: "Password123!"
+    )
+
+    assert user.confirmed?
+    assert user.active_for_authentication?
+  end
+
   test "dummy app validates recordable declarations" do
     assert RecordingStudio.validate_recordable_declarations!
     assert_includes RecordingStudio.root_recordable_types, "Workspace"
