@@ -126,7 +126,7 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
     assert_includes response.body, 'name="attachment_import[attachments][][name]"'
     assert_includes response.body, 'value="favicon"'
     refute_includes frame_html("site-favicon"), "M12 2C6.48 2 2 6.48"
-    assert_includes frame_html("site-favicon"), "flat-pack--icon-name-value=\"photo\""
+    assert_includes frame_html("site-favicon"), "m2.25 15.75 5.159-5.159"
     refute_includes frame_html("site-square-logo"), "M12 2C6.48 2 2 6.48"
     square_preview = RecordingStudioSiteSettings.square_logo_for(@site_root).preview_url
     wide_preview = RecordingStudioSiteSettings.wide_logo_for(@site_root).preview_url
@@ -165,9 +165,9 @@ class SiteSettingsAdminTest < ActionDispatch::IntegrationTest
       refute_includes frame_html("site-square-logo"), "M12 2C6.48 2 2 6.48"
       refute_includes frame_html("site-wide-logo"), "M12 2C6.48 2 2 6.48"
       refute_includes frame_html("site-favicon"), "M12 2C6.48 2 2 6.48"
-      assert_includes frame_html("site-square-logo"), "flat-pack--icon-name-value=\"photo\""
-      assert_includes frame_html("site-wide-logo"), "flat-pack--icon-name-value=\"photo\""
-      assert_includes frame_html("site-favicon"), "flat-pack--icon-name-value=\"photo\""
+      assert_includes frame_html("site-square-logo"), "m2.25 15.75 5.159-5.159"
+      assert_includes frame_html("site-wide-logo"), "m2.25 15.75 5.159-5.159"
+      assert_includes frame_html("site-favicon"), "m2.25 15.75 5.159-5.159"
       assert_select "header img", count: 0
       assert_select "aside", count: 0
       assert_includes unescaped_page, recording_studio_attachable.recording_attachment_imports_path(

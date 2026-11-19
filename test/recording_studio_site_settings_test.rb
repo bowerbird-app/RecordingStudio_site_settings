@@ -5,7 +5,7 @@ require "test_helper"
 class RecordingStudioSiteSettingsTest < Minitest::Test
   def test_that_it_has_a_version_number
     refute_nil ::RecordingStudioSiteSettings::VERSION
-    assert_equal "0.6.0", ::RecordingStudioSiteSettings::VERSION
+    assert_equal "0.7.0", ::RecordingStudioSiteSettings::VERSION
   end
 
   def test_readme_is_the_public_product
@@ -39,30 +39,35 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     refute_includes gemspec, 'spec.add_dependency "recording_studio_accessible", "~> 0.11"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_admin", ">= 2.16.0", "< 3.0"'
     assert_includes gemspec, 'spec.add_dependency "recording_studio_attachable", ">= 0.28.0", "< 1.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio", tag: "v7.3.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.45.1"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.31.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio", tag: "v7.3.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.45.1"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.31.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/flatpack", tag: "v0.1.377"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.18.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_admin", tag: "v2.18.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_logs", tag: "v0.8.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.0.1"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_root_switchable", tag: "v0.16.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_users", tag: "v0.32.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_metrics", tag: "v0.9.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_trashable", tag: "v1.0.1"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_cache", tag: "v0.7.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_api", tag: "v1.2.1"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.0"'
-    assert_includes dummy_gemfile, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_api", tag: "v1.2.1"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_icons", tag: "v0.4.0"'
-    assert_includes readme, 'github: "bowerbird-app/RecordingStudio_moveable", tag: "v6.0.0"'
+    [
+      [readme, "recording_studio", "RecordingStudio", "v7.8.0", "~> 7.8"],
+      [readme, "recording_studio_accessible", "RecordingStudio_accessible", "v0.58.0", "~> 0.58"],
+      [readme, "recording_studio_attachable", "RecordingStudio_attachable", "v0.34.0", "~> 0.34"],
+      [readme, "recording_studio_metrics", "RecordingStudio_metrics", "v0.10.0", "~> 0.10"],
+      [readme, "recording_studio_admin", "RecordingStudio_admin", "v2.20.0", "~> 2.20"],
+      [readme, "recording_studio_api", "RecordingStudio_api", "v1.21.2", "~> 1.21"],
+      [readme, "recording_studio_icons", "RecordingStudio_icons", "v0.5.0", "~> 0.5"],
+      [readme, "recording_studio_moveable", "RecordingStudio_moveable", "v6.1.0", "~> 6.1"],
+      [readme, "recording_studio_logs", "RecordingStudio_logs", "v0.9.0", "~> 0.9", "require: false"],
+      [readme, "recording_studio_trashable", "RecordingStudio_trashable", "v1.3.0", "~> 1.3", "require: false"],
+      [dummy_gemfile, "recording_studio", "RecordingStudio", "v7.8.0", "~> 7.8"],
+      [dummy_gemfile, "recording_studio_accessible", "RecordingStudio_accessible", "v0.58.0", "~> 0.58"],
+      [dummy_gemfile, "recording_studio_attachable", "RecordingStudio_attachable", "v0.34.0", "~> 0.34"],
+      [dummy_gemfile, "flat_pack", "flatpack", "v0.2.0", "~> 0.2"],
+      [dummy_gemfile, "recording_studio_admin", "RecordingStudio_admin", "v2.20.0", "~> 2.20"],
+      [dummy_gemfile, "recording_studio_logs", "RecordingStudio_logs", "v0.9.0", "~> 0.9", "require: false"],
+      [dummy_gemfile, "recording_studio_metrics", "RecordingStudio_metrics", "v0.10.0", "~> 0.10"],
+      [dummy_gemfile, "recording_studio_moveable", "RecordingStudio_moveable", "v6.1.0", "~> 6.1"],
+      [dummy_gemfile, "recording_studio_api", "RecordingStudio_api", "v1.21.2", "~> 1.21"],
+      [dummy_gemfile, "recording_studio_icons", "RecordingStudio_icons", "v0.5.0", "~> 0.5"],
+      [dummy_gemfile, "recording_studio_cache", "RecordingStudio_cache", "v0.8.0", "~> 0.8"],
+      [dummy_gemfile, "recording_studio_user", "RecordingStudio_users", "v0.32.0"],
+      [dummy_gemfile, "recording_studio_trashable", "RecordingStudio_trashable", "v1.3.0", "~> 1.3", "require: false"],
+      [dummy_gemfile, "recording_studio_root_switchable", "RecordingStudio_root_switchable", "v0.17.0", "~> 0.17"]
+    ].each do |pin|
+      source, gem_name, repo, tag, requirement, suffix = pin
+      assert_includes source, pin_line(gem_name, repo, tag, requirement: requirement, suffix: suffix)
+    end
     assert_equal "3.3.13", ruby_version
     assert_equal "3.3.13", dummy_ruby_version
     assert_match(
@@ -213,5 +218,15 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
     assert_includes helper, "def recording_studio_site_logo"
     refute_includes helper, "FileInput"
     assert_includes model, "max_file_count: 3"
+  end
+
+  private
+
+  def pin_line(gem_name, repo, tag, requirement: nil, suffix: nil)
+    parts = [%(gem "#{gem_name}")]
+    parts << %("#{requirement}") if requirement
+    parts << %(github: "bowerbird-app/#{repo}", tag: "#{tag}")
+    line = parts.join(", ")
+    suffix ? "#{line}, #{suffix}" : line
   end
 end
