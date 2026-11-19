@@ -7,9 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-19
+
 ### Changed
-- Dummy Gemfile pins the current GitHub release tags: Recording Studio `v7.3.0`, Flatpack `v0.1.377`, Accessible `v0.45.1`, Admin `v2.18.0`, API `v1.2.1`, Attachable `v0.31.0`, Cache `v0.7.0`, Icons `v0.4.0`, Moveable `v6.0.0`, Trashable `v1.0.1`, and Users `v0.32.0`. Logs stay `v0.8.0`. Metrics stay `v0.9.0`. Root Switchable stays `v0.16.0`. Dummy Puma is `8.1.1`. Gemspec bounds are unchanged.
+- Development Gemfiles pin Recording Studio `~> 7.8` (`v7.8.0`), Flatpack `~> 0.2` (`v0.2.0`), Accessible `~> 0.58` (`v0.58.0`), Admin `~> 2.20` (`v2.20.0`), API `~> 1.21` (`v1.21.2`), Attachable `~> 0.34` (`v0.34.0`), Icons `~> 0.5` (`v0.5.0`), Logs `~> 0.9` (`v0.9.0`), Metrics `~> 0.10` (`v0.10.0`), Moveable `~> 6.1` (`v6.1.0`), and Trashable `~> 1.3` (`v1.3.0`). Dummy also pins Cache `~> 0.8` (`v0.8.0`) and Root Switchable `~> 0.17` (`v0.17.0`). Users stays `v0.32.0`. Dummy Puma stays `8.1.1`. Gemspec bounds are unchanged.
+- The dummy app drops the manual `flat_pack/heroicons` importmap pin. Flatpack 0.2 renders icons on the server.
+- The dummy app adds `config/recording_studio_api.yml`. API `1.21.2` raises at boot when that file is missing.
+- The dummy app copies API migration `20261117000024_add_owner_to_recording_studio_api_api_clients` so API clients can store `owner_id`.
+- The dummy app supplies `required_role: :edit` on the Users `users_update` endpoint. Users stays pinned at `v0.32.0`, which registers that endpoint with `scope_id: false` and no role. API `1.21.2` rejects that at boot. Users `v0.33.0` passes the role. This gem does not bump Users.
 - Dummy `User` records skip Devise confirmation on create. Users `v0.32.0` adds confirmable and refuses password sign-in until `confirmed_at` is set. Seeded and test accounts stay able to sign in with their passwords.
+
+### Upgrade notes
+- Bump to `0.7.0`. This gem ships no new migration. Public methods are unchanged.
+- Hosts MUST run the Recording Studio 7.4, 7.5 and 7.7 migrations if they have not.
+- flat_pack 0.2.0 is supported; hosts moving to 0.2 must remove the manual `flat_pack/heroicons` importmap pin and any `flat-pack--icon` controller registration.
+- Hosts on API `1.21.2` need `config/recording_studio_api.yml` and API migration `20261117000024` (`owner_type` and `owner_id` on API clients).
+- Hosts that still pin Users `v0.32.0` must pass `required_role: :edit` on `users_update`. Users `v0.33.0` does that. This gem leaves Users at `v0.32.0`.
 
 ## [0.6.0] - 2026-11-15
 
@@ -220,7 +233,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Print the square mark with `recording_studio_site_square_logo` or `recording_studio_site_logo`. Print the wide mark with `recording_studio_site_wide_logo`. Print the tab icon with `recording_studio_site_favicon`. Do not depend on Attachable from other gems just for those marks.
 - Set `site_root_types` in the initializer. Do not add a YAML settings file.
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.7...v0.6.0
 [0.5.7]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/bowerbird-app/RecordingStudio_site_settings/compare/v0.5.5...v0.5.6

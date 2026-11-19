@@ -32,7 +32,11 @@ class DocsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Install"
     assert_includes response.body, "Add the gem"
     assert_includes response.body, "recording_studio_site_settings"
-    assert_includes response.body, "v0.31.0"
+    rendered_pin = [
+      %(gem &quot;recording_studio_attachable&quot;, &quot;~&gt; 0.34&quot;, ),
+      %(github: &quot;bowerbird-app/RecordingStudio_attachable&quot;, tag: &quot;v0.34.0&quot;)
+    ].join
+    assert_includes response.body, rendered_pin
     assert_includes response.body, "bin/rails generate recording_studio_site_settings:install"
   end
 
