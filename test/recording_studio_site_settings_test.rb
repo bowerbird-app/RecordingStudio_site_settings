@@ -61,7 +61,7 @@ class RecordingStudioSiteSettingsTest < Minitest::Test
       [dummy_gemfile, "recording_studio_api", "RecordingStudio_api", "v1.21.2", "~> 1.21"],
       [dummy_gemfile, "recording_studio_icons", "RecordingStudio_icons", "v0.5.0", "~> 0.5"],
       [dummy_gemfile, "recording_studio_cache", "RecordingStudio_cache", "v0.8.0", "~> 0.8"],
-      [dummy_gemfile, "recording_studio_user", "RecordingStudio_users", "v0.32.0"],
+      [dummy_gemfile, "recording_studio_user", "RecordingStudio_users", "v0.41.0", "~> 0.41"],
       [dummy_gemfile, "recording_studio_trashable", "RecordingStudio_trashable", "v1.3.0", "~> 1.3", "require: false"],
       [dummy_gemfile, "recording_studio_root_switchable", "RecordingStudio_root_switchable", "v0.17.0", "~> 0.17"]
     ].each do |pin|

@@ -52,8 +52,25 @@ class RecordingStudioSiteSettingsHostTest < ActiveSupport::TestCase
     assert connection.table_exists?(:recording_studio_access_rules)
     assert connection.table_exists?(:recording_studio_site_settings)
     assert connection.table_exists?(:recording_studio_attachable_attachments)
+    assert connection.table_exists?(:recording_studio_user_sign_in_links)
+    assert connection.table_exists?(:recording_studio_user_sign_in_locks)
+    assert connection.table_exists?(:recording_studio_user_password_failures)
     refute connection.table_exists?(:recording_studio_access_boundaries)
     refute connection.table_exists?(:recording_studio_device_sessions)
+  end
+
+  test "users update registers an edit role without a dummy pre-registration" do
+    endpoint = RecordingStudioApi.registered_endpoint(
+      RecordingStudioUser::Api::USERS_UPDATE_ENDPOINT,
+      api: RecordingStudioUser::Api::USERS_API
+    )
+    initializer = Rails.root.join("config/initializers/recording_studio_user.rb").read
+
+    assert_equal :users_update, endpoint.name.to_sym
+    assert_equal :patch, endpoint.http_verb
+    assert_equal :edit, endpoint.required_role
+    refute_includes initializer, "USERS_UPDATE_ENDPOINT"
+    refute_includes initializer, "DummyUsersUpdateRequiredRole"
   end
 
   test "dummy seeds use hierarchy idempotently and restore current actor" do

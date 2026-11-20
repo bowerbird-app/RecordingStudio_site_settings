@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Dummy app pins RS Users v0.41.0 and no longer pre-registers `users_update`.
+
 ## [0.7.0] - 2026-11-19
 
 ### Changed
